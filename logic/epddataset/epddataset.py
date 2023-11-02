@@ -15,12 +15,30 @@ class EpdDataset(object):
         pass
 
     def __add__(self, other):
+        """Function to add two EpdDataset-objects
 
-        if isinstance(other, EpdDataset):
-            new = self._data + other._data
-            return new
-        else:
-            print("Addend must be an 'EpdDataset'-object")
+        Parameters
+        ----------
+        other: EpdDataset
+            other EpdDataset to be added
+        Returns
+        -------
+        result_epd: EpdDataset
+            sum of self and other EpdDataset-object
+        """
+        try:
+            if isinstance(other, EpdDataset):
+                new_data = self._data + other._data
+
+                result_epd = EpdDataset()
+                result_epd._data = new_data
+
+        except TypeError as Error:
+            raise TypeError(f"Error when adding something to the dataset {self._name}. {Error}")
+        except ValueError as Error:
+            raise ValueError(f"Error when adding something to the dataset {self._name}. {Error}")
+
+        return result_epd
 
     def __sub__(self, other):
         pass
