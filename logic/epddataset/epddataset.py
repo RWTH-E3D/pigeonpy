@@ -1,3 +1,4 @@
+import uuid
 
 class EpdDataset(object):
     environmental_indicators = None
@@ -14,7 +15,12 @@ class EpdDataset(object):
         pass
 
     def __add__(self, other):
-        pass
+
+        if isinstance(other, EpdDataset):
+            new = self._data + other._data
+            return new
+        else:
+            print("Addend must be an 'EpdDataset'-object")
 
     def __sub__(self, other):
         pass
