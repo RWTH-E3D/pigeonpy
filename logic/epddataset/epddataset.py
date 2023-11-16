@@ -17,7 +17,31 @@ class EpdDataset(object):
         pass
 
     def __sub__(self, other):
-        pass
+        """Function to subtract other EpdDataset from self
+
+        Parameters
+        ----------
+        other: EpdDataset
+            other EpdDataset to be subtracted
+        Returns
+        -------
+        result_epd: EpdDataset
+            Difference of self and other EpdDataset-object
+        """
+        try:
+            
+            if isinstance(other, EpdDataset):
+                new_data = self._data - other._data
+
+            result_epd = EpdDataset()
+            result_epd._data = new_data
+
+        except TypeError as Error:
+            raise TypeError(f"Error when subtracting something from the dataset {self._name}. {Error}")
+        except ValueError as Error:
+            raise ValueError(f"Error when subtracting something from the dataset {self._name}. {Error}")
+
+        return result_epd
 
     def __truediv__(self, other):
         pass
