@@ -1,0 +1,154 @@
+{
+  "indicators_en_15804_a1": [
+    {
+      "abbreviation": "pere",
+      "name": "Renewable primary energy as energy carrier",
+      "unit": "MJ",
+      "description": "Use of renewable primary energy excluding renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "perm",
+      "name": "Renewable primary energy resources as material utilization",
+      "unit": "MJ",
+      "description": "Use of renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "pert",
+      "name": "Total use of renewable primary energy resources",
+      "unit": "MJ",
+      "description": "Total use of renewable primary energy resources; Input"
+    },
+    {
+      "abbreviation": "penre",
+      "name": "Non-renewable primary energy as energy carrier",
+      "unit": "MJ",
+      "description": "Use of non-renewable primary energy excluding non-renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "penrm",
+      "name": "Non-renewable primary energy as material utilization",
+      "unit": "MJ",
+      "description": "Use of non-renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "penrt",
+      "name": "Total use of non-renewable primary energy resources",
+      "unit": "MJ",
+      "description": "Total use of non-renewable primary energy resources; Input"
+    },
+    {
+      "abbreviation": "sm",
+      "name": "Use of secondary material",
+      "unit": "kg",
+      "description": "Use of secondary material; Input"
+    },
+    {
+      "abbreviation": "rsf",
+      "name": "Use of renewable secondary fuels",
+      "unit": "MJ",
+      "description": "Use of renewable secondary fuels; Input"
+    },
+    {
+      "abbreviation": "nrsf",
+      "name": "Use of non renewable secondary fuels",
+      "unit": "MJ",
+      "description": "Use of non renewable secondary fuels; Input"
+    },
+    {
+      "abbreviation": "fw",
+      "name": "Use of net fresh water",
+      "unit": "m^3",
+      "description": "Use of net fresh water; Input"
+    },
+    {
+      "abbreviation": "hwd",
+      "name": "Hazardous waste disposed",
+      "unit": "kg",
+      "description": "Hazardous waste disposed; Output"
+    },
+    {
+      "abbreviation": "nhwd",
+      "name": "Non hazardous waste dispose",
+      "unit": "kg",
+      "description": "Non hazardous waste dispose; Output"
+    },
+    {
+      "abbreviation": "rwd",
+      "name": "Radioactive waste disposed",
+      "unit": "kg",
+      "description": "Radioactive waste disposed; Output"
+    },
+    {
+      "abbreviation": "cru",
+      "name": "Components for re-use",
+      "unit": "kg",
+      "description": "Components for re-use; Output"
+    },
+    {
+      "abbreviation": "mfr",
+      "name": "Materials for recycling",
+      "unit": "kg",
+      "description": "Materials for recycling; Output"
+    },
+    {
+      "abbreviation": "mer",
+      "name": "Materials for energy recovery",
+      "unit": "kg",
+      "description": "Materials for energy recovery; Output"
+    },
+    {
+      "abbreviation": "eee",
+      "name": "Exported electrical energy",
+      "unit": "MJ",
+      "description": "Exported electrical energy; Output"
+    },
+    {
+      "abbreviation": "eet",
+      "name": "Exported thermal energy",
+      "unit": "MJ",
+      "description": "Exported thermal energy; Output"
+    },
+    {
+      "abbreviation": "gwp",
+      "name": "Global Warming Potential",
+      "unit": "kg CO2 eq.",
+      "description": "The total greenhouse gas emissions expressed as carbon dioxide equivalents"
+    },
+    {
+      "abbreviation": "odp",
+      "name": "Ozone Depletion Potential",
+      "unit": "kg R11 eq.",
+      "description": "The potential of a substance to cause the depletion of the ozone layer"
+    },
+    {
+      "abbreviation": "pocp",
+      "name": "Photochemical Ozone Creation Potential",
+      "unit": "kg Ethene eq.",
+      "description": "The potential of a substance to contribute to the formation of ground-level ozone"
+    },
+    {
+      "abbreviation": "ap",
+      "name": "Acidification Potential",
+      "unit": "kg SO2 eq.",
+      "description": "The potential of a substance to cause acidification of the environment"
+    },
+    {
+      "abbreviation": "ep",
+      "name": "Eutrophication Potential",
+      "unit": "kg Phosphate eq.",
+      "description": "The potential of a substance to cause over-fertilisation of water and soil"
+    },
+    {
+      "abbreviation": "adpe",
+      "name": "Abiotic Depletion Potential for non fossil resources",
+      "unit": "kg Sb eq.",
+      "description": "The potential of a substance to cause depletion of abiotic resources (minerals and metals)"
+    },
+    {
+      "abbreviation": "adpf",
+      "name": "Abiotic Depletion Potential for fossil resources",
+      "unit": "MJ",
+      "description": "The potential of a substance to cause depletion of abiotic resources (fossil fuels)"
+    }
+  ]
+}
