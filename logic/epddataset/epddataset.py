@@ -11,7 +11,35 @@ class EpdDataset(object):
         self._data = None
 
     def __mul__(self, other):
-        pass
+        """Function to multiply the dataset.
+
+        Parameters
+        ----------
+        other: the object to be multiplied
+
+        Returns
+        -------
+        result dataset
+
+        """
+        try:
+            if isinstance(other, EpdDataset):
+                new_data = self._data * other._data
+            else:
+                new_data = self._data * other
+
+            result_epd = EpdDataset()
+            result_epd._data = new_data
+
+        except TypeError as Error:
+            raise TypeError(f"Error when multiplying something to dataset {self._name}. {Error}")
+        except ValueError as Error:
+            raise ValueError(f"Error when multiplying something to dataset {self._name}. {Error}")
+
+        return result_epd
+
+
+
 
     def __add__(self, other):
         pass
