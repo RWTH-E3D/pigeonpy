@@ -1,4 +1,4 @@
-from epddataset import EPDDataset
+from epddataset import EpdDataset
 import numpy as np
 
 class En15804A1Dataset(EpdDataset):

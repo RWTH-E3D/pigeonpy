@@ -3,7 +3,7 @@ import uuid
 class EpdDataset(object):
     environmental_indicators = None
     life_cycle_stages = None
-    def __int__(self):
+    def __init__(self):
         self.epd_data_id = str(uuid.uuid1())
         self._name = None
         self.ref_flow_value = None
