@@ -5,38 +5,36 @@ from logic.lifecyclestage.lifecyclestage import LifeCycleStage
 import numpy as np
 
 
-def assign_indicators():
-    tmp_dataclass = DataClass()
-    indicator_list = []
-    indicators = list(tmp_dataclass.indicators_bind["indicators_en_15804_a1"])
-    for indicator in indicators:
-        new_indicator = EnvironmentalIndicator(abbreviation=indicator["abbreviation"], name=indicator["name"],
-                                               unit=indicator["unit"], description=indicator["description"])
-        indicator_list.append(new_indicator)
-    del tmp_dataclass
-    return indicator_list
-
-
-def assign_life_cycle_stages():
-    tmp_dataclass = DataClass()
-    life_cycle_stage_list = []
-    life_cycle_stages = list(tmp_dataclass.life_cycle_stages_bind["LifeCycleStages"])
-    for stage in life_cycle_stages:
-        new_stage = LifeCycleStage(abbreviation=stage["abbreviation"], name=stage["name"],
-                                   description=stage["description"])
-        life_cycle_stage_list.append(new_stage)
-    del tmp_dataclass
-    return life_cycle_stage_list
-
-
 class En15804A1Dataset(EpdDataset):
-    environmental_indicators = assign_indicators()
-    life_cycle_stages = assign_life_cycle_stages()
+    environmental_indicators = []
+    life_cycle_stages = []
+    loaded = False
+
+    @classmethod
+    def set_indicators_and_stages(cls):
+        tmp_dataclass = DataClass()
+        indicators = list(tmp_dataclass.indicators_bind["indicators_en_15804_a1"])
+        life_cycle_stages = list(tmp_dataclass.life_cycle_stages_bind["LifeCycleStages"])
+
+        for indicator in indicators:
+            new_indicator = EnvironmentalIndicator(abbreviation=indicator["abbreviation"], name=indicator["name"],
+                                                   unit=indicator["unit"], description=indicator["description"])
+            cls.environmental_indicators.append(new_indicator)
+
+        for stage in life_cycle_stages:
+            new_stage = LifeCycleStage(abbreviation=stage["abbreviation"], name=stage["name"],
+                                       description=stage["description"])
+            cls.life_cycle_stages.append(new_stage)
+
+        cls.loaded = True
+        del tmp_dataclass
 
     def __init__(self, environmental_indicator=None, life_cycle_stages=None):
 
         super().__init__()
-        self._data = np.full((25, 17), 0.0)
+        self._data = np.full((25, 18), 0.0)
+        if not self.loaded:
+            En15804A1Dataset.set_indicators_and_stages()
 
     def load_lca_dataset(self, given_lca_id, data_class):
 
