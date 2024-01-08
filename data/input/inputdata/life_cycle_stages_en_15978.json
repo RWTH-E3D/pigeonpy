@@ -16,6 +16,11 @@
       "description": "Manufacturing of construction products, and all upstream processes from cradle to gate"
     },
     {
+      "abbreviation": "a1_a3",
+      "name": "Production",
+      "description": "The production of construction products as the sum of the first three production stages a1, a2, a3"
+    },
+    {
       "abbreviation": "a4",
       "name": "Transport",
       "description": "Transport to the construction site"
