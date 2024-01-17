@@ -62,6 +62,7 @@ class DataClass(object):
                     self.life_cycle_stages_bind = json.load(
                         f, object_pairs_hook=collections.OrderedDict
                     )
+                    self.life_cycle_stages_bind = list(self.life_cycle_stages_bind["LifeCycleStages"])
             except json.decoder.JSONDecodeError:
                 print("The json file for the life cycle stages seems to be broken.")
 
@@ -72,6 +73,10 @@ class DataClass(object):
                     self.indicators_bind = json.load(
                         f, object_pairs_hook=collections.OrderedDict
                     )
+                    if self.used_standard == "A1":
+                        self.indicators_bind = list(self.indicators_bind["indicators_en_15804_a1"])
+                    elif self.used_standard == "A2":
+                        pass
             except json.decoder.JSONDecodeError:
                 print("The json file for the environmental indicators seems to be broken.")
 
@@ -97,7 +102,7 @@ class DataClass(object):
                               "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
                               "HWD", "NHWD", "RWD", "CRU", "MFR", "MER", "EEE", "EET",
                               "GWP", "ODP", "POCP", "AP", "EP", "ADPE", "ADPF"]
-            lca_data_bind_pd = pd.read_csv("OBD_2023_I_2024-01-09T12_49_34.csv", sep=';', encoding="ISO-8859-1",
+            lca_data_bind_pd = pd.read_csv(self.path_lca_data, sep=';', encoding="ISO-8859-1",
                                            usecols=use_columns_a1, converters={'Bezugsgroesse': convert_string_to_1},
                                            dtype=dtype_dict)
             # delete all rows containing Datasets for Standard +A2
@@ -135,9 +140,11 @@ class DataClass(object):
                     | (lca_data_bind_pd.Konformität == "'EN 15804' / 'ISO 14025' / 'OEKOBAUDAT Entry Level Compliance'")
                     ].index)
 
-        lca_data_bind_pd = lca_data_bind_pd.reset_index()
         # missing units exchanged with pcs. (pieces), fits for the current status of the database (09.01.2024)
         lca_data_bind_pd["Bezugseinheit"] = lca_data_bind_pd["Bezugseinheit"].fillna("pcs.")
+        # Transform 'Modul' entries with lower case entries and replace a1-a3 with a1_a3:
+        lca_data_bind_pd["Modul"] = lca_data_bind_pd["Modul"].str.casefold()
+        lca_data_bind_pd["Modul"].replace('a1-a3', 'a1_a3', inplace=True)
 
         self.lca_data_bind = lca_data_bind_pd
 
