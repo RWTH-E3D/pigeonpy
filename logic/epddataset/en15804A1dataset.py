@@ -2,6 +2,7 @@ from logic.epddataset.epddataset import EpdDataset
 from data.dataclass import DataClass
 from logic.environmentalindicator.environmentalindicator import EnvironmentalIndicator
 from logic.lifecyclestage.lifecyclestage import LifeCycleStage
+import data.input.lca_dataset_input as lca_dataset_input
 import numpy as np
 
 
@@ -37,26 +38,11 @@ class En15804A1Dataset(EpdDataset):
 
     def load_lca_dataset(self, given_lca_id, data_class):
 
-        lca_data_bind = data_class.lca_data_bind
-
-        # Following only for json, probably not suitable for csv or xml
-        if given_lca_id in lca_data_bind.keys():
-            lca_dataset_bind = lca_data_bind[given_lca_id]
-            self.epd_data_id = given_lca_id
-            self._name = lca_dataset_bind["name"]
-            self.ref_flow_unit = lca_dataset_bind["ref_flow"]["unit"]
-            self.ref_flow_value = lca_dataset_bind["ref_flow"]["value"]
+        if data_class.file_format == "teco_json":
+            lca_dataset_input.load_lca_dataset_json(self, given_lca_id, data_class)
+        elif data_class.file_format == "csv":
+            lca_dataset_input.load_lca_dataset_csv(self, given_lca_id, data_class)
         else:
-            print(f"No dataset for given lca id '{given_lca_id}' was found. Please enter a valid lca id.")
-            return
+            print(f"Given input file format '{data_class.file_format}' for given id '{given_lca_id}' not available."
+                  f"\nAvailable input formats: 'teco_json', 'csv'")
 
-        # to get a callable index
-        indicators = list(data_class.indicators_bind["indicators_en_15804_a1"])
-        life_cycle_stages = list(data_class.life_cycle_stages_bind["LifeCycleStages"])
-
-        for indicator_index, indicator in enumerate(indicators):
-            if indicator["abbreviation"] in lca_dataset_bind.keys():
-                for stage_index, life_cycle_stage in enumerate(life_cycle_stages):
-                    if life_cycle_stage["abbreviation"] in lca_dataset_bind[indicator["abbreviation"]]:
-                        self._data[indicator_index][stage_index] = float((lca_dataset_bind[indicator["abbreviation"]]
-                                                                         [life_cycle_stage["abbreviation"]]))
