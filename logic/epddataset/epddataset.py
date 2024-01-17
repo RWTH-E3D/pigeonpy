@@ -92,7 +92,27 @@ class EpdDataset(object):
             raise ValueError(f"Error when subtracting something from the dataset {self._name}. {Error}")
 
     def __truediv__(self, other):
-        pass
+        """ Function to divide a dataset by a scalar
+
+        Parameters
+        ----------
+        scalar: scalar which the dataset is divided with
+
+        Returns
+        -------
+        result_epd: Instance of self type
+            dataset divided by scalar
+        """
+        try:
+            new_data = self._data / other
+            result_epd = type(self)()
+            result_epd._data = new_data
+            return result_epd
+
+        except TypeError as Error:
+            raise TypeError(f"Error when dividing the dataset {self._name} with something. {Error}")
+        except ValueError as Error:
+            raise ValueError(f"Error when dividing the dataset {self._name} with something. {Error}")
 
     def load(self, filepath, filetype):
         pass
