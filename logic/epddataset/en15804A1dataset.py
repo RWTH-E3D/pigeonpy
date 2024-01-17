@@ -8,32 +8,31 @@ import numpy as np
 class En15804A1Dataset(EpdDataset):
     environmental_indicators = []
     life_cycle_stages = []
-    loaded = False
+    stages_and_indicators_loaded = False
 
     @classmethod
     def set_indicators_and_stages(cls):
         tmp_dataclass = DataClass()
-        indicators = list(tmp_dataclass.indicators_bind["indicators_en_15804_a1"])
-        life_cycle_stages = list(tmp_dataclass.life_cycle_stages_bind["LifeCycleStages"])
 
-        for indicator in indicators:
+        for indicator in tmp_dataclass.indicators_bind:
             new_indicator = EnvironmentalIndicator(abbreviation=indicator["abbreviation"], name=indicator["name"],
                                                    unit=indicator["unit"], description=indicator["description"])
             cls.environmental_indicators.append(new_indicator)
 
-        for stage in life_cycle_stages:
+        for stage in tmp_dataclass.life_cycle_stages_bind:
             new_stage = LifeCycleStage(abbreviation=stage["abbreviation"], name=stage["name"],
                                        description=stage["description"])
             cls.life_cycle_stages.append(new_stage)
 
-        cls.loaded = True
+        cls.stages_and_indicators_loaded = True
         del tmp_dataclass
 
-    def __init__(self, environmental_indicator=None, life_cycle_stages=None):
+    def __init__(self):
 
         super().__init__()
         self._data = np.full((25, 18), 0.0)
-        if not self.loaded:
+        self.used_standard = "En15804+A1"
+        if not self.stages_and_indicators_loaded:
             En15804A1Dataset.set_indicators_and_stages()
 
     def load_lca_dataset(self, given_lca_id, data_class):
