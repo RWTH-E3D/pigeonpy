@@ -1,12 +1,37 @@
-import uuid
 
 
 class EpdDataset(object):
+    """Abstract class for basic attributes and Epd dataset metadata as well as basic calculation dunder
+    methods for easy calculations of datasets
+
+    Class variables
+    ----------
+    environmental_indicators : list
+        Empty list for environmental indicators
+    life_cycle_stages : list
+        Empty list for life cycle stages
+
+    Attributes
+    ----------
+    epd_data_id : -
+        lca id for the contained dataset
+    _name : -
+        Name of the contained dataset
+    ref_flow_value : -
+        Value of the reference flow
+    ref_flow_unit : -
+        Unit of the reference flow
+    used_standard : -
+        Information about the used standard
+    _data : -
+        matrix to hold the numerical values of a dataset
+
+    """
     environmental_indicators = None
     life_cycle_stages = None
 
     def __init__(self):
-        self.epd_data_id = str(uuid.uuid1())
+        self.epd_data_id = None
         self._name = None
         self.ref_flow_value = None
         self.ref_flow_unit = None
@@ -15,7 +40,7 @@ class EpdDataset(object):
         self._data = None
 
     def __mul__(self, other):
-        """Function to multiply the dataset.
+        """Method to multiply the dataset with another dataset or a scalar.
 
         Parameters
         ----------
@@ -23,7 +48,7 @@ class EpdDataset(object):
 
         Returns
         -------
-        result_epd: Instance of self type
+        result_epd: EpdDataset (instance of self type)
             dataset multiplied with other dataset or scalar
         """
         try:
@@ -42,7 +67,7 @@ class EpdDataset(object):
             raise ValueError(f"Error when multiplying something to dataset {self._name}. {Error}")
 
     def __add__(self, other):
-        """Function to add two EpdDataset-objects
+        """Method to add two EpdDataset-objects
 
         Parameters
         ----------
@@ -51,7 +76,7 @@ class EpdDataset(object):
 
         Returns
         -------
-        result_epd: Instance of self type
+        result_epd: EpdDataset (instance of self type)
             sum of self and other EpdDataset-object
         """
         try:
@@ -67,7 +92,7 @@ class EpdDataset(object):
             raise ValueError(f"Error when adding something to the dataset {self._name}. {Error}")
 
     def __sub__(self, other):
-        """Function to subtract other EpdDataset from self
+        """Method to subtract other EpdDataset from self
 
         Parameters
         ----------
@@ -76,7 +101,7 @@ class EpdDataset(object):
 
         Returns
         -------
-        result_epd: Instance of self type
+        result_epd: EpdDataset (instance of self type)
             Difference of self and other EpdDataset-object
         """
         try:
@@ -96,11 +121,11 @@ class EpdDataset(object):
 
         Parameters
         ----------
-        scalar: scalar which the dataset is divided with
+        other : Scalar the dataset is divided with
 
         Returns
         -------
-        result_epd: Instance of self type
+        result_epd: EpdDataset (instance of self type)
             dataset divided by scalar
         """
         try:
@@ -113,10 +138,4 @@ class EpdDataset(object):
             raise TypeError(f"Error when dividing the dataset {self._name} with something. {Error}")
         except ValueError as Error:
             raise ValueError(f"Error when dividing the dataset {self._name} with something. {Error}")
-
-    def load(self, filepath, filetype):
-        pass
-
-    def save(self, filepath, filetype):
-        pass
 

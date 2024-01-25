@@ -5,6 +5,45 @@ import pandas as pd
 
 
 class DataClass(object):
+    """Class for file and data bindings.
+
+    Loads files with information about indicators, life cycle stages and lca data (json, CSV)
+    and binds the data in its attributes
+
+    Parameters
+    ----------
+    used_standard : str
+        Indicates which standard (EN 15804+A1/ EN 15804+A2) should be used for the data ('A1', 'A2',
+        default: 'A1').
+    file_format : str
+        File format for the lca database to be used either from teco in json format or from the Oekobaudat
+        in CSV ('teco_json', 'CSV', default: 'teco_json').
+
+    Attributes
+    ----------
+    used_standard : str
+        Indicates which standard (EN 15804+A1/ EN 15804+A2) should be used for the data ('A1', 'A2',
+        default: 'A1')
+    file_format : str
+        File format for the lca database to be used either from teco in json format or from the Oekobaudat
+        in CSV ('teco_json', 'CSV', default: 'teco_json').
+    life_cycle_stages_bind : list
+        A list containing the life cycle stages according to EN 15978
+    indicators_bind : list
+        A list containing the environmental indicators dependent on the used_standard
+    lca_data_bind : collections.OrderedDictionary (for teco_json) or pd DataFrame (for CSV)
+        Binding containing the lca datasets dependent on the file_format
+    path_life_cycle_stages : str
+        Full path to life_cycle_stages_en_15978.json
+        Default: dynamic_lca_draft/data/input/inputdata/life_cycle_stages_en_15978.json
+    path_indicators: str
+        Full path to indicators_en_15804_a1.json or indicators_en_15804_a2.json dependent on the
+        used_standard (default: 'A1')
+    path_lca_data : str
+        Full path to LcaDataTeco.json or OBD_2023_I_2024-01-09T12_49_34.csv dependet on the
+        file_format (default: 'teco_json')
+
+    """
     def __init__(self, used_standard="A1", file_format="teco_json"):
         self.used_standard = used_standard
         self.file_format = file_format
@@ -19,10 +58,6 @@ class DataClass(object):
         self.path_life_cycle_stages = get_full_path(os.path.join(
             "data", "input", "inputdata", "life_cycle_stages_en_15978.json"
         ))
-        # database download: 09.01.2024
-        self.path_lca_data_csv = get_full_path(os.path.join(
-                    "data", "input", "inputdata", "OBD_2023_I_2024-01-09T12_49_34.csv"
-                ))
 
         if self.used_standard == "A1":
             self.path_indicators = get_full_path(os.path.join(
@@ -33,17 +68,24 @@ class DataClass(object):
                     "data", "input", "inputdata", "LcaDataTeco.json"
                 ))
             elif self.file_format == "csv":
-                self.path_lca_data = self.path_lca_data_csv
+                # database download: 09.01.2024
+                self.path_lca_data = get_full_path(os.path.join(
+                    "data", "input", "inputdata", "OBD_2023_I_2024-01-09T12_49_34.csv"
+                ))
             elif self.file_format == "xml":
                 pass
         elif self.used_standard == "A2":
-            pass
+            self.path_indicators = get_full_path(os.path.join(
+                "data", "input", "inputdata", "indicators_en_15804_a2.json"
+            ))
 
         self.load_lca_data_binding()
         self.load_life_cycle_stages()
         self.load_indicators()
 
     def load_lca_data_binding(self):
+        """Loads the lca datasets from the file into the lca_data_bind parameter or for CSV data calls the
+        load_and_preprocess_csv_binding method"""
         if self.path_lca_data.endswith("json") and os.path.isfile(self.path_lca_data):
             try:
                 with open(self.path_lca_data, "r+") as f:
@@ -56,6 +98,7 @@ class DataClass(object):
             self.load_and_preprocess_csv_binding()
 
     def load_life_cycle_stages(self):
+        """Loads the life cycle stages defined in the json file as a list into the life cycle stages binding"""
         if self.path_life_cycle_stages.endswith("json") and os.path.isfile(self.path_life_cycle_stages):
             try:
                 with open(self.path_life_cycle_stages, "r+") as f:
@@ -67,6 +110,8 @@ class DataClass(object):
                 print("The json file for the life cycle stages seems to be broken.")
 
     def load_indicators(self):
+        """Loads the indicators defined in the json files for the two possible standards (A1, A2) as a list into
+        the life cycle stages binding"""
         if self.path_indicators.endswith("json") and os.path.isfile(self.path_indicators):
             try:
                 with open(self.path_indicators, "r+") as f:
@@ -76,11 +121,16 @@ class DataClass(object):
                     if self.used_standard == "A1":
                         self.indicators_bind = list(self.indicators_bind["indicators_en_15804_a1"])
                     elif self.used_standard == "A2":
-                        pass
+                        self.indicators_bind = list(self.indicators_bind["indicators_en_15804_a2"])
             except json.decoder.JSONDecodeError:
                 print("The json file for the environmental indicators seems to be broken.")
 
     def load_and_preprocess_csv_binding(self):
+        """Method to load data from the Oekobaudat CSV into a pandas DataFrame and preprocess it. Sorting out not
+        needed columns and datasets dependent on the used_standard (CSV contains unsorted datasets for multiple
+        standards) as well as aligning the syntax of the datasets for later use resulting in a lca_data_binding with a
+        pd DataFrame to load single datasets from"""
+
         dtype_dict = {"UUID": str,
                       "Name (de)": str,
                       "Name (en)": str,
@@ -150,6 +200,7 @@ class DataClass(object):
 
 
 def convert_string_to_1(value, default_value=1.0):
+    """Helper function to convert values in pd Dataframe"""
     try:
         return float(value)
     except ValueError:
@@ -157,7 +208,18 @@ def convert_string_to_1(value, default_value=1.0):
 
 
 def get_full_path(relative_path):
+    """Helper function to build full paths to files
 
+    Parameters
+    ----------
+    relative_path : str
+        relative path to file with filename starting with first folder hierarchy inside dynamic_lca_draft
+
+    Returns
+    ----------
+    full_path : str
+        full path to file
+    """
     directory = os.path.dirname(__file__)
     src = "dynamic_lca_draft"
     last_index = directory.rfind(src)
