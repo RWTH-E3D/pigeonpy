@@ -2,6 +2,21 @@
 
 
 def load_lca_dataset_json(lca_dataset_object, given_lca_id, data_class):
+    """Loads the metadata and indicator values from the dataset specified with the lca id from the
+    teco json binding of the DataClass instance into the _data attribute of the passed instance of
+    the dataset object
+
+    Parameters
+    ----------
+    lca_dataset_object : En15804A1Dataset (or En15804A2Dataset when implemented)
+        instance the dataset of the given lca id
+    given_lca_id : str
+        String with LCA id for the dataset to be loaded
+    data_class : DataClass
+        Instance of DataClass with file and data bindings
+
+    """
+
     lca_data_bind = data_class.lca_data_bind
 
     if given_lca_id in lca_data_bind.keys():
@@ -38,6 +53,21 @@ def load_lca_dataset_json(lca_dataset_object, given_lca_id, data_class):
 
 
 def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
+    """Loads the metadata and indicator values from the dataset specified with the lca id from the
+    CSV binding (Oekobaudat database) of the DataClass instance into the _data attribute of the passed
+    instance of the dataset object
+
+    Parameters
+    ----------
+    lca_dataset_object : En15804A1Dataset (or En15804A2Dataset when implemented)
+        instance the dataset of the given lca id
+    given_lca_id : str
+        String with LCA id for the dataset to be loaded
+    data_class : DataClass
+        Instance of DataClass
+
+    """
+
     if given_lca_id in data_class.lca_data_bind['UUID'].values:
         lca_dataset_mask = data_class.lca_data_bind['UUID'].values == given_lca_id
         lca_dataset_bind = data_class.lca_data_bind[lca_dataset_mask]
