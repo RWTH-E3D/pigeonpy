@@ -60,6 +60,9 @@ class En15804A1Dataset(EpdDataset):
             Instance of DataClass with file and data bindings
 
         """
+        if data_class is None:
+            data_class = DataClass(used_standard="A1", file_format="teco_json")
+
         if data_class.file_format == "teco_json":
             lca_dataset_input.load_lca_dataset_json(self, given_lca_id, data_class)
         elif data_class.file_format == "csv":
