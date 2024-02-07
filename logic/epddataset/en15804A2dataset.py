@@ -64,6 +64,11 @@ class En15804A2Dataset(EpdDataset):
         if data_class is None:
             data_class = DataClass(used_standard="A2", file_format="csv")
 
+        if data_class.used_standard != self.used_standard:
+            raise Exception("You are trying to load a dataset according to standard En15804+A1 into an instance "
+                            "of the En15804+A2 class. Used standard in given DataClass instance is not equal to "
+                            "used standard of self.")
+
         if data_class.file_format == "csv":
             lca_dataset_input.load_lca_dataset_csv(self, given_lca_id, data_class)
         else:
