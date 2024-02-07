@@ -31,32 +31,31 @@ def load_lca_dataset_json(lca_dataset_object, given_lca_id, data_class):
                         f"'{data_class.file_format}' and standard En15804+{lca_dataset_object.used_standard} was found. "
                         f"Please enter a valid lca id or try another file format.")
 
-
-    for indicator_index, indicator in enumerate(data_class.indicators_bind):
-        if indicator["abbreviation"] in lca_dataset_bind.keys():
-            for stage_index, stage in enumerate(data_class.life_cycle_stages_bind):
-                if stage["abbreviation"] in lca_dataset_bind[indicator["abbreviation"]]:
+    for indicator_index, indicator in enumerate(lca_dataset_object.environmental_indicators):
+        if indicator.abbreviation in lca_dataset_bind.keys():
+            for stage_index, stage in enumerate(lca_dataset_object.life_cycle_stages):
+                if stage.abbreviation in lca_dataset_bind[indicator.abbreviation]:
                     lca_dataset_object._data[indicator_index][stage_index] = float(
-                        (lca_dataset_bind[indicator["abbreviation"]][stage["abbreviation"]]))
-                elif (stage["abbreviation"] == "a1_a3") and (
-                        "a1_a3" not in lca_dataset_bind[indicator["abbreviation"]]):
+                        (lca_dataset_bind[indicator.abbreviation][stage.abbreviation]))
+                elif (stage.abbreviation == "a1_a3") and (
+                        "a1_a3" not in lca_dataset_bind[indicator.abbreviation]):
                     # Alle vorhandene Werte werden aufaddiert
                     # Warnung: Bei Verrechnung mit anderen Datensätzen wird die stage a1_a3 im Ergebnis Datensatz
                     # nicht mehr die Summe aus a1,a2,a3 ergeben
                     try:
                         lca_dataset_object._data[indicator_index][stage_index] = float(
-                            lca_dataset_bind[indicator["abbreviation"]]["a1"]
-                            + lca_dataset_bind[indicator["abbreviation"]]["a2"]
-                            + lca_dataset_bind[indicator["abbreviation"]]["a3"]
+                            lca_dataset_bind[indicator.abbreviation]["a1"]
+                            + lca_dataset_bind[indicator.abbreviation]["a2"]
+                            + lca_dataset_bind[indicator.abbreviation]["a3"]
                         )
                     except KeyError as Error:
                         print(f"Stage a1_a3 of dataset '{(lca_dataset_bind['name'])}' with id: '{given_lca_id}' for "
-                              f"indicator '{(indicator['abbreviation'])}' is calculated without stage {Error},"
+                              f"indicator '{indicator.abbreviation}' is calculated without stage {Error},"
                               f"because it is not contained in the dataset.")
                         lca_dataset_object._data[indicator_index][stage_index] = float(
-                            lca_dataset_bind[indicator["abbreviation"]].get("a1", 0.0)
-                            + lca_dataset_bind[indicator["abbreviation"]].get("a2", 0.0)
-                            + lca_dataset_bind[indicator["abbreviation"]].get("a3", 0.0)
+                            lca_dataset_bind[indicator.abbreviation].get("a1", 0.0)
+                            + lca_dataset_bind[indicator.abbreviation].get("a2", 0.0)
+                            + lca_dataset_bind[indicator.abbreviation].get("a3", 0.0)
                         )
 
 
@@ -89,13 +88,13 @@ def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
                         f"'{data_class.file_format}' and standard En15804+{lca_dataset_object.used_standard} was found. "
                         f"Please enter a valid lca id or try another file format.")
 
-    for indicator_index, indicator in enumerate(data_class.indicators_bind):
-        for stage_index, stage in enumerate(data_class.life_cycle_stages_bind):
-            if stage['abbreviation'] in lca_dataset_bind['Modul'].values:
+    for indicator_index, indicator in enumerate(lca_dataset_object.environmental_indicators):
+        for stage_index, stage in enumerate(lca_dataset_object.life_cycle_stages):
+            if stage.abbreviation in lca_dataset_bind['Modul'].values:
                 lca_dataset_object._data[indicator_index][stage_index] = lca_dataset_bind.loc[
-                    lca_dataset_bind['Modul'] == stage['abbreviation'], indicator['abbreviation'].upper()].values[0]
+                    lca_dataset_bind['Modul'] == stage.abbreviation, indicator.abbreviation.upper()].values[0]
 
-            elif (stage['abbreviation'] == "a1_a3") and ("a1_a3" not in lca_dataset_bind['Modul']):
+            elif (stage.abbreviation == "a1_a3") and ("a1_a3" not in lca_dataset_bind['Modul']):
                 # Nicht vorhandene Werte beim aufaddieren von a1,a2,a3 zu a1_a3 werden durch den default=0.0 ersetzt
                 # Warnung: Bei Verrechnung mit anderen Datensätzen wird die stage a1_a3 im Ergebnis Datensatz
                 # nicht mehr die Summe aus a1,a2,a3 ergeben
@@ -103,11 +102,11 @@ def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
                     # test_replace_NaN_with_default = lca_dataset_bind.loc[lca_dataset_bind['Modul'] == 'a1', indicator['abbreviation'].upper()].reset_index(drop=True).get(0, default=0.0)
                     lca_dataset_object._data[indicator_index][stage_index] = (
                             lca_dataset_bind.loc[
-                                lca_dataset_bind['Modul'] == 'a1', indicator['abbreviation'].upper()].item()
+                                lca_dataset_bind['Modul'] == 'a1', indicator.abbreviation.upper()].item()
                             + lca_dataset_bind.loc[
-                                lca_dataset_bind['Modul'] == 'a2', indicator['abbreviation'].upper()].item()
+                                lca_dataset_bind['Modul'] == 'a2', indicator.abbreviation.upper()].item()
                             + lca_dataset_bind.loc[
-                                lca_dataset_bind['Modul'] == 'a3', indicator['abbreviation'].upper()].item()
+                                lca_dataset_bind['Modul'] == 'a3', indicator.abbreviation.upper()].item()
                     )
                 except KeyError as Error:
                     print(f"Error during calculation of stage a1_a3 for dataset '{(lca_dataset_bind['name'])}' with id"
