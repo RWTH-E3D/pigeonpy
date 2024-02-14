@@ -72,6 +72,6 @@ class En15804A2Dataset(EpdDataset):
         if data_class.file_format == "csv":
             lca_dataset_input.load_lca_dataset_csv(self, given_lca_id, data_class)
         else:
-            print(f"Given input file format '{data_class.file_format}' for given id '{given_lca_id}' not available."
+            print(f"Given input file format '{data_class.file_format}' not available."
                   f"\nAvailable input formats: 'csv'")
 
