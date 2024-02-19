@@ -1,4 +1,9 @@
+from logic.epddataset.en15804A1dataset import En15804A1Dataset
+from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import pandas as pd
+
+# Löschen falls übergeben wird siehe calculate Funktion
+from data.dataclass import DataClass
 
 class calculator(object):
 
@@ -57,8 +62,33 @@ class calculator(object):
 
 
     def calculate(self, *categorizations):
-        pass
+
+        if len(categorizations) == 1:
+            calc_df = self._select_by_categorization(categorizations[0])
+        else:
+            calc_df = self._select_by_categorization(categorizations[0], categorizations[1])
+
+        dataset_objects = []
+        for index, row in calc_df.iterrows():
+            dummy_dataclass = DataClass(used_standard='A1', file_format='csv')
+            if dummy_dataclass.used_standard == "A1":
+                dataset_object = En15804A1Dataset()
+            else:
+                dataset_object = En15804A2Dataset()
+
+            dataset_object.load_lca_dataset(row['epd_uuid'], data_class=dummy_dataclass)
+            dataset_object *= row['value']
+
+            calculated_result_row = {
+                'epd_dataset': dataset_object,
+                'category_name' : row['category_name'],
+                'categorization': row['categorization_name']
+            }
+            dataset_objects.append(calculated_result_row)
+        calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name', 'categorization'])
+
+        calculated_df = calculated_df.groupby('category_name')['epd_dataset'].sum()
+
+        return calculated_df
 
 
-test = calculator()
-print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
