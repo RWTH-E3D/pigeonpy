@@ -21,4 +21,11 @@ class calculator(object):
         self._categorization_header = ["categorization_id", "name"]
         self._categorization_table = pd.DataFrame(dummy_data_calc, columns=self._categorization_header)
 
+    def _select_by_categorization(self, *categorizations):
+        result = df.query('A == 2')
 
+        merged_df = self._calculation_table.merge(categorizations[0], on='category_id')
+
+
+    def calculate(self, *categorizations):
+        pass
