@@ -25,7 +25,7 @@ dataclass_csv = DataClass(file_format="csv")
 
 # Bsp. Laubschnittholz getrocknet (Durchschnitt DE): 596f1878-75cf-4cd4-a510-003a67094dd7
 laubschnitt_dataset_csv = En15804A1Dataset()
-laubschnitt_dataset_csv.load_lca_dataset("596f1878-75cf-4cd4-a510-003a67094dd7", dataclass_csv)
+laubschnitt_dataset_csv.load_lca_dataset("", dataclass_csv)
 # Bsp. Zellulosefaserplatten: cf963fcb-0e03-48c0-b501-ad0d1e3c22c0
 zellulose_dataset = En15804A1Dataset()
 zellulose_dataset.load_lca_dataset("cf963fcb-0e03-48c0-b501-ad0d1e3c22c0", dataclass_csv)
@@ -36,5 +36,21 @@ multiplied_dataset_csv = laubschnitt_dataset_csv * zellulose_dataset
 multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
 divided_dataset_csv = laubschnitt_dataset_csv/2
 
-print(laubschnitt_dataset_csv)
-print(added_dataset_csv)
+#print(laubschnitt_dataset_csv)
+print(multiplied_dataset_scalar_csv*2 + multiplied_dataset_scalar_csv)
+
+
+
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 123
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 241
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 23
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 42
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
+multiplied_dataset_scalar_csv = laubschnitt_dataset_csv * 2
