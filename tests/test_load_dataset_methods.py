@@ -21,6 +21,8 @@ class TestLoadDatasetMethods(unittest.TestCase):
         self.csv_a1_lca_data_bind_dropped_duplicates = self.csv_a1_lca_data_bind.drop_duplicates(subset="UUID")
 
         self.dataclass_csv_a2 = DataClass(file_format="csv", used_standard="A2")
+        self.csv_a2_lca_data_bind = self.dataclass_csv_a2.lca_data_bind
+        self.csv_a2_lca_data_bind_dropped_duplicates = self.csv_a2_lca_data_bind.drop_duplicates(subset="UUID")
 
         self.test_dataset_a1 = En15804A1Dataset()
         self.test_dataset_a2 = En15804A2Dataset()
@@ -39,8 +41,13 @@ class TestLoadDatasetMethods(unittest.TestCase):
 
     def test_csv_a1_load_every_dataset(self):
         for index, row in self.csv_a1_lca_data_bind_dropped_duplicates.iterrows():
-            print(index)
-            load_lca_dataset_csv(self.test_dataset_a2, row["UUID"], self.dataclass_csv_a1)
+            # print(index)
+            load_lca_dataset_csv(self.test_dataset_a1, row["UUID"], self.dataclass_csv_a1)
+
+    def test_csv_a2_load_every_dataset(self):
+        for index, row in self.csv_a2_lca_data_bind_dropped_duplicates.iterrows():
+            # print(index)
+            load_lca_dataset_csv(self.test_dataset_a2, row["UUID"], self.dataclass_csv_a2)
 
 
 

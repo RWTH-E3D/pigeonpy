@@ -109,6 +109,9 @@ def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
                                 lca_dataset_bind['Modul'] == 'a3', indicator.abbreviation.upper()].item()
                     )
                 except KeyError as Error:
-                    print(f"Error during calculation of stage a1_a3 for dataset '{(lca_dataset_bind['name'])}' with id"
-                          f"'{given_lca_id}'. {Error}")
+                    print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
+                          f" with ID '{given_lca_id}'. {Error}")
+                except ValueError as Error:
+                    print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
+                          f" with ID '{given_lca_id}'. {Error}")
 
