@@ -97,14 +97,16 @@ class EpdDataset(object):
             sum of self and other EpdDataset-object
         """
         try:
-            if isinstance(other, EpdDataset):
-                new_data = self._data + other._data
-                result_epd = type(self)()
-                result_epd._data = new_data
-                return result_epd
+            # __add__ Methode nur für das Addieren zweier data Matrizen von EpdDataset Objekten und nichts anderes?
+            # --> Durch if statement wird verhindert, dass Error ausgelöst wird
+            # if isinstance(other, EpdDataset):
+            new_data = self._data + other._data
+            result_epd = type(self)()
+            result_epd._data = new_data
+            return result_epd
 
-        except TypeError as Error:
-            raise TypeError(f"Error when adding something to the dataset {self._name}. {Error}")
+        except AttributeError as Error:
+            raise AttributeError(f"Error when adding something to the dataset {self._name}. {Error}")
         except ValueError as Error:
             raise ValueError(f"Error when adding something to the dataset {self._name}. {Error}")
 
@@ -122,14 +124,15 @@ class EpdDataset(object):
             Difference of self and other EpdDataset-object
         """
         try:
-            if isinstance(other, EpdDataset):
-                new_data = self._data - other._data
-                result_epd = type(self)()
-                result_epd._data = new_data
-                return result_epd
+            # siehe __add__ Methode
+            # if isinstance(other, EpdDataset):
+            new_data = self._data - other._data
+            result_epd = type(self)()
+            result_epd._data = new_data
+            return result_epd
 
-        except TypeError as Error:
-            raise TypeError(f"Error when subtracting something from the dataset {self._name}. {Error}")
+        except AttributeError as Error:
+            raise AttributeError(f"Error when subtracting something from the dataset {self._name}. {Error}")
         except ValueError as Error:
             raise ValueError(f"Error when subtracting something from the dataset {self._name}. {Error}")
 
@@ -145,16 +148,21 @@ class EpdDataset(object):
         result_epd: EpdDataset (instance of self type)
             dataset divided by scalar
         """
+        np.seterr(divide = 'raise')
         try:
             new_data = self._data / other
             result_epd = type(self)()
             result_epd._data = new_data
+            np.seterr(divide='ignore')
             return result_epd
 
+        except FloatingPointError as Error:
+            raise FloatingPointError(f"Error when dividing the dataset {self._name} with something. {Error}")
         except TypeError as Error:
             raise TypeError(f"Error when dividing the dataset {self._name} with something. {Error}")
         except ValueError as Error:
             raise ValueError(f"Error when dividing the dataset {self._name} with something. {Error}")
+
 
 
     def set_indicators_and_stages(self):
