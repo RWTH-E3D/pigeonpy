@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 class calculator(object):
 
@@ -50,7 +51,12 @@ class calculator(object):
 
         return calc_df
 
+    def import_calculation(self, path):
 
+        self.calculation_table = pd.read_csv(path, sep=';')
+        default_column_names = ["value", "epd_uuid", "epd_name", "comment"]
+        self.calculation_table = self.calculation_table.rename(
+            columns={list(self.calculation_table)[idx]: name for idx, name in enumerate(default_column_names)})
 
 
 
