@@ -53,13 +53,39 @@ class calculator(object):
 
     def import_calculation(self, path):
 
-        self.calculation_table = pd.read_csv(path, sep=';')
-        default_column_names = ["value", "epd_uuid", "epd_name", "comment"]
-        self.calculation_table = self.calculation_table.rename(
-            columns={list(self.calculation_table)[idx]: name for idx, name in enumerate(default_column_names)})
+
+        import_df = pd.read_csv(path, sep=',')
+
+        catigorizations = [[idx, col] for idx, col in enumerate(import_df.columns[4:11])]
+        categories = []
+        calculations = []
+
+        for idx, row in import_df.iloc[:, :4].iterrows():
+            calculations.append([idx] + row.tolist())
+
+        for col_idx, col_name in catigorizations:
+            col_values = import_df.iloc[:, col_idx + 4]
+            for idx, val in enumerate(col_values):
+                categories.append([idx, val, col_idx])
+
+        self._calculation_df = pd.DataFrame(calculations, columns=self._calculation_header)
+        self._category_df = pd.DataFrame(categories, columns=self._category_header)
+        self._categorization_df = pd.DataFrame(catigorizations, columns=self._categorization_header)
+
+        """
+        self._calculation_df = import_df
+        self._calculation_df.insert(loc=0, column="calculation_id", value=self._calculation_df.index)
+        self._calculation_df = self._calculation_df.rename(
+            columns={list(import_df)[idx]: name for idx, name in enumerate(self._calculation_header)})
+        self._calculation_df = self._calculation_df[self._calculation_header]
 
 
 
+        #cat_df = import_df.iloc[:,[len_header:]]
+
+        print(enumerate(self._calculation_header))
+
+        """
 
 
     def calculate(self, *categorizations):
@@ -67,4 +93,6 @@ class calculator(object):
 
 
 test = calculator()
-print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
+#print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
+test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\Input_draft.CSV"))
+
