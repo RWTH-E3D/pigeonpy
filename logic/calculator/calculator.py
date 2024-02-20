@@ -1,6 +1,7 @@
 from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import pandas as pd
+from pathlib import Path
 
 # Löschen falls übergeben wird siehe calculate Funktion
 from data.dataclass import DataClass
@@ -55,10 +56,41 @@ class calculator(object):
 
         return calc_df
 
+    def import_calculation(self, path):
+
+
+        import_df = pd.read_csv(path, sep=',')
+
+        catigorizations = [[idx, col] for idx, col in enumerate(import_df.columns[4:11])]
+        categories = []
+        calculations = []
+
+        for idx, row in import_df.iloc[:, :4].iterrows():
+            calculations.append([idx] + row.tolist())
+
+        for col_idx, col_name in catigorizations:
+            col_values = import_df.iloc[:, col_idx + 4]
+            for idx, val in enumerate(col_values):
+                categories.append([idx, val, col_idx])
+
+        self._calculation_df = pd.DataFrame(calculations, columns=self._calculation_header)
+        self._category_df = pd.DataFrame(categories, columns=self._category_header)
+        self._categorization_df = pd.DataFrame(catigorizations, columns=self._categorization_header)
+
+        """
+        self._calculation_df = import_df
+        self._calculation_df.insert(loc=0, column="calculation_id", value=self._calculation_df.index)
+        self._calculation_df = self._calculation_df.rename(
+            columns={list(import_df)[idx]: name for idx, name in enumerate(self._calculation_header)})
+        self._calculation_df = self._calculation_df[self._calculation_header]
 
 
 
+        #cat_df = import_df.iloc[:,[len_header:]]
 
+        print(enumerate(self._calculation_header))
+
+        """
 
 
     def calculate(self, *categorizations):
@@ -91,4 +123,8 @@ class calculator(object):
 
         return calculated_df
 
+
+test = calculator()
+#print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
+test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\Input_draft.CSV"))
 
