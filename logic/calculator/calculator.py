@@ -2,11 +2,12 @@ from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import pandas as pd
 from pathlib import Path
+import data.output.lca_data_output as lca_data_output
 
 # Löschen falls übergeben wird siehe calculate Funktion
 from data.dataclass import DataClass
 
-class calculator(object):
+class Calculator(object):
 
     def __init__(self):
         self._calculation_header = ["calculation_id", "value", "epd_uuid", "epd_name", "comment"]
@@ -126,10 +127,13 @@ class calculator(object):
         return calculated_df
 
 
-test = calculator()
+test = Calculator()
 #print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
 test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\input_data_dynamic_csv_V2.CSV"))
 huhu = test.calculate("Category1","Year Installation for components or occurence for consumption")
+
+lca_data_output.export_calculated_dataframe(huhu, file_format="teco_json")
+lca_data_output.export_calculated_dataframe(huhu, file_format="csv", drop_rows=True)
 
 print(huhu[("Technical building equipment", 1996)])
 
