@@ -5,6 +5,20 @@ import os
 
 
 def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv", drop_rows=False):
+    """Function to handle the given/ not given path and call the correct function depending on file_format
+
+    Parameters
+    ----------
+    df : pd Dataframe
+        Pandas dataframe containing calculation results
+    path : str
+        Path to location where exported file is created containing filename
+    file_format: str
+        String containing the file format the calculation results are exported to
+    drop_rows: Boolean
+        If True, rows/ life_cycle_stages of a dataset that are empty (all equal to 0) are dropped in the export dataframe
+    """
+
     dir_path = os.path.dirname(__file__)
     if file_format == "teco_json":
         if path=="lca_data_export.csv":
@@ -19,6 +33,18 @@ def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv
 
 
 def export_dataframe_to_csv(df, path, drop_rows=False):
+    """Function that exports the given dataframe with calculation results to a csv file in the location given by path
+
+    Parameters
+    ----------
+    df : pd Dataframe
+        Pandas dataframe containing calculation results
+    path : str
+        Path to location where exported file is created containing filename
+    drop_rows: Boolean
+        If True, rows/ life_cycle_stages of a dataset that are empty (all equal to 0) are dropped in the export dataframe
+    """
+
     header = ['name', 'module'] + [indicator.abbreviation for indicator in df[0].environmental_indicators]
     export_dataframe = pd.DataFrame(columns=header)
     for index, row in df.items():
@@ -39,6 +65,17 @@ def export_dataframe_to_csv(df, path, drop_rows=False):
     export_dataframe.to_csv(path, sep=';', index=False)
 
 def export_dataframe_to_teco_json(df, path):
+    """Function that exports the given dataframe with calculation results to a json file formatted according to the
+     teco_json format in the location given by path
+
+    Parameters
+    ----------
+    df : pd Dataframe
+        Pandas dataframe containing calculation results
+    path : str
+        Path to location where exported file is created containing filename
+    """
+
     export_dict = {}
     for index, row in df.items():
         dataset = row
@@ -63,6 +100,18 @@ def export_dataframe_to_teco_json(df, path):
 
 
 def export_single_dataset_to_csv(dataset, path, drop_rows=False):
+    """Function that exports the data matrix of a single dataset to a csv file in the location given by path
+
+    Parameters
+    ----------
+    dataset : EpdDataset
+        Instance of EpdDataset
+    path : str
+        Path to location where exported file is created containing filename
+    drop_rows: Boolean
+        If True, rows/ life_cycle_stages of the dataset that are empty (all equal to 0) are dropped in the export dataframe
+    """
+
     if path is None:
         path = os.path.join(os.path.dirname(__file__), (dataset._name + ".csv"))
 
@@ -79,6 +128,16 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False):
     export_df.to_csv(path, sep=';', index=False)
 
 def export_single_dataset_to_json(dataset, path):
+    """Function that exports the given dataframe with calculation results to a json file formatted according to the
+     teco_json format in the location given by path
+
+    Parameters
+    ----------
+    dataset : EpdDataset
+        Instance of EpdDataset
+    path : str
+        Path to location where exported file is created containing filename
+    """
     if path is None:
         path = os.path.join(os.path.dirname(__file__), (dataset._name + ".json"))
 
