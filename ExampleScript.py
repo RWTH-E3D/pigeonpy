@@ -1,6 +1,8 @@
 from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 from data.dataclass import DataClass
+from logic.calculator.calculator import Calculator
+import data.output.lca_data_output as lca_data_output
 
 
 """
@@ -76,3 +78,24 @@ print(holzfaser_dataset_a1)
 print(added_dataset_tecojson_csv_a1)
 print(Hobelware_dataset_a2)
 
+
+"""
+Beispiel für Berechnung und Export
+"""
+
+example = Calculator()
+
+example.import_calculation("C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draft\\data\\input\\inputdata\\input_data_dynamic_csv_V2.CSV")
+calculated_dataframe = example.calculate("Category1","Year Installation for components or occurence for consumption")
+
+lca_data_output.export_calculated_dataframe(df=calculated_dataframe, file_format="teco_json")
+# default file_format ist csv, default drop_rows=False, default path/ Dateiname ist output Ordner vom Projekt/ lca_data_export.csv
+lca_data_output.export_calculated_dataframe(df=calculated_dataframe)
+lca_data_output.export_calculated_dataframe(df=calculated_dataframe,
+                                            path="C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draft\\data\\output\\lca_data_export_drop_rows.csv",
+                                            drop_rows=True)
+
+Faserplatte_dataset_a2.export(drop_rows=True)
+Faserplatte_dataset_a2.export(file_format="teco_json")
+
+print(calculated_dataframe[("Technical building equipment", 1996)])
