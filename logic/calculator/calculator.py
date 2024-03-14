@@ -46,11 +46,14 @@ class calculator(object):
             cat_df = pd.merge(self._category_df, catz_df, on="categorization_id", how='inner')
             calc_df = pd.merge(self._calculation_df, cat_df, on="calculation_id", how='inner')
         else:
+            categorization = ' '.join(categorizations)
             cat_df = self._category_df.merge(self._categorization_df, on='categorization_id')
             pivot_df = cat_df.pivot(index='calculation_id', columns='categorization_name',
                                        values='category_name').reset_index()
             pivot_df['category_name'] = pivot_df[list(categorizations)].apply(tuple, axis=1)
             calc_df = self._calculation_df.merge(pivot_df, on='calculation_id', how='left').fillna('')
+            calc_df.insert(2, "categorization_name", categorization)
+
 
 
 
@@ -113,8 +116,8 @@ class calculator(object):
 
             calculated_result_row = {
                 'epd_dataset': dataset_object,
-                'category_name' : row['category_name']
-                #'categorization': row['categorization_name']
+                'category_name' : row['category_name'],
+                'categorization': row['categorization_name']
             }
             dataset_objects.append(calculated_result_row)
         calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name', 'categorization'])
@@ -127,7 +130,7 @@ class calculator(object):
 test = calculator()
 #print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
 test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\input_data_dynamic_csv_V2.CSV"))
-huhu = test.calculate("Category1","Year Installation for components or occurence for consumption")
+huhu = test.calculate("Category1", "Year Installation for components or occurence for consumption")
 
-print(huhu[("Technical building equipment", 1996)])
+
 
