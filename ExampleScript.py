@@ -1,7 +1,7 @@
 from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 from data.dataclass import DataClass
-from logic.calculator.calculator import Calculator
+#from logic.calculator.calculator import Calculator
 import data.output.lca_data_output as lca_data_output
 
 
@@ -52,6 +52,12 @@ divided_dataset_csv_a1 = laubschnitt_dataset_csv_a1/2
 # Verrechnen von Datensätzen aus unterschiedlichen Quellen
 added_dataset_tecojson_csv_a1 = holzfaser_dataset_a1 + zellulose_dataset_a1
 
+print(zellulose_dataset_a1.get("gwp", "a1_a3"))
+
+print(zellulose_dataset_a1.get_sum("gwp", "d"))
+
+print(zellulose_dataset_a1)
+
 
 
 """
@@ -74,15 +80,15 @@ Faserplatte_dataset_a2 = En15804A2Dataset()
 Faserplatte_dataset_a2.load_lca_dataset("8bd1172b-b81f-4805-a77e-1534b5f6bdee")
 
 
-print(holzfaser_dataset_a1)
-print(added_dataset_tecojson_csv_a1)
-print(Hobelware_dataset_a2)
+#print(holzfaser_dataset_a1)
+#print(added_dataset_tecojson_csv_a1)
+#print(Hobelware_dataset_a2)
 
 
 """
 Beispiel für Berechnung und Export
 """
-
+"""
 example = Calculator()
 
 example.import_calculation("C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draft\\data\\input\\inputdata\\input_data_dynamic_csv_V2.CSV")
@@ -98,4 +104,5 @@ lca_data_output.export_calculated_dataframe(df=calculated_dataframe,
 Faserplatte_dataset_a2.export(drop_rows=True)
 Faserplatte_dataset_a2.export(file_format="teco_json")
 
-print(calculated_dataframe[('Technical building equipment', 1996), 'Category1 Year Installation for components or occurence for consumption'])
+print(calculated_dataframe[("Technical building equipment", 1996)])
+"""

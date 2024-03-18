@@ -218,6 +218,39 @@ class EpdDataset(object):
         else:
             lca_data_output.export_single_dataset_to_csv(self, path, drop_rows=drop_rows)
 
+    def get(self, abr_indicator, abr_life_cycle_stage):
+        id_indicator = self._get_index_indicator(abr_indicator)
+        id_life_cycle_stage = self._get_index_life_cycle_stage(abr_life_cycle_stage)
+        return self._data[id_indicator,id_life_cycle_stage]
+
+    def get_indicator(self, abr_indicator):
+        id_indicator = self._get_index_indicator(abr_indicator)
+        return self._data[id_indicator, :]
+
+    def get_sum(self, abr_indicator, excluded_stages = None):
+
+        excluded_value = 0
+
+        if excluded_stages is not None:
+            for stage in excluded_stages:
+                excluded_value += self.get(abr_indicator, stage)
+
+        return self.get_indicator(abr_indicator).sum() - excluded_value
+
+    def _get_index_life_cycle_stage(self, abr_life_cycle_stage):
+        for index, life_cycle_stage in enumerate(self.life_cycle_stages):
+            if life_cycle_stage.abbreviation == abr_life_cycle_stage:
+                return index
+        raise KeyError(f"There is no life cycle stage {abr_life_cycle_stage}")
+
+
+
+
+    def _get_index_indicator(self, abr_indicator):
+        for index, indicator in enumerate(self.environmental_indicators):
+            if indicator.abbreviation == abr_indicator:
+                return index
+        raise KeyError(f"There is no indicator {abr_indicator}")
 
     @staticmethod
     def format__1(digits, num):
