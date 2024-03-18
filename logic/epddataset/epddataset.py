@@ -2,6 +2,7 @@ import numpy as np
 from data.dataclass import DataClass
 from logic.environmentalindicator.environmentalindicator import EnvironmentalIndicator
 from logic.lifecyclestage.lifecyclestage import LifeCycleStage
+import data.output.lca_data_output as lca_data_output
 
 class EpdDataset(object):
     """Abstract class for basic attributes and Epd dataset metadata
@@ -210,6 +211,13 @@ class EpdDataset(object):
             readable_data_string += "\n"
             readable_data_string += str('%s [%s]' % (self.format__1(rw, row_label), ' '.join(self.format__1(max_chars, i) for i in row)))
         return readable_data_string
+
+    def export(self, path=None ,file_format="csv", drop_rows=False):
+        if file_format == "teco_json":
+            lca_data_output.export_single_dataset_to_json(self, path)
+        else:
+            lca_data_output.export_single_dataset_to_csv(self, path, drop_rows=drop_rows)
+
 
     @staticmethod
     def format__1(digits, num):

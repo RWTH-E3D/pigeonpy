@@ -2,11 +2,12 @@ from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import pandas as pd
 from pathlib import Path
+import data.output.lca_data_output as lca_data_output
 
 # Löschen falls übergeben wird siehe calculate Funktion
 from data.dataclass import DataClass
 
-class calculator(object):
+class Calculator(object):
 
     def __init__(self):
         self._calculation_header = ["calculation_id", "value", "epd_uuid", "epd_name", "comment"]
@@ -122,12 +123,14 @@ class calculator(object):
             dataset_objects.append(calculated_result_row)
         calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name', 'categorization'])
 
-        calculated_df = calculated_df.groupby('category_name')['epd_dataset'].sum()
+        calculated_df = calculated_df.groupby('category_name')['epd_dataset'].sum() # actually a series
+        for index, dataset in calculated_df.items():
+            dataset._name = str(index)
 
         return calculated_df
 
 
-test = calculator()
+test = Calculator()
 #print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
 test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\input_data_dynamic_csv_V2.CSV"))
 huhu = test.calculate("Category1", "Year Installation for components or occurence for consumption")
