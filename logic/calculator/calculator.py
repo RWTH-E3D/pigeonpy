@@ -123,7 +123,7 @@ class Calculator(object):
             dataset_objects.append(calculated_result_row)
         calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name', 'categorization'])
 
-        calculated_df = calculated_df.groupby('category_name')['epd_dataset'].sum() # actually a series
+        calculated_df = calculated_df.groupby(['category_name', 'categorization'])['epd_dataset'].sum() # actually a series
         for index, dataset in calculated_df.items():
             dataset._name = str(index)
 

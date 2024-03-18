@@ -98,4 +98,4 @@ lca_data_output.export_calculated_dataframe(df=calculated_dataframe,
 Faserplatte_dataset_a2.export(drop_rows=True)
 Faserplatte_dataset_a2.export(file_format="teco_json")
 
-print(calculated_dataframe[("Technical building equipment", 1996)])
+print(calculated_dataframe[('Technical building equipment', 1996), 'Category1 Year Installation for components or occurence for consumption'])

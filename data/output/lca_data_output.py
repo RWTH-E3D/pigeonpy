@@ -45,8 +45,8 @@ def export_dataframe_to_csv(df, path, drop_rows=False):
         If True, rows/ life_cycle_stages of a dataset that are empty (all equal to 0) are dropped in the export dataframe
     """
 
-    header = ['name', 'module'] + [indicator.abbreviation for indicator in df[0].environmental_indicators]
-    export_dataframe = pd.DataFrame(columns=header)
+    export_dataframe = pd.DataFrame()
+
     for index, row in df.items():
         dataset = row
         temp_df = pd.DataFrame(data=dataset._data.transpose(),
