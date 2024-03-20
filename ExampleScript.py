@@ -3,6 +3,7 @@ from logic.epddataset.en15804A2dataset import En15804A2Dataset
 from data.dataclass import DataClass
 #from logic.calculator.calculator import Calculator
 import data.output.lca_data_output as lca_data_output
+import utility as utility
 
 
 """
@@ -106,3 +107,18 @@ Faserplatte_dataset_a2.export(file_format="teco_json")
 
 print(calculated_dataframe[("Technical building equipment", 1996)])
 """
+
+
+"""
+Beispiel für Interpolation
+"""
+# Only for example datasets
+import numpy as np
+
+example_dataset1 = En15804A1Dataset()
+example_dataset1._data = np.full((25, 18), 1)
+example_dataset2 = En15804A1Dataset()
+example_dataset2._data = np.full((25, 18), 2)
+
+list_of_interpolation_results = utility.linear_interpolate(example_dataset1, example_dataset2, 5, return_datasets=False)
+print(list_of_interpolation_results[0])
