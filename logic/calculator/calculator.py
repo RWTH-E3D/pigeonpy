@@ -117,13 +117,13 @@ class Calculator(object):
 
             calculated_result_row = {
                 'epd_dataset': dataset_object,
-                'category_name' : row['category_name'],
-                'categorization': row['categorization_name']
+                'category_name' : row['category_name']
+                # 'categorization': row['categorization_name']
             }
             dataset_objects.append(calculated_result_row)
-        calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name', 'categorization'])
+        calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name'])
 
-        calculated_df = calculated_df.groupby(['category_name', 'categorization'])['epd_dataset'].sum() # actually a series
+        calculated_df = calculated_df.groupby(['category_name'])['epd_dataset'].sum() # now a series
         for index, dataset in calculated_df.items():
             dataset._name = str(index)
 
@@ -134,6 +134,6 @@ test = Calculator()
 #print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
 test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\input_data_dynamic_csv_V2.CSV"))
 huhu = test.calculate("Category1", "Year Installation for components or occurence for consumption")
-
+print(huhu[("Technical building equipment", 1996)])
 
 
