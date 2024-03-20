@@ -48,10 +48,10 @@ def load_lca_dataset_json(lca_dataset_object, given_lca_id, data_class):
                             + lca_dataset_bind[indicator.abbreviation]["a2"]
                             + lca_dataset_bind[indicator.abbreviation]["a3"]
                         )
-                    except KeyError as Error:
-                        print(f"Stage a1_a3 of dataset '{(lca_dataset_bind['name'])}' with id: '{given_lca_id}' for "
-                              f"indicator '{indicator.abbreviation}' is calculated without stage {Error},"
-                              f"because it is not contained in the dataset.")
+                    except KeyError:
+                        # print(f"Stage a1_a3 of dataset '{(lca_dataset_bind['name'])}' with id: '{given_lca_id}' for "
+                        #       f"indicator '{indicator.abbreviation}' is calculated without stage {Error},"
+                        #       f"because it is not contained in the dataset.")
                         lca_dataset_object._data[indicator_index][stage_index] = float(
                             lca_dataset_bind[indicator.abbreviation].get("a1", 0.0)
                             + lca_dataset_bind[indicator.abbreviation].get("a2", 0.0)
@@ -108,10 +108,12 @@ def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
                             + lca_dataset_bind.loc[
                                 lca_dataset_bind['Modul'] == 'a3', indicator.abbreviation.upper()].item()
                     )
-                except KeyError as Error:
-                    print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
-                          f" with ID '{given_lca_id}'. {Error}")
-                except ValueError as Error:
-                    print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
-                          f" with ID '{given_lca_id}'. {Error}")
+                except (Exception,):
+                    pass
+                # except KeyError as Error:
+                #     print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
+                #           f" with ID '{given_lca_id}'. {Error}")
+                # except ValueError as Error:
+                #     print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
+                #           f" with ID '{given_lca_id}'. {Error}")
 
