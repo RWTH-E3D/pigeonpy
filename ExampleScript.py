@@ -116,9 +116,9 @@ Beispiel für Interpolation
 import numpy as np
 
 example_dataset1 = En15804A1Dataset()
-example_dataset1._data = np.full((25, 18), 1)
+example_dataset1._data = np.full((25, 18), 2021)
 example_dataset2 = En15804A1Dataset()
-example_dataset2._data = np.full((25, 18), 2)
+example_dataset2._data = np.full((25, 18), 2030)
 
-list_of_interpolation_results = utility.linear_interpolate(example_dataset1, example_dataset2, 5, return_datasets=False)
+list_of_interpolation_results = utility.linear_interpolate(example_dataset1, example_dataset2, 9, return_datasets=False)
 print(list_of_interpolation_results[0])

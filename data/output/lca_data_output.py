@@ -4,7 +4,7 @@ import uuid
 import os
 
 
-def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv", drop_rows=False):
+def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv", drop_rows=False, add_uuid=False):
     """Function to handle the given/ not given path and call the correct function depending on file_format
 
     Parameters
@@ -17,6 +17,8 @@ def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv
         String containing the file format the calculation results are exported to
     drop_rows: Boolean
         If True, rows/ life_cycle_stages of a dataset that are empty (all equal to 0) are dropped in the export dataframe
+    add_uuid: Boolean
+        If True, adds an uuid column to the exported csv file
     """
 
     dir_path = os.path.dirname(__file__)
@@ -27,12 +29,12 @@ def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv
             export_dataframe_to_csv(df=df, path=path)
     else:
         if path=="lca_data_export.csv":
-            export_dataframe_to_csv(df=df, path=os.path.join(dir_path, path), drop_rows=drop_rows)
+            export_dataframe_to_csv(df=df, path=os.path.join(dir_path, path), drop_rows=drop_rows, add_uuid=add_uuid)
         else:
-            export_dataframe_to_csv(df=df, path=path, drop_rows=drop_rows)
+            export_dataframe_to_csv(df=df, path=path, drop_rows=drop_rows, add_uuid=add_uuid)
 
 
-def export_dataframe_to_csv(df, path, drop_rows=False):
+def export_dataframe_to_csv(df, path, drop_rows=False, add_uuid=False):
     """Function that exports the given dataframe with calculation results to a csv file in the location given by path
 
     Parameters
@@ -43,6 +45,8 @@ def export_dataframe_to_csv(df, path, drop_rows=False):
         Path to location where exported file is created containing filename
     drop_rows: Boolean
         If True, rows/ life_cycle_stages of a dataset that are empty (all equal to 0) are dropped in the export dataframe
+    add_uuid: Boolean
+        If True, adds an uuid column to the exported csv file
     """
 
     export_dataframe = pd.DataFrame()
@@ -53,12 +57,20 @@ def export_dataframe_to_csv(df, path, drop_rows=False):
                                index=[x for x in range(len(dataset.life_cycle_stages))],
                                columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
 
-        temp_df.insert(0, "module", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
-        temp_df.insert(0, "name", value=str(index))
+        temp_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
+        if dataset.used_standard == "A1":
+            temp_df.insert(0, "Konformität", value="'EN 15804'")
+        else:
+            temp_df.insert(0, "Konformität", value="'EN 15804+A2'")
+        temp_df.insert(0, "Name (de)", value=str(index))
+
+        if add_uuid:
+            temp_df.insert(0, "UUID", value=str(uuid.uuid1()))
 
         # drop rows/ life cycle stages where all values are equal to zero
+        help_column_index = temp_df.columns.get_loc('pere')
         if drop_rows:
-            temp_df = temp_df[~temp_df.iloc[:, 2:].isin([0]).all(axis=1)]
+            temp_df = temp_df[~temp_df.iloc[:, help_column_index:].isin([0]).all(axis=1)]
 
         export_dataframe = pd.concat([export_dataframe, temp_df], ignore_index=True)
 
@@ -99,7 +111,7 @@ def export_dataframe_to_teco_json(df, path):
         json.dump(export_dict, f, indent=4, separators=(',', ': '))
 
 
-def export_single_dataset_to_csv(dataset, path, drop_rows=False):
+def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False):
     """Function that exports the data matrix of a single dataset to a csv file in the location given by path
 
     Parameters
@@ -110,6 +122,8 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False):
         Path to location where exported file is created containing filename
     drop_rows: Boolean
         If True, rows/ life_cycle_stages of the dataset that are empty (all equal to 0) are dropped in the export dataframe
+    add_uuid: Boolean
+        If True, adds an uuid column to the exported csv file
     """
 
     if path is None:
@@ -118,12 +132,18 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False):
     export_df = pd.DataFrame(data=dataset._data.transpose(),
                  index=[x for x in range(len(dataset.life_cycle_stages))],
                  columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
-    export_df.insert(0, "module", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
-    export_df.insert(0, "name", value=str(dataset._name))
-
+    export_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
+    if dataset.used_standard == "A1":
+        export_df.insert(0, "Konformität", value="'EN 15804'")
+    else:
+        export_df.insert(0, "Konformität", value="'EN 15804+A2'")
+    export_df.insert(0, "Name (de)", value=str(dataset._name))
+    if add_uuid:
+        export_df.insert(0, "UUID", value=str(uuid.uuid1()))
     # drop rows/ life cycle stages where all values are equal to zero
+    help_column_index = export_df.columns.get_loc('pere')
     if drop_rows:
-        export_df = export_df[~export_df.iloc[:, 2:].isin([0]).all(axis=1)]
+        export_df = export_df[~export_df.iloc[:, help_column_index:].isin([0]).all(axis=1)]
 
     export_df.to_csv(path, sep=';', index=False)
 

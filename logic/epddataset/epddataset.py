@@ -212,11 +212,11 @@ class EpdDataset(object):
             readable_data_string += str('%s [%s]' % (self.format__1(rw, row_label), ' '.join(self.format__1(max_chars, i) for i in row)))
         return readable_data_string
 
-    def export(self, path=None ,file_format="csv", drop_rows=False):
+    def export(self, path=None ,file_format="csv", drop_rows=False, add_uuid=False):
         if file_format == "teco_json":
             lca_data_output.export_single_dataset_to_json(self, path)
         else:
-            lca_data_output.export_single_dataset_to_csv(self, path, drop_rows=drop_rows)
+            lca_data_output.export_single_dataset_to_csv(self, path, drop_rows=drop_rows, add_uuid=add_uuid)
 
     def get(self, abr_indicator, abr_life_cycle_stage):
         id_indicator = self._get_index_indicator(abr_indicator)
