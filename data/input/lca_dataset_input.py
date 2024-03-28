@@ -99,7 +99,6 @@ def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
                 # Warnung: Bei Verrechnung mit anderen Datensätzen wird die stage a1_a3 im Ergebnis Datensatz
                 # nicht mehr die Summe aus a1,a2,a3 ergeben
                 try:
-                    # test_replace_NaN_with_default = lca_dataset_bind.loc[lca_dataset_bind['Modul'] == 'a1', indicator['abbreviation'].upper()].reset_index(drop=True).get(0, default=0.0)
                     lca_dataset_object._data[indicator_index][stage_index] = (
                             lca_dataset_bind.loc[
                                 lca_dataset_bind['Modul'] == 'a1', indicator.abbreviation.upper()].item()
@@ -110,10 +109,13 @@ def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
                     )
                 except (Exception,):
                     pass
-                # except KeyError as Error:
-                #     print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
-                #           f" with ID '{given_lca_id}'. {Error}")
-                # except ValueError as Error:
-                #     print(f"Stage a1_a3 could not be calculated for dataset '{lca_dataset_object._name}'"
-                #           f" with ID '{given_lca_id}'. {Error}")
+
+                # # without try except but a little slower:
+                # v1_a1 = lca_dataset_bind.loc[
+                #     lca_dataset_bind['Modul'] == 'a1', indicator.abbreviation.upper()].reset_index(drop=True).get(0,default=0.0)
+                # v1_a2 = lca_dataset_bind.loc[
+                #     lca_dataset_bind['Modul'] == 'a2', indicator.abbreviation.upper()].reset_index(drop=True).get(0,default=0.0)
+                # v1_a3 = lca_dataset_bind.loc[
+                #     lca_dataset_bind['Modul'] == 'a3', indicator.abbreviation.upper()].reset_index(drop=True).get(0,default=0.0)
+                # lca_dataset_object._data[indicator_index][stage_index] = v1_a1 + v1_a2 + v1_a3
 
