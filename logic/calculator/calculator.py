@@ -2,12 +2,30 @@ from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import pandas as pd
 from pathlib import Path
-import data.output.lca_data_output as lca_data_output
 
 # Löschen falls übergeben wird siehe calculate Funktion
 from data.dataclass import DataClass
 
 class Calculator(object):
+    """Class for a category based calculation of datasets.
+
+    Contains methods to import csv data as input for the calculation and the calculation itself
+
+    Attributes
+    ----------
+    _calculation_header : list
+        Column names for calculation df
+    _calculation_df : pd.DataFrame
+        Contains lca dataset UUIDs and their amount for the calculation
+    _categorization_header: list
+        Column names for categorization df
+    _categorization_df: pd.DataFrame
+        Contains the different categorizations for the calculation
+    _category_header: list
+        Column names for category df
+    _category_df: pd.DataFrame
+        Many to many connection of calculation df and categorization df (intermediate table with category names)
+    """
 
     def __init__(self):
         self._calculation_header = ["calculation_id", "value", "epd_uuid", "epd_name", "comment"]
@@ -40,6 +58,19 @@ class Calculator(object):
         self._categorization_df = pd.DataFrame(dummy_data_catz, columns=self._categorization_header)
 
     def _select_by_categorization(self, *categorizations):
+        """Method to create a dataframe for the calculation which additionally contains the category or category
+        combination according to which the datasets will be calculated.
+
+        Parameters
+        ----------
+        *categorizations: str
+            The category names as strings according to which the calculation will be made
+
+        Returns
+        -------
+        calc_df: pd.DataFrame
+            Contains information for the calculation; UUIDs, amounts, category/ categories
+        """
 
         if len(categorizations) == 1:
             categorization = categorizations[0]
@@ -61,7 +92,14 @@ class Calculator(object):
         return calc_df
 
     def import_calculation(self, path):
+        """Method to set the class attributes (dataframes with calculation info, categorizations, categories)
+        based on the input csv
 
+        Parameters
+        ----------
+        path: str
+            Path to the input csv file
+        """
 
         import_df = (pd.read_csv(path, sep=',',encoding='ANSI'))
         import_df['UUID'] = import_df['UUID'].str.strip()
@@ -99,6 +137,22 @@ class Calculator(object):
 
 
     def calculate(self, *categorizations):
+        """Method for category based calculation of datasets
+
+        Loads the datasets based on the UUIDs, multiplies them with the value defined in the input csv and sums up
+        every dataset with the same category name.
+
+        Parameters
+        ----------
+        *categorizations: str
+            The category name(s) as strings according to which the calculation will be made
+
+        Returns
+        -------
+        calculated_df: pd.Series
+            Contains the category or category combination as index and the associated calculation result in the form
+            of an EpdDataset object
+        """
 
         if len(categorizations) == 1:
             calc_df = self._select_by_categorization(categorizations[0])
@@ -130,10 +184,10 @@ class Calculator(object):
         return calculated_df
 
 
-test = Calculator()
-#print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
-test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\input_data_dynamic_csv_V2.CSV"))
-huhu = test.calculate("Category1", "Year Installation for components or occurence for consumption")
-print(huhu[("Technical building equipment", 1996)])
+# test = Calculator()
+# #print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
+# test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\input_data_dynamic_csv_V2.CSV"))
+# huhu = test.calculate("Category1", "Year Installation for components or occurence for consumption")
+# print(huhu[("Technical building equipment", 1996)])
 
 
