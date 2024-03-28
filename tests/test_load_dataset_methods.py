@@ -24,6 +24,12 @@ class TestLoadDatasetMethods(unittest.TestCase):
         self.csv_a2_lca_data_bind = self.dataclass_csv_a2.lca_data_bind
         self.csv_a2_lca_data_bind_dropped_duplicates = self.csv_a2_lca_data_bind.drop_duplicates(subset="UUID")
 
+        self.dataclass_csv_edited_oekobaudat = DataClass(file_format="csv", used_standard="A2")
+        self.dataclass_csv_edited_oekobaudat.path_lca_data = "C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draft\\data\\input\\inputdata\\OBD_2023_I_2024-01-09T12_49_34_Strommix_interpoliert.csv"
+        self.dataclass_csv_edited_oekobaudat.load_and_preprocess_csv_binding()
+        self.csv_edited_oekobaudat_lca_data_bind = self.dataclass_csv_edited_oekobaudat.lca_data_bind
+        self.csv_edited_oekobaudat_lca_data_bind_dropped = self.csv_edited_oekobaudat_lca_data_bind.drop_duplicates(subset="UUID")
+
         self.test_dataset_a1 = En15804A1Dataset()
         self.test_dataset_a2 = En15804A2Dataset()
 
@@ -40,14 +46,25 @@ class TestLoadDatasetMethods(unittest.TestCase):
 
 
     def test_csv_a1_load_every_dataset(self):
+        number_of_datasets_a1 = 0
         for index, row in self.csv_a1_lca_data_bind_dropped_duplicates.iterrows():
             # print(index)
             load_lca_dataset_csv(self.test_dataset_a1, row["UUID"], self.dataclass_csv_a1)
+            number_of_datasets_a1 += 1
+        print(f"Datasets A1: {number_of_datasets_a1}")
 
     def test_csv_a2_load_every_dataset(self):
+        number_of_datasets_a2 = 0
         for index, row in self.csv_a2_lca_data_bind_dropped_duplicates.iterrows():
             # print(index)
             load_lca_dataset_csv(self.test_dataset_a2, row["UUID"], self.dataclass_csv_a2)
+            number_of_datasets_a2 += 1
+        print(f"Datasets A2: {number_of_datasets_a2}")
+
+    def test_edited_oekobaudat_load_every_dataset(self):
+        for row in self.csv_edited_oekobaudat_lca_data_bind_dropped.itertuples():
+            #self.test_dataset_a2_ = En15804A2Dataset()
+            load_lca_dataset_csv(self.test_dataset_a2, row.UUID, self.dataclass_csv_edited_oekobaudat)
 
 
 
