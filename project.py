@@ -1,19 +1,12 @@
-import pandas as pd
 from pathlib import Path
 import data.output.lca_data_output as lca_data_output
 from logic.calculator.calculator import Calculator
-from data.dataclass import DataClass
 
 
 class Project(object):
 
     def __init__(self):
         self._name = "Project"
-        # self.calculations = pd.DataFrame()
-        # self.results = pd.Series()
-
-        # self.calculations = []
-        # self.results = []
 
         self.calculations = {}
         self.results = {}
@@ -22,11 +15,6 @@ class Project(object):
     def add_calculation(self, name, path, *categorizations):
         new_calculator = Calculator()
         new_calculator.import_calculation(path)
-        #calculation_df = pd.DataFrame(data={'name': name, 'calculator': new_calculator, 'categorization': categorizations})
-        #self.calculations = pd.concat([self.calculations, calculation_df])
-
-        #self.calculations.append(calculation_df)
-
         self.calculations[name] = {"calculator": new_calculator, "categorizations": categorizations}
 
     def add_categorization(self, calculation_name, *categorizations):
@@ -41,29 +29,6 @@ class Project(object):
         self.calculations[calculation_name].update({"categorizations": tuple(existing_categorizations)})
 
     def calculate_all(self):
-        # for calculation in self.calculations.itertuples():
-        #     if type(calculation.categorization) == tuple:
-        #         result = calculation.calculator.calculate(calculation.categorization[0], calculation.categorization[1])
-        #     else:
-        #         result = calculation.calculator.calculate(calculation.categorization)
-        #     #result = result.to_frame()
-        #     #result["categorization"] = str(calculation.categorization)
-        #     #result["name"] = calculation.name
-        #     self.results = pd.concat([self.results, result])
-        #     #self.results['name'] = calculation.name
-
-
-        # for df in self.calculations:
-        #     result = pd.Series()
-        #     for calculation in df.itertuples():
-        #         if type(calculation.categorization) == tuple:
-        #             tmp_result = calculation.calculator.calculate(calculation.categorization[0],
-        #                                                       calculation.categorization[1])
-        #         else:
-        #             tmp_result = calculation.calculator.calculate(calculation.categorization)
-        #         result = pd.concat([result, tmp_result])
-        #     self.results.append(result)
-
 
         for name, obj in self.calculations.items():
             self.results[name] = {}
@@ -78,6 +43,7 @@ class Project(object):
                 self.results[name].update({str(categorization): tmp_result})
 
     def export_results(self, directory_path=None, all_results=False, one_file=False, calculation_name=None, categorization_name=None, dataset_name=None):
+
         export_dir_path = Path()
         if directory_path is None:
             path_to_output_folder = Path(__file__).parent / "data" / "output"
