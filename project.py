@@ -17,6 +17,12 @@ class Project(object):
         new_calculator.import_calculation(path)
         self.calculations[name] = {"calculator": new_calculator, "categorizations": categorizations}
 
+    def remove_calculation(self, name):
+        try:
+            del self.calculations[name]
+        except KeyError as Error:
+            print(f"Calculation for removal not found. {Error}")
+
     def add_categorization(self, calculation_name, *categorizations):
         existing_categorizations = list(self.calculations[calculation_name]["categorizations"])
         new_categorizations = existing_categorizations + list(categorizations)
@@ -76,13 +82,15 @@ test = Project()
 test._name = "Test_project"
 
 test.add_calculation("2 Single Categorizations", input_csv_path, "Category1", "Year Disposal")
+test.add_calculation("Test calculation", input_csv_path)
+test.remove_calculation("Test calculation")
 
 test.add_calculation("Tuple Categorization", input_csv_path)
 test.add_categorization("Tuple Categorization", "test123", ("Category1","Year Installation for components or occurence for consumption"), "test456")
 test.remove_categorization("Tuple Categorization", "test456", "test123")
 
 test.calculate_all()
-test.export_results(all_results=True)
+#test.export_results(all_results=True)
 
 temp = test.results['2 Single Categorizations']['Category1']["Foundation"]
 print(temp)
