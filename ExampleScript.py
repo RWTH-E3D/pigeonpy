@@ -4,6 +4,7 @@ from data.dataclass import DataClass
 #from logic.calculator.calculator import Calculator
 import data.output.lca_data_output as lca_data_output
 import utility as utility
+from project import Project
 
 
 """
@@ -81,10 +82,6 @@ Faserplatte_dataset_a2 = En15804A2Dataset()
 Faserplatte_dataset_a2.load_lca_dataset("8bd1172b-b81f-4805-a77e-1534b5f6bdee")
 
 
-#print(holzfaser_dataset_a1)
-#print(added_dataset_tecojson_csv_a1)
-#print(Hobelware_dataset_a2)
-
 
 """
 Beispiel für Berechnung und Export
@@ -122,3 +119,28 @@ example_dataset2._data = np.full((25, 18), 2030)
 
 list_of_interpolation_results = utility.linear_interpolate(example_dataset1, example_dataset2, 9, return_datasets=False)
 print(list_of_interpolation_results[0])
+
+
+
+"""
+Beispiel für Interaktion mit Project Class
+"""
+
+input_csv_path = "C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draft\\data\\input\\inputdata\\input_data_dynamic_csv_V2.CSV"
+
+test = Project()
+test._name = "Test_project"
+
+test.add_calculation("2 Single Categorizations", input_csv_path, "Category1", "Year Disposal")
+test.add_calculation("Test calculation", input_csv_path)
+test.remove_calculation("Test calculation")
+
+test.add_calculation("Tuple Categorization", input_csv_path)
+test.add_categorization("Tuple Categorization", "test123", ("Category1","Year Installation for components or occurence for consumption"), "test456")
+test.remove_categorization("Tuple Categorization", "test456", "test123")
+
+test.calculate_all()
+#test.export_results(all_results=True)
+
+temp = test.results['2 Single Categorizations']['Category1']["Foundation"]
+print(temp)
