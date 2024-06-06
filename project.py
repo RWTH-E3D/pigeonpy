@@ -130,8 +130,7 @@ class Project(object):
             for categorization in obj["categorizations"]:
 
                 if type(categorization) == tuple:
-                    tmp_result = tmp_calculator.calculate(categorization[0],
-                                                          categorization[1])
+                    tmp_result = tmp_calculator.calculate(*categorization)
                 else:
                     tmp_result = tmp_calculator.calculate(categorization)
                 self.results[name].update({str(categorization): tmp_result})
