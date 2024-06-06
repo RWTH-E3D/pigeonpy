@@ -18,6 +18,10 @@ class Project(object):
 
     name : str
         Name of the project with the default name "Project"
+    used_standard : str
+        The standard (A1 or A2) used in the project
+    lca_data_input_format : str
+        The data type for the input format (csv, teco_json)
     calculations : dict
         A dictionary containing the different calculations with name, path for the input csv and
         categorizations for calculation
@@ -30,6 +34,8 @@ class Project(object):
 
     def __init__(self):
         self._name = "Project"
+        self.used_standard = "A2"
+        self.lca_data_input_format = "csv"
 
         self.calculations = {}
         self.results = {}
@@ -55,7 +61,7 @@ class Project(object):
 
         """
 
-        new_calculator = Calculator()
+        new_calculator = Calculator(used_standard=self.used_standard, lca_data_input_format=self.lca_data_input_format)
         new_calculator.import_calculation(path)
         self.calculations[name] = {"calculator": new_calculator, "categorizations": categorizations}
 

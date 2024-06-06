@@ -1,10 +1,8 @@
 from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
-import pandas as pd
-from pathlib import Path
-
-# Löschen falls übergeben wird siehe calculate Funktion
 from data.dataclass import DataClass
+import pandas as pd
+
 
 class Calculator(object):
     """Class for a category based calculation of datasets.
@@ -27,7 +25,10 @@ class Calculator(object):
         Many to many connection of calculation df and categorization df (intermediate table with category names)
     """
 
-    def __init__(self):
+    def __init__(self, used_standard="A2", lca_data_input_format="csv"):
+        self.used_standard = used_standard
+        self.lca_data_input_format = lca_data_input_format
+
         self._calculation_header = ["calculation_id", "value", "epd_uuid", "epd_name", "comment"]
         dummy_data_calc = [[0,1, "cf963fcb-0e03-48c0-b501-ad0d1e3c22c0", "", ""],
                            [1, 3, "cf963fcb-0e03-48c0-b501-ad0d1e3c22c0", "", ""],
@@ -158,23 +159,26 @@ class Calculator(object):
             calc_df = self._select_by_categorization(categorizations[0])
         else:
             calc_df = self._select_by_categorization(categorizations[0], categorizations[1])
+
+        dataclass = DataClass(used_standard=self.used_standard, file_format=self.lca_data_input_format)
         dataset_objects = []
-        for index, row in calc_df.iterrows():
-            dummy_dataclass = DataClass(used_standard='A2', file_format='csv')
-            if dummy_dataclass.used_standard == "A1":
+
+        for row in calc_df.itertuples():
+            if self.used_standard == "A1":
                 dataset_object = En15804A1Dataset()
             else:
                 dataset_object = En15804A2Dataset()
 
-            dataset_object.load_lca_dataset(row['epd_uuid'], data_class=dummy_dataclass)
-            dataset_object *= row['value']
+            dataset_object.load_lca_dataset(row.epd_uuid, data_class=dataclass)
+            dataset_object *= row.value
 
             calculated_result_row = {
                 'epd_dataset': dataset_object,
-                'category_name' : row['category_name']
+                'category_name' : row.category_name
                 # 'categorization': row['categorization_name']
             }
             dataset_objects.append(calculated_result_row)
+
         calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name'])
 
         calculated_df = calculated_df.groupby(['category_name'])['epd_dataset'].sum() # now a series
@@ -182,12 +186,5 @@ class Calculator(object):
             dataset._name = str(index)
 
         return calculated_df
-
-
-# test = Calculator()
-# #print(test._select_by_categorization("Jahr", "Typ", "Bauteil")[["value", "epd_uuid", "category_name"]])
-# test.import_calculation(Path(r"C:\Users\Cuypers\Documents\dynamic_lca_draft\data\input\inputdata\input_data_dynamic_csv_V2.CSV"))
-# huhu = test.calculate("Category1", "Year Installation for components or occurence for consumption")
-# print(huhu[("Technical building equipment", 1996)])
 
 
