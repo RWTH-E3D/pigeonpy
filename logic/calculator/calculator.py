@@ -158,7 +158,7 @@ class Calculator(object):
         if len(categorizations) == 1:
             calc_df = self._select_by_categorization(categorizations[0])
         else:
-            calc_df = self._select_by_categorization(categorizations[0], categorizations[1])
+            calc_df = self._select_by_categorization(*categorizations)
 
         dataclass = DataClass(used_standard=self.used_standard, file_format=self.lca_data_input_format)
         dataset_objects = []
