@@ -130,6 +130,8 @@ input_csv_path = "C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draf
 
 test = Project()
 test._name = "Test_project"
+test.used_standard = "A2"
+test.lca_data_input_format = "csv" # Alternativ 'teco_json'
 
 test.add_calculation("2 Single Categorizations", input_csv_path, "Category1", "Year Disposal")
 test.add_calculation("Test calculation", input_csv_path)
