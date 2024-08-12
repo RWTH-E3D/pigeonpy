@@ -1,8 +1,7 @@
 from pathlib import Path
 from data.dataclass import DataClass
 import data.output.lca_data_output as lca_data_output
-from logic.calculator.calculator import Calculator
-from data.output.result import Result
+from data.output.study import Study
 
 
 class Project(object):
@@ -36,30 +35,26 @@ class Project(object):
 
     def __init__(self, used_standard = "A2", lca_data_input_format="csv"):
         self._name = "Project"
-        self.used_standard = used_standard
-        self.lca_data_input_format = lca_data_input_format
-
-        self.calculations = {}
-        self.results = {}
-
-        self.dataclass = DataClass(used_standard=self.used_standard, file_format=self.lca_data_input_format)
-        self._used_stages = self.dataclass.life_cycle_stages_bind
-        self._used_indicators = self.dataclass.indicators_bind
+        self.studies = {}
 
 
-    def add_calculation(self, name, path, *categorizations):
-        """Adds a calculation to the calculations dictionary.
+    def add_study(self, *categorizations, study_name, input_csv_path, used_standard, lca_input_format):
+        """Adds a study to the studies dictionary.
 
-        This method needs a name for identification and a path to an input csv file to create an
-        instance of the Calculator class to save everything together as one entry in the dictionary.
+        This method needs a name for identification, a path to an input csv file and the standard as well
+        as the input format for the lca data to create an instance of the Study class.
 
         Parameters
         ----------
-        name : str
+        study_name : str
             A name to identify the calculation
-        path : str
+        input_csv_path : str
             A path to the input csv file containing information about the required datasets and
             categorizations
+        used_standard : str
+            The standard used for the study
+        lca_input_format : str
+            The file format that is used for the study
         categorizations : str or tuple of strings (optional)
             The categorizations according to which the calculation should be carried out. It is possible to
             pass the categorizations in this method as a single string or a tuple of strings but it is also
@@ -67,85 +62,48 @@ class Project(object):
 
         """
 
-        new_calculator = Calculator(used_standard=self.used_standard, lca_data_input_format=self.lca_data_input_format)
-        new_calculator.import_calculation(path)
-        self.calculations[name] = {"calculator": new_calculator, "categorizations": categorizations}
+        new_study = Study(study_name=study_name,
+                          input_csv_path=input_csv_path,
+                          used_standard=used_standard,
+                          lca_data_input_format=lca_input_format,
+                          categorizations=categorizations)
+        self.studies[study_name] = {"input csv path": input_csv_path, "used standard": used_standard,
+                                    "lca data input format": lca_input_format, "Study object": new_study}
 
-    def remove_calculation(self, name):
-        """Removes a calculation entry with the given name from the calculations dictionary.
+        return new_study
+
+    def remove_study(self, study_name):
+        """Removes a study entry with the given name from the studies dictionary.
 
         Parameters:
         ----------
         name : str
-            The name for which the calculation should be removed.
+            The name for which the study should be removed.
 
         """
 
         try:
-            del self.calculations[name]
+            del self.studies[study_name]
         except KeyError as Error:
-            print(f"Calculation for removal not found. {Error}")
+            print(f"Study for removal not found. {Error}")
 
-    def add_categorization(self, calculation_name, *categorizations):
-        """Method to add a categorization to an existing calculation.
+    def get_study(self, study_name):
+        study = self.studies.get(study_name)
+        if not study:
+            raise ValueError(f"No study found with name {study_name}")
+        return study
 
-        Parameters
-        ----------
-        calculation_name : str
-            Name of the calculation the categorization should be added to
-        categorizations : str or tuple of strings
-            Can be a single string, a tuple of two strings or a combination of the two which are added
-            to the calculations dictionary entry specified by the calculation_name
-
-        """
-
-        existing_categorizations = list(self.calculations[calculation_name]["categorizations"])
-        new_categorizations = existing_categorizations + list(categorizations)
-        self.calculations[calculation_name].update({"categorizations": tuple(new_categorizations)})
-
-    def remove_categorization(self, calculation_name, *categorizations):
-        """Method to remove a categorization from an existing calculation
-
-        Parameters
-        ----------
-        calculation_name : str
-            Name of the calculation the categorization should be removed from
-        categorizations : str or tuple of strings
-            The categorizations which should be removed
-
-        """
-
-        existing_categorizations = list(self.calculations[calculation_name]["categorizations"])
-        for categorization in categorizations:
-            existing_categorizations.remove(categorization)
-        self.calculations[calculation_name].update({"categorizations": tuple(existing_categorizations)})
-
-    def calculate_all(self):
-        """Method to calculate every entry from the calculations dictionary and save its results in the
-        result dictionary.
+    def calculate_all_studies(self):
+        """Method to calculate every entry from the studies dictionary and save its results in the
+        Study instance.
 
         Calls the calculate method from the Calculator class for every categorization contained in the
-        categorizations part of the calculation dictionary entry and saves the results in the results
+        categorizations part of the study dictionary entry and saves the results in the results
         dictionary under the name of the calculation and the categorization.
 
         """
-
-        for name, obj in self.calculations.items():
-            self.results[name] = {}
-            tmp_calculator = obj["calculator"]
-            for categorization in obj["categorizations"]:
-                new_result = Result(calculation_name=name,
-                                    categorization=str(categorization),
-                                    used_indicators=self._used_indicators,
-                                    used_stages=self._used_stages)
-                if type(categorization) == tuple:
-                    new_result.calculated_dataframe = tmp_calculator.calculate(*categorization)
-                else:
-                    new_result.calculated_dataframe = tmp_calculator.calculate(categorization)
-
-                if self._used_indicators != self.dataclass.indicators_bind or self._used_stages != self.dataclass.life_cycle_stages_bind:
-                    new_result.exclude_stages_and_indicators()
-                self.results[name].update({str(categorization): new_result})
+        for study_name, study_object in self.studies.items():
+            study_object['Study object'].calculate_study()
 
 
     def export_results(self, directory_path=None,
@@ -198,27 +156,3 @@ class Project(object):
             pass
 
         # Export methods to be revised in the future
-
-    def exclude_stages(self, *stages_to_exclude):
-        to_exclude = set()
-        for stage in stages_to_exclude:
-            if isinstance(stage, str):
-                to_exclude.add(stage)
-            elif isinstance(stage, list):
-                to_exclude.update(stage)
-            else:
-                raise ValueError("Stages must be either given as lowercase strings or a list of strings")
-
-        self._used_stages = [stage for stage in self._used_stages if stage["abbreviation"] not in to_exclude]
-
-    def exclude_indicators(self, *indicators_to_exclude):
-        to_exclude = set()
-        for indicator in indicators_to_exclude:
-            if isinstance(indicator, str):
-                to_exclude.add(indicator)
-            elif isinstance(indicator, list):
-                to_exclude.update(indicator)
-            else:
-                raise ValueError("Indicators must be either given as lowercase strings or a list of strings")
-
-        self._used_indicators = [indicator for indicator in self._used_indicators if indicator["abbreviation"] not in to_exclude]
