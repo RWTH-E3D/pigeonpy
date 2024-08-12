@@ -130,24 +130,35 @@ input_csv_path = "C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draf
 
 test = Project()
 test._name = "Test_project"
-test.used_standard = "A2"
-test.lca_data_input_format = "csv" # Alternativ 'teco_json'
 
-test.add_calculation("2 Single Categorizations", input_csv_path, "Category1", "Year Disposal")
-test.add_calculation("Test calculation", input_csv_path)
-test.remove_calculation("Test calculation")
+two_single_categorizations = test.add_study(study_name="2 Single Categorizations",
+                                            input_csv_path=input_csv_path,
+                                            used_standard="A2",
+                                            lca_input_format="csv") # Alternativ: 'teco_json'
+tuple_categorization = test.add_study("test categorization",
+                                      ("Category1","Year Installation for components or occurence for consumption"),
+                                      "test categorization 2",
+                                      study_name="Tuple Categorization",
+                                      input_csv_path=input_csv_path,
+                                      used_standard="A2",
+                                      lca_input_format="csv")
 
-test.add_calculation("Tuple Categorization", input_csv_path)
-test.add_categorization("Tuple Categorization", "test123", ("Category1","Year Installation for components or occurence for consumption"), "test456")
-test.remove_categorization("Tuple Categorization", "test456", "test123")
+example_study = test.add_study(study_name="Nur ein Beispiel",
+                               input_csv_path=input_csv_path,
+                               used_standard="A1",
+                               lca_input_format="teco_json")
+test.remove_study(study_name="Nur ein Beispiel")
 
-test.exclude_stages("a1", "a2", "c1", "c2")
-test.exclude_stages(["b1", "b2", "d"])
-test.exclude_indicators("pere", "perm")
-test.exclude_indicators(["pert", "penre"])
+two_single_categorizations.add_categorizations("Category1", "Year Disposal")
+tuple_categorization.remove_categorizations("test categorization", "test categorization 2")
 
-test.calculate_all()
+two_single_categorizations.exclude_stages("a1", "a2", "c1", "c2")
+two_single_categorizations.exclude_stages(["b1", "b2", "d"])
+two_single_categorizations.exclude_indicators("pere", "perm")
+two_single_categorizations.exclude_indicators(["pert", "penre"])
+
+test.calculate_all_studies()
 #test.export_results(all_results=True)
 
-example_dataframe = test.results['2 Single Categorizations']['Category1'].calculated_dataframe["Foundation"]
+example_dataframe = two_single_categorizations.grouped_results['Category1']["Foundation"]
 print(example_dataframe)
