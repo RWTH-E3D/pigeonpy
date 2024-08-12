@@ -44,7 +44,7 @@ class En15804A1Dataset(EpdDataset):
         self._data = np.full((25, 18), 0.0)
         self.used_standard = "A1"
         if not En15804A1Dataset.stages_and_indicators_loaded:
-            EpdDataset.set_indicators_and_stages(self)
+            EpdDataset._set_indicators_and_stages(self)
             En15804A1Dataset.stages_and_indicators_loaded = True
 
 
