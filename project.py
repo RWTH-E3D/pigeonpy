@@ -1,6 +1,8 @@
 from pathlib import Path
+from data.dataclass import DataClass
 import data.output.lca_data_output as lca_data_output
 from logic.calculator.calculator import Calculator
+from data.output.result import Result
 
 
 class Project(object):
@@ -16,7 +18,7 @@ class Project(object):
     Attributes
     ----------
 
-    name : str
+    _name : str
         Name of the project with the default name "Project"
     used_standard : str
         The standard (A1 or A2) used in the project
@@ -32,13 +34,17 @@ class Project(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, used_standard = "A2", lca_data_input_format="csv"):
         self._name = "Project"
-        self.used_standard = "A2"
-        self.lca_data_input_format = "csv"
+        self.used_standard = used_standard
+        self.lca_data_input_format = lca_data_input_format
 
         self.calculations = {}
         self.results = {}
+
+        self.dataclass = DataClass(used_standard=self.used_standard, file_format=self.lca_data_input_format)
+        self._used_stages = self.dataclass.life_cycle_stages_bind
+        self._used_indicators = self.dataclass.indicators_bind
 
 
     def add_calculation(self, name, path, *categorizations):
@@ -128,12 +134,19 @@ class Project(object):
             self.results[name] = {}
             tmp_calculator = obj["calculator"]
             for categorization in obj["categorizations"]:
-
+                new_result = Result(calculation_name=name,
+                                    categorization=str(categorization),
+                                    used_indicators=self._used_indicators,
+                                    used_stages=self._used_stages)
                 if type(categorization) == tuple:
-                    tmp_result = tmp_calculator.calculate(*categorization)
+                    new_result.calculated_dataframe = tmp_calculator.calculate(*categorization)
                 else:
-                    tmp_result = tmp_calculator.calculate(categorization)
-                self.results[name].update({str(categorization): tmp_result})
+                    new_result.calculated_dataframe = tmp_calculator.calculate(categorization)
+
+                if self._used_indicators != self.dataclass.indicators_bind or self._used_stages != self.dataclass.life_cycle_stages_bind:
+                    new_result.exclude_stages_and_indicators()
+                self.results[name].update({str(categorization): new_result})
+
 
     def export_results(self, directory_path=None,
                        all_results=True,
@@ -186,4 +199,26 @@ class Project(object):
 
         # Export methods to be revised in the future
 
+    def exclude_stages(self, *stages_to_exclude):
+        to_exclude = set()
+        for stage in stages_to_exclude:
+            if isinstance(stage, str):
+                to_exclude.add(stage)
+            elif isinstance(stage, list):
+                to_exclude.update(stage)
+            else:
+                raise ValueError("Stages must be either given as lowercase strings or a list of strings")
 
+        self._used_stages = [stage for stage in self._used_stages if stage["abbreviation"] not in to_exclude]
+
+    def exclude_indicators(self, *indicators_to_exclude):
+        to_exclude = set()
+        for indicator in indicators_to_exclude:
+            if isinstance(indicator, str):
+                to_exclude.add(indicator)
+            elif isinstance(indicator, list):
+                to_exclude.update(indicator)
+            else:
+                raise ValueError("Indicators must be either given as lowercase strings or a list of strings")
+
+        self._used_indicators = [indicator for indicator in self._used_indicators if indicator["abbreviation"] not in to_exclude]
