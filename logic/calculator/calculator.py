@@ -58,6 +58,10 @@ class Calculator(object):
         self._categorization_header = ["categorization_id", "categorization_name"]
         self._categorization_df = pd.DataFrame(dummy_data_catz, columns=self._categorization_header)
 
+        self._calc_df_for_calculation_methods = None
+        self._calculated_epd_quantities = None
+        self._calculated_categorizations = None
+
     def _select_by_categorization(self, *categorizations):
         """Method to create a dataframe for the calculation which additionally contains the category or category
         combination according to which the datasets will be calculated.
@@ -104,22 +108,23 @@ class Calculator(object):
 
         import_df = (pd.read_csv(path, sep=',',encoding='ANSI'))
         import_df['UUID'] = import_df['UUID'].str.strip()
+        import_df['epd categorization'] = import_df['UUID']
 
-        catigorizations = [[idx, col] for idx, col in enumerate(import_df.columns[4:11])]
+        categorizations = [[idx, col] for idx, col in enumerate(import_df.columns[4:11])]
         categories = []
         calculations = []
 
         for idx, row in import_df.iloc[:, :4].iterrows():
             calculations.append([idx] + row.tolist())
 
-        for col_idx, col_name in catigorizations:
+        for col_idx, col_name in categorizations:
             col_values = import_df.iloc[:, col_idx + 4]
             for idx, val in enumerate(col_values):
                 categories.append([idx, val, col_idx])
 
         self._calculation_df = pd.DataFrame(calculations, columns=self._calculation_header)
         self._category_df = pd.DataFrame(categories, columns=self._category_header)
-        self._categorization_df = pd.DataFrame(catigorizations, columns=self._categorization_header)
+        self._categorization_df = pd.DataFrame(categorizations, columns=self._categorization_header)
 
         """
         self._calculation_df = import_df
@@ -137,16 +142,17 @@ class Calculator(object):
         """
 
 
-    def calculate(self, *categorizations):
-        """Method for category based calculation of datasets
+    def calculate_epd_quantities(self, *categorizations, dataclass):
+        """Method for calculating the quantities of each epd dataset given in the input csv file
 
-        Loads the datasets based on the UUIDs, multiplies them with the value defined in the input csv and sums up
-        every dataset with the same category name.
+        Loads the datasets based on the UUIDs and multiplies them with the value defined in the input csv.
 
         Parameters
         ----------
         *categorizations: str
             The category name(s) as strings according to which the calculation will be made
+        dataclass : DataClass
+            Instance of the DataClass class
 
         Returns
         -------
@@ -156,14 +162,14 @@ class Calculator(object):
         """
 
         if len(categorizations) == 1:
-            calc_df = self._select_by_categorization(categorizations[0])
+            self._calc_df_for_calculation_methods = self._select_by_categorization(categorizations[0])
         else:
-            calc_df = self._select_by_categorization(*categorizations)
+            self._calc_df_for_calculation_methods = self._select_by_categorization(*categorizations)
 
-        dataclass = DataClass(used_standard=self.used_standard, file_format=self.lca_data_input_format)
+        dataclass = dataclass
         dataset_objects = []
 
-        for row in calc_df.itertuples():
+        for row in self._calc_df_for_calculation_methods.itertuples():
             if self.used_standard == "A1":
                 dataset_object = En15804A1Dataset()
             else:
@@ -179,12 +185,20 @@ class Calculator(object):
             }
             dataset_objects.append(calculated_result_row)
 
-        calculated_df = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name'])
+        self._calculated_epd_quantities = pd.DataFrame(dataset_objects, columns=['epd_dataset', 'category_name'])
 
-        calculated_df = calculated_df.groupby(['category_name'])['epd_dataset'].sum() # now a series
-        for index, dataset in calculated_df.items():
+        return self._calculated_epd_quantities
+
+
+    def calculate_categorizations(self, calculated_epd_quantities=None):
+        """Group calculated epd quantities by the given categorizations/ category names which means summing up
+        every dataset with the same category name."""
+        if calculated_epd_quantities is None:
+            calculated_epd_quantities = self._calculated_epd_quantities
+
+        self._calculated_categorizations = calculated_epd_quantities.groupby(['category_name'])['epd_dataset'].sum() # now a Series
+
+        for index, dataset in self._calculated_categorizations.items():
             dataset._name = str(index)
 
-        return calculated_df
-
-
+        return self._calculated_categorizations
