@@ -141,8 +141,13 @@ test.add_calculation("Tuple Categorization", input_csv_path)
 test.add_categorization("Tuple Categorization", "test123", ("Category1","Year Installation for components or occurence for consumption"), "test456")
 test.remove_categorization("Tuple Categorization", "test456", "test123")
 
+test.exclude_stages("a1", "a2", "c1", "c2")
+test.exclude_stages(["b1", "b2", "d"])
+test.exclude_indicators("pere", "perm")
+test.exclude_indicators(["pert", "penre"])
+
 test.calculate_all()
 #test.export_results(all_results=True)
 
-temp = test.results['2 Single Categorizations']['Category1']["Foundation"]
-print(temp)
+example_dataframe = test.results['2 Single Categorizations']['Category1'].calculated_dataframe["Foundation"]
+print(example_dataframe)
