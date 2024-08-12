@@ -1,5 +1,5 @@
 """Module contains functions to load lca datasets from the file/ dataset bindings of the dataclass"""
-
+import numpy as np
 
 def load_lca_dataset_json(lca_dataset_object, given_lca_id, data_class):
     """Loads the metadata and indicator values from the dataset specified with the lca id from the
@@ -88,34 +88,21 @@ def load_lca_dataset_csv(lca_dataset_object, given_lca_id, data_class):
                         f"'{data_class.file_format}' and standard En15804+{lca_dataset_object.used_standard} was found. "
                         f"Please enter a valid lca id or try another file format.")
 
-    for indicator_index, indicator in enumerate(lca_dataset_object.environmental_indicators):
-        for stage_index, stage in enumerate(lca_dataset_object.life_cycle_stages):
-            if stage.abbreviation in lca_dataset_bind['Modul'].values:
-                lca_dataset_object._data[indicator_index][stage_index] = lca_dataset_bind.loc[
-                    lca_dataset_bind['Modul'] == stage.abbreviation, indicator.abbreviation.upper()].values[0]
+    data_array = lca_dataset_object._data
+    grouped = lca_dataset_bind.groupby("Modul")
 
-            elif (stage.abbreviation == "a1_a3") and ("a1_a3" not in lca_dataset_bind['Modul']):
-                # Nicht vorhandene Werte beim aufaddieren von a1,a2,a3 zu a1_a3 werden durch den default=0.0 ersetzt
-                # Warnung: Bei Verrechnung mit anderen Datensätzen wird die stage a1_a3 im Ergebnis Datensatz
-                # nicht mehr die Summe aus a1,a2,a3 ergeben
-                try:
-                    lca_dataset_object._data[indicator_index][stage_index] = (
-                            lca_dataset_bind.loc[
-                                lca_dataset_bind['Modul'] == 'a1', indicator.abbreviation.upper()].item()
-                            + lca_dataset_bind.loc[
-                                lca_dataset_bind['Modul'] == 'a2', indicator.abbreviation.upper()].item()
-                            + lca_dataset_bind.loc[
-                                lca_dataset_bind['Modul'] == 'a3', indicator.abbreviation.upper()].item()
-                    )
-                except (Exception,):
-                    pass
+    test_list = [indicator.abbreviation.upper() for indicator in lca_dataset_object.environmental_indicators]
 
-                # # without try except but a little slower:
-                # v1_a1 = lca_dataset_bind.loc[
-                #     lca_dataset_bind['Modul'] == 'a1', indicator.abbreviation.upper()].reset_index(drop=True).get(0,default=0.0)
-                # v1_a2 = lca_dataset_bind.loc[
-                #     lca_dataset_bind['Modul'] == 'a2', indicator.abbreviation.upper()].reset_index(drop=True).get(0,default=0.0)
-                # v1_a3 = lca_dataset_bind.loc[
-                #     lca_dataset_bind['Modul'] == 'a3', indicator.abbreviation.upper()].reset_index(drop=True).get(0,default=0.0)
-                # lca_dataset_object._data[indicator_index][stage_index] = v1_a1 + v1_a2 + v1_a3
+    for i, stage in enumerate(lca_dataset_object.life_cycle_stages):
+        group = grouped.get_group(stage.abbreviation) if stage.abbreviation in grouped.groups else None
+        if group is not None:
+            values = group[test_list].iloc[0].values
+            data_array[:, i] = values
+        else:
+            data_array[:, i] = 0.0
 
+    a1_a3_column_index = [stage.abbreviation for stage in lca_dataset_object.life_cycle_stages].index("a1_a3")
+    if np.count_nonzero(data_array[:, a1_a3_column_index]) == 0:
+        data_array[:, a1_a3_column_index] = np.sum(data_array[:, :a1_a3_column_index], axis=1)
+
+    lca_dataset_object._data = data_array

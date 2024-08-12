@@ -166,18 +166,21 @@ class EpdDataset(object):
 
 
 
-    def set_indicators_and_stages(self):
+    def _set_indicators_and_stages(self, indicator_list=None, stages_list=None):
         """Class method to set the class variables for environmental indicators and life cycle stages the first time
         the class is loaded"""
 
         tmp_dataclass = DataClass(used_standard=self.used_standard)
 
-        for indicator in tmp_dataclass.indicators_bind:
+        indicator_list = indicator_list if indicator_list else tmp_dataclass.indicators_bind
+        stages_list = stages_list if stages_list else tmp_dataclass.life_cycle_stages_bind
+
+        for indicator in indicator_list:
             new_indicator = EnvironmentalIndicator(abbreviation=indicator["abbreviation"], name=indicator["name"],
                                                    unit=indicator["unit"], description=indicator["description"])
             self.environmental_indicators.append(new_indicator)
 
-        for stage in tmp_dataclass.life_cycle_stages_bind:
+        for stage in stages_list:
             new_stage = LifeCycleStage(abbreviation=stage["abbreviation"], name=stage["name"],
                                        description=stage["description"])
             self.life_cycle_stages.append(new_stage)
