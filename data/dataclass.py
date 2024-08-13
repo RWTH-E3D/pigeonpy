@@ -44,6 +44,7 @@ class DataClass(object):
         file_format (default: 'teco_json')
 
     """
+
     def __init__(self, used_standard="A1", file_format="teco_json"):
         self.used_standard = used_standard
         self.file_format = file_format
@@ -188,7 +189,7 @@ class DataClass(object):
                               "AP (A2)", "GWPtotal (A2)", "GWPbiogenic (A2)", "GWPfossil (A2)", "GWPluluc (A2)",
                               "EPmarine (A2)", "EPfreshwater (A2)", "EPterrestrial (A2)", "ODP (A2)", "POCP (A2)",
                               "ADPF (A2)", "ADPE (A2)", "WDP (A2)",
-                               ]
+                              ]
             lca_data_bind_pd = pd.read_csv(self.path_lca_data, sep=';', encoding="ISO-8859-1",
                                            usecols=use_columns_a2, converters={'Bezugsgroesse': convert_string_to_1},
                                            dtype=dtype_dict)
@@ -202,10 +203,11 @@ class DataClass(object):
                     ].index)
             # Renaming columns to fit the syntax of indicators_en_15804_a2.json
             rename_columns_a2 = {"AP (A2)": "AP", "GWPtotal (A2)": "GWP-TOTAL", "GWPbiogenic (A2)": "GWP-BIOGEN",
-                              "GWPfossil (A2)": "GWP-FOSSIL", "GWPluluc (A2)": "GWP-LULUC", "EPmarine (A2)": "EP-MARINE",
-                              "EPfreshwater (A2)": "EP-FRESHWATER", "EPterrestrial (A2)": "EP-TERRESTRIAL",
-                              "ODP (A2)": "ODP", "POCP (A2)": "POCP", "ADPF (A2)": "ADPF", "ADPE (A2)": "ADPE",
-                              "WDP (A2)": "WDP"}
+                                 "GWPfossil (A2)": "GWP-FOSSIL", "GWPluluc (A2)": "GWP-LULUC",
+                                 "EPmarine (A2)": "EP-MARINE",
+                                 "EPfreshwater (A2)": "EP-FRESHWATER", "EPterrestrial (A2)": "EP-TERRESTRIAL",
+                                 "ODP (A2)": "ODP", "POCP (A2)": "POCP", "ADPF (A2)": "ADPF", "ADPE (A2)": "ADPE",
+                                 "WDP (A2)": "WDP"}
             lca_data_bind_pd.rename(columns=rename_columns_a2, inplace=True)
 
         # missing units exchanged with pcs. (pieces), fits for the current status of the database (09.01.2024)

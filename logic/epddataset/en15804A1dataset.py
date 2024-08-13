@@ -47,7 +47,6 @@ class En15804A1Dataset(EpdDataset):
             EpdDataset._set_indicators_and_stages(self)
             En15804A1Dataset.stages_and_indicators_loaded = True
 
-
     def load_lca_dataset(self, given_lca_id, data_class=None):
         """Method that calls the functions to load a dataset from the file binding into the instance dependent
         on the passed file format inside the DataClass instance
@@ -75,4 +74,3 @@ class En15804A1Dataset(EpdDataset):
         else:
             print(f"Given input file format '{data_class.file_format}' not available."
                   f"\nAvailable input formats: 'teco_json', 'csv'")
-

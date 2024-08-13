@@ -1,6 +1,7 @@
 """Module contains functions to load lca datasets from the file/ dataset bindings of the dataclass"""
 import numpy as np
 
+
 def load_lca_dataset_json(lca_dataset_object, given_lca_id, data_class):
     """Loads the metadata and indicator values from the dataset specified with the lca id from the
     teco json binding of the DataClass instance into the _data attribute of the passed instance of

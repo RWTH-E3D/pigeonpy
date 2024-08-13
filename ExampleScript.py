@@ -1,11 +1,10 @@
 from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 from data.dataclass import DataClass
-#from logic.calculator.calculator import Calculator
+# from logic.calculator.calculator import Calculator
 import data.output.lca_data_output as lca_data_output
 import utility as utility
 from project import Project
-
 
 """
 Bsp. für teco json (enthält nur A1 Datensätze):
@@ -25,8 +24,6 @@ holzfaser_dataset_a1.load_lca_dataset("d601d54e-a2eb-42bb-b32b-c59d1b2332a9", da
 # Laden ohne übergebene DataClass Instanz
 laubschnitt_dataset_a1 = En15804A1Dataset()
 laubschnitt_dataset_a1.load_lca_dataset("596f1878-75cf-4cd4-a510-003a67094dd7")
-
-
 
 """
 Bsp. für CSV und Standard A1:
@@ -49,7 +46,7 @@ added_dataset_csv_a1 = laubschnitt_dataset_csv_a1 + zellulose_dataset_a1
 subtracted_dataset_csv_a1 = laubschnitt_dataset_csv_a1 - zellulose_dataset_a1
 multiplied_dataset_csv_a1 = laubschnitt_dataset_csv_a1 * zellulose_dataset_a1
 multiplied_dataset_scalar_csv_a1 = laubschnitt_dataset_csv_a1 * 2
-divided_dataset_csv_a1 = laubschnitt_dataset_csv_a1/2
+divided_dataset_csv_a1 = laubschnitt_dataset_csv_a1 / 2
 
 # Verrechnen von Datensätzen aus unterschiedlichen Quellen
 added_dataset_tecojson_csv_a1 = holzfaser_dataset_a1 + zellulose_dataset_a1
@@ -59,8 +56,6 @@ print(zellulose_dataset_a1.get("gwp", "a1_a3"))
 print(zellulose_dataset_a1.get_sum("gwp", "d"))
 
 print(zellulose_dataset_a1)
-
-
 
 """
 Bsp. für csv und Standard A2:
@@ -80,8 +75,6 @@ Hobelware_dataset_a2.load_lca_dataset("4ef9fd61-0aae-45e0-abcb-7573b4b05408", da
 # Laden ohne übergebene DataClass Instanz
 Faserplatte_dataset_a2 = En15804A2Dataset()
 Faserplatte_dataset_a2.load_lca_dataset("8bd1172b-b81f-4805-a77e-1534b5f6bdee")
-
-
 
 """
 Beispiel für Berechnung und Export
@@ -105,7 +98,6 @@ Faserplatte_dataset_a2.export(file_format="teco_json")
 print(calculated_dataframe[("Technical building equipment", 1996)])
 """
 
-
 """
 Beispiel für Interpolation
 """
@@ -120,8 +112,6 @@ example_dataset2._data = np.full((25, 18), 2030)
 list_of_interpolation_results = utility.linear_interpolate(example_dataset1, example_dataset2, 9, return_datasets=False)
 print(list_of_interpolation_results[0])
 
-
-
 """
 Beispiel für Interaktion mit Project Class
 """
@@ -134,9 +124,9 @@ test._name = "Test_project"
 two_single_categorizations = test.add_study(study_name="2 Single Categorizations",
                                             input_csv_path=input_csv_path,
                                             used_standard="A2",
-                                            lca_input_format="csv") # Alternativ: 'teco_json'
+                                            lca_input_format="csv")  # Alternativ: 'teco_json'
 tuple_categorization = test.add_study("test categorization",
-                                      ("Category1","Year Installation for components or occurence for consumption"),
+                                      ("Category1", "Year Installation for components or occurence for consumption"),
                                       "test categorization 2",
                                       study_name="Tuple Categorization",
                                       input_csv_path=input_csv_path,
@@ -158,7 +148,7 @@ two_single_categorizations.exclude_indicators("pere", "perm")
 two_single_categorizations.exclude_indicators(["pert", "penre"])
 
 test.calculate_all_studies()
-#test.export_results(all_results=True)
+# test.export_results(all_results=True)
 
 example_dataframe = two_single_categorizations.grouped_results['Category1']["Foundation"]
 print(example_dataframe)

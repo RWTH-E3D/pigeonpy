@@ -23,12 +23,12 @@ def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv
 
     dir_path = os.path.dirname(__file__)
     if file_format == "teco_json":
-        if path=="lca_data_export.csv":
+        if path == "lca_data_export.csv":
             export_dataframe_to_teco_json(df=df, path=os.path.join(dir_path, "lca_data_export.json"))
         else:
             export_dataframe_to_csv(df=df, path=path)
     else:
-        if path=="lca_data_export.csv":
+        if path == "lca_data_export.csv":
             export_dataframe_to_csv(df=df, path=os.path.join(dir_path, path), drop_rows=drop_rows, add_uuid=add_uuid)
         else:
             export_dataframe_to_csv(df=df, path=path, drop_rows=drop_rows, add_uuid=add_uuid)
@@ -76,6 +76,7 @@ def export_dataframe_to_csv(df, path, drop_rows=False, add_uuid=False):
 
     export_dataframe.to_csv(path, sep=';', index=False)
 
+
 def export_dataframe_to_teco_json(df, path):
     """Function that exports the given dataframe with calculation results to a json file formatted according to the
      teco_json format in the location given by path
@@ -103,7 +104,8 @@ def export_dataframe_to_teco_json(df, path):
             temp_dict[temp_uuid][indicator.abbreviation] = {'unit': indicator.unit}
             for stage_index, stage in enumerate(dataset.life_cycle_stages):
                 if dataset._data[indicator_index][stage_index] != 0.0:
-                    temp_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset._data[indicator_index][stage_index]
+                    temp_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset._data[indicator_index][
+                        stage_index]
 
         export_dict.update(temp_dict)
 
@@ -130,8 +132,8 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False)
         path = os.path.join(os.path.dirname(__file__), (dataset._name + ".csv"))
 
     export_df = pd.DataFrame(data=dataset._data.transpose(),
-                 index=[x for x in range(len(dataset.life_cycle_stages))],
-                 columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
+                             index=[x for x in range(len(dataset.life_cycle_stages))],
+                             columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
     export_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
     if dataset.used_standard == "A1":
         export_df.insert(0, "Konformität", value="'EN 15804'")
@@ -146,6 +148,7 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False)
         export_df = export_df[~export_df.iloc[:, help_column_index:].isin([0]).all(axis=1)]
 
     export_df.to_csv(path, sep=';', index=False)
+
 
 def export_single_dataset_to_json(dataset, path):
     """Function that exports the given dataframe with calculation results to a json file formatted according to the
@@ -164,10 +167,10 @@ def export_single_dataset_to_json(dataset, path):
     temp_uuid = str(uuid.uuid1())
     # add ref_flow attributes here when meta-data is passed by dunder methods in EpdDataset
     export_dict = {temp_uuid: {'name': str(dataset._name),
-                             'ref_flow': {
-                                 'value': '',
-                                 'unit': ''
-                             }}}
+                               'ref_flow': {
+                                   'value': '',
+                                   'unit': ''
+                               }}}
 
     for indicator_index, indicator in enumerate(dataset.environmental_indicators):
         export_dict[temp_uuid][indicator.abbreviation] = {'unit': indicator.unit}
@@ -178,4 +181,3 @@ def export_single_dataset_to_json(dataset, path):
 
     with open(path, 'w') as f:
         json.dump(export_dict, f, indent=4, separators=(',', ': '))
-

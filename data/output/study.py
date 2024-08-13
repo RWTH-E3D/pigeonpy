@@ -29,7 +29,6 @@ class Study(object):
         self.epd_results = pd.Series
         self.overall_results = EpdDataset()
 
-
     def initiate_dataclass(self):
         new_dataclass = DataClass(used_standard=self.used_standard, file_format=self.lca_data_input_format)
         return new_dataclass
@@ -73,10 +72,12 @@ class Study(object):
         for categorization in self.categorizations:
             if type(categorization) == tuple:
                 epd_quantities = self.__calculator_object.calculate_epd_quantities(*categorization,
-                                                                                    dataclass=self.data_class)
+                                                                                   dataclass=self.data_class)
             else:
-                epd_quantities = self.__calculator_object.calculate_epd_quantities(categorization,                                                                                                   dataclass=self.data_class)
-            self.grouped_results[str(categorization)] = self.__calculator_object.calculate_categorizations(epd_quantities)
+                epd_quantities = self.__calculator_object.calculate_epd_quantities(categorization,
+                                                                                   dataclass=self.data_class)
+            self.grouped_results[str(categorization)] = self.__calculator_object.calculate_categorizations(
+                epd_quantities)
 
             # if self._used_indicators != self.dataclass.indicators_bind or self._used_stages != self.dataclass.life_cycle_stages_bind:
             #     new_result = self.exclude_stages_and_indicators()
@@ -108,7 +109,8 @@ class Study(object):
             else:
                 raise ValueError("Indicators must be either given as lowercase strings or a list of strings")
 
-        self._used_indicators = [indicator for indicator in self._used_indicators if indicator["abbreviation"] not in to_exclude]
+        self._used_indicators = [indicator for indicator in self._used_indicators if
+                                 indicator["abbreviation"] not in to_exclude]
 
     """
     def exclude_stages_and_indicators(self):

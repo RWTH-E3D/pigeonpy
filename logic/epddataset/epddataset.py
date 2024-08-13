@@ -4,8 +4,9 @@ from logic.environmentalindicator.environmentalindicator import EnvironmentalInd
 from logic.lifecyclestage.lifecyclestage import LifeCycleStage
 import data.output.lca_data_output as lca_data_output
 
+
 class EpdDataset(object):
-    """Abstract class for basic attributes and Epd dataset metadata
+    """Abstract class for basic attributes and EPD dataset metadata
 
     Contains dunder methods for basic calculations of datasets and representing the data
 
@@ -149,7 +150,7 @@ class EpdDataset(object):
         result_epd: EpdDataset (instance of self type)
             dataset divided by scalar
         """
-        np.seterr(divide = 'raise')
+        np.seterr(divide='raise')
         try:
             new_data = self._data / other
             result_epd = type(self)()
@@ -163,8 +164,6 @@ class EpdDataset(object):
             raise TypeError(f"Error when dividing the dataset {self._name} with something. {Error}")
         except ValueError as Error:
             raise ValueError(f"Error when dividing the dataset {self._name} with something. {Error}")
-
-
 
     def _set_indicators_and_stages(self, indicator_list=None, stages_list=None):
         """Class method to set the class variables for environmental indicators and life cycle stages the first time
@@ -209,29 +208,72 @@ class EpdDataset(object):
 
         max_chars = max([len(str(item)) for item in arr.flatten()])  # char number required to display any item in list
         rw = max([len(str(item)) for item in row_labels])
-        readable_data_string = str('%s %s' % (' ' * (rw + 1), ' '.join(self.format__1(max_chars, i) for i in col_labels)))
+        readable_data_string = str(
+            '%s %s' % (' ' * (rw + 1), ' '.join(self.format__1(max_chars, i) for i in col_labels)))
         for row_label, row in zip(row_labels, arr):
             readable_data_string += "\n"
-            readable_data_string += str('%s [%s]' % (self.format__1(rw, row_label), ' '.join(self.format__1(max_chars, i) for i in row)))
+            readable_data_string += str(
+                '%s [%s]' % (self.format__1(rw, row_label), ' '.join(self.format__1(max_chars, i) for i in row)))
         return readable_data_string
 
-    def export(self, path=None ,file_format="csv", drop_rows=False, add_uuid=False):
+    def export(self, path=None, file_format="csv", drop_rows=False, add_uuid=False):
         if file_format == "teco_json":
             lca_data_output.export_single_dataset_to_json(self, path)
         else:
             lca_data_output.export_single_dataset_to_csv(self, path, drop_rows=drop_rows, add_uuid=add_uuid)
 
     def get(self, abr_indicator, abr_life_cycle_stage):
+        """This function returns     the value of a indicator for a specific life cycle stage
+
+        Parameters
+        ----------
+        abr_indicator: str
+            the abbreviation of the requested indicator
+        abr_life_cycle_stage: str
+            the abbreviation of the requested life cycle stage
+
+        Returns
+        -------
+        value: float
+            the value of the requested indicator for the requested life cycle stage
+        """
         id_indicator = self._get_index_indicator(abr_indicator)
         id_life_cycle_stage = self._get_index_life_cycle_stage(abr_life_cycle_stage)
-        return self._data[id_indicator,id_life_cycle_stage]
+        return self._data[id_indicator, id_life_cycle_stage]
 
     def get_indicator(self, abr_indicator):
+        """This functions returns a vector of all values of the requested indicator
+
+        Parameters
+        ----------
+        abr_indicator: str
+            the abbreviation of the requested indicator
+
+        Returns
+        -------
+        value vector: numpy
+            vector with every values of the requested indicator
+
+        """
         id_indicator = self._get_index_indicator(abr_indicator)
         return self._data[id_indicator, :]
 
-    def get_sum(self, abr_indicator, excluded_stages = None):
+    def get_sum(self, abr_indicator, excluded_stages=None):
+        """This function sums up all life cycle stages of one indicator to one value, except these given in
+        "excluded_stages"
 
+        Parameters
+        ----------
+        abr_indicator: str
+            the abbreviation of the requested indicator
+        excluded_stages: list
+            list with abbreviation of the life cycle stages that should not be added up
+
+        Returns
+        -------
+        sum: float
+            sum of all life cycle stages ot the requested indicator, except these given in "excluded_stages"
+        """
         excluded_value = 0
 
         if excluded_stages is not None:
@@ -245,9 +287,6 @@ class EpdDataset(object):
             if life_cycle_stage.abbreviation == abr_life_cycle_stage:
                 return index
         raise KeyError(f"There is no life cycle stage {abr_life_cycle_stage}")
-
-
-
 
     def _get_index_indicator(self, abr_indicator):
         for index, indicator in enumerate(self.environmental_indicators):

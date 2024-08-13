@@ -33,10 +33,9 @@ class Project(object):
 
     """
 
-    def __init__(self, used_standard = "A2", lca_data_input_format="csv"):
+    def __init__(self, used_standard="A2", lca_data_input_format="csv"):
         self._name = "Project"
         self.studies = {}
-
 
     def add_study(self, *categorizations, study_name, input_csv_path, used_standard, lca_input_format):
         """Adds a study to the studies dictionary.
@@ -105,7 +104,6 @@ class Project(object):
         for study_name, study_object in self.studies.items():
             study_object['Study object'].calculate_study()
 
-
     def export_results(self, directory_path=None,
                        all_results=True,
                        one_file=False,
@@ -150,7 +148,7 @@ class Project(object):
                     file_path = export_dir_path / name_for_file
 
                     lca_data_output.export_calculated_dataframe(df=self.results[name][categorization],
-                                                                path =file_path,
+                                                                path=file_path,
                                                                 drop_rows=True)
         elif all_results and one_file:
             pass
