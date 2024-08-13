@@ -2,7 +2,8 @@
 
 
 def linear_interpolate(dataset1, dataset2, steps, return_datasets=True):
-    """
+    """This function interpolates linearly between the values of two EPD datasets. One EPD dataset is generated per
+    step between dataset1 and datatset2.
 
     Parameters
     ----------
