@@ -1,8 +1,7 @@
 from data.dataclass import DataClass
-from logic.calculator.calculator import Calculator
+from logic.calculator import Calculator
 from logic.epddataset.epddataset import EpdDataset
-from logic.epddataset.otherdataset import OtherDataset
-import data.output.lca_data_output as lca_data_output
+from logic.goalandscope import GoalAndScope
 import pandas as pd
 
 

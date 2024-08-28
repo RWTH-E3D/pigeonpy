@@ -1,7 +1,6 @@
 from pathlib import Path
-from data.dataclass import DataClass
 import data.output.lca_data_output as lca_data_output
-from data.output.study import Study
+from study import Study
 
 
 class Project(object):
