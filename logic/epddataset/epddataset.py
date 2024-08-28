@@ -1,7 +1,7 @@
 import numpy as np
 from data.dataclass import DataClass
-from logic.environmentalindicator.environmentalindicator import EnvironmentalIndicator
-from logic.lifecyclestage.lifecyclestage import LifeCycleStage
+from logic.environmentalindicator import EnvironmentalIndicator
+from logic.lifecyclestage import LifeCycleStage
 import data.output.lca_data_output as lca_data_output
 
 
