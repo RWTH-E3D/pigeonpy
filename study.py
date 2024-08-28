@@ -9,12 +9,15 @@ class Study(object):
     def __init__(self,
                  study_name,
                  input_csv_path,
-                 used_standard,
                  lca_data_input_format,
+                 used_standard=None,
                  categorizations=None):
 
         self.study_name = study_name
         self.categorizations = categorizations
+
+        self.goal_and_scope = GoalAndScope()
+
         self.used_standard = used_standard
         self.lca_data_input_format = lca_data_input_format
         self.__input_csv_path = input_csv_path
@@ -27,6 +30,28 @@ class Study(object):
         self.grouped_results = {}
         self.epd_results = pd.Series
         self.overall_results = EpdDataset()
+
+    def set_goal_and_scope(self, standard, considered_stages=[], considered_indicators=[], description=""):
+        """Function to set goal and scope of the study
+
+        Parameters
+        ----------
+        standard : str
+            EPD standard used in the study for calculation
+        considered_stages : list
+            List of all life cycle stages considered in the study. Default is [] which is equal to evry stage from the used EPD
+            standard
+        considered_indicators : list
+            List of all
+        description
+
+        Returns
+        -------
+
+        """
+
+        self.goal_and_scope = GoalAndScope(standard, considered_stages, considered_indicators, description)
+
 
     def initiate_dataclass(self):
         new_dataclass = DataClass(used_standard=self.used_standard, file_format=self.lca_data_input_format)
