@@ -1,7 +1,7 @@
 import numpy as np
 from data.dataclass import DataClass
-from logic.environmentalindicator.environmentalindicator import EnvironmentalIndicator
-from logic.lifecyclestage.lifecyclestage import LifeCycleStage
+from logic.environmentalindicator import EnvironmentalIndicator
+from logic.lifecyclestage import LifeCycleStage
 import data.output.lca_data_output as lca_data_output
 
 
@@ -171,9 +171,13 @@ class EpdDataset(object):
 
         tmp_dataclass = DataClass(used_standard=self.used_standard)
 
-        indicator_list = indicator_list if indicator_list else tmp_dataclass.indicators_bind
-        stages_list = stages_list if stages_list else tmp_dataclass.life_cycle_stages_bind
+        #todo: this functions doesn´t work, cause the indicator_list from the dataclass ist actually a dictonarie
+        #       I hardcoded the key to be "indicators_en15804_a1" to make the example script runable. Yet, this is
+        #       not a fix and the whole handling of importing standars should be remodeled
 
+        indicator_list = indicator_list["indicators_en_15804_a2"] if indicator_list else tmp_dataclass.indicators_bind["indicators_en_15804_a2"]
+        stages_list = stages_list if stages_list else tmp_dataclass.life_cycle_stages_bind
+        print(indicator_list)
         for indicator in indicator_list:
             new_indicator = EnvironmentalIndicator(abbreviation=indicator["abbreviation"], name=indicator["name"],
                                                    unit=indicator["unit"], description=indicator["description"])

@@ -45,7 +45,7 @@ class DataClass(object):
 
     """
 
-    def __init__(self, used_standard="A1", file_format="teco_json"):
+    def __init__(self, used_standard="EN15804+A1", file_format="teco_json"):
         self.used_standard = used_standard
         self.file_format = file_format
 
@@ -60,11 +60,11 @@ class DataClass(object):
             "data", "input", "inputdata", "life_cycle_stages_en_15978.json"
         ))
 
-        if self.used_standard == "A1":
+        if self.used_standard == "EN15804+A1":
             self.path_indicators = get_full_path(os.path.join(
                 "data", "input", "inputdata", "indicators_en_15804_a1.json"
             ))
-        elif self.used_standard == "A2":
+        elif self.used_standard == "EN15804+A2":
             self.path_indicators = get_full_path(os.path.join(
                 "data", "input", "inputdata", "indicators_en_15804_a2.json"
             ))
@@ -155,7 +155,7 @@ class DataClass(object):
                       "IRP (A2)": float, "SOP (A2)": float, "ODP (A2)": float, "POCP (A2)": float, "ADPF (A2)": float,
                       "ADPE (A2)": float, "WDP (A2)": float}
 
-        if self.used_standard == "A1":
+        if self.used_standard == "EN15804+A1":
             use_columns_a1 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
                               "Bezugseinheit", "Referenzfluss-Name", "Modul",
                               "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
@@ -178,7 +178,7 @@ class DataClass(object):
                       f"{len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformität'].str.contains('A2')])} datasets"
                       f"conform to standard A2")
 
-        elif self.used_standard == "A2":
+        elif self.used_standard == "EN15804+A2":
             use_columns_a2 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
                               "Bezugseinheit", "Referenzfluss-Name", "Modul",
                               "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
