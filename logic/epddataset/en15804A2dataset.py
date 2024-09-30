@@ -1,6 +1,6 @@
 from logic.epddataset.epddataset import EpdDataset
 from data.dataclass import DataClass
-import data.input.lca_dataset_input as lca_dataset_input
+from data.epddata.epddatamanager import EpdDataManager
 import numpy as np
 
 
@@ -43,12 +43,12 @@ class En15804A2Dataset(EpdDataset):
 
         super().__init__()
         self._data = np.full((31, 18), 0.0)
-        self.used_standard = "A2"
+        self.used_standard = "EN15804+A2"
         if not En15804A2Dataset.stages_and_indicators_loaded:
             EpdDataset._set_indicators_and_stages(self)
             En15804A2Dataset.stages_and_indicators_loaded = True
 
-    def load_lca_dataset(self, given_lca_id, data_class=None):
+    def load_lca_dataset(self, epd_id, epd_data_manager, source = None):
         """Method that calls the functions to load a dataset from the file binding into the instance dependent
         on the passed file format inside the DataClass instance
 
@@ -60,16 +60,4 @@ class En15804A2Dataset(EpdDataset):
             Instance of DataClass with file and data bindings
 
         """
-        if data_class is None:
-            data_class = DataClass(used_standard="A2", file_format="csv")
-
-        if data_class.used_standard != self.used_standard:
-            raise Exception("You are trying to load a dataset according to standard En15804+A1 into an instance "
-                            "of the En15804+A2 class. Used standard in given DataClass instance is not equal to "
-                            "used standard of self.")
-
-        if data_class.file_format == "csv":
-            lca_dataset_input.load_lca_dataset_csv(self, given_lca_id, data_class)
-        else:
-            print(f"Given input file format '{data_class.file_format}' not available."
-                  f"\nAvailable input formats: 'csv'")
+        epd_data_manager.load_epd(self, epd_id, source, "EN15804+A2")
