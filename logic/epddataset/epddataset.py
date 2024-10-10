@@ -152,7 +152,11 @@ class EpdDataset(object):
         """
         np.seterr(divide='raise')
         try:
-            new_data = self._data / other
+            if isinstance(other, self.__class__):
+                #Todo: check if
+                new_data = np.divide(self._data, other._data, out=np.zeros_like(self._data), where=other._data != 0.0)
+            else:
+                new_data = self._data / other
             result_epd = type(self)()
             result_epd._data = new_data
             np.seterr(divide='ignore')

@@ -2,60 +2,56 @@ from study import Study
 from pathlib import Path
 from logic.goalandscope import GoalAndScope
 from data.epddata.source.oekobaudatcsv import OekobaudatCsv
-from methods import normalization
+from logic.epddataset.en15804A2dataset import En15804A2Dataset
+import logic.methods.normalization as norm
 
-input_csv_path = Path("C:/Users/Cuypers/Documents/dynamic_lca_draft/data/input/inputdata/input_data_dynamic_csv_V2.CSV")
+def doktorandenseminar_weighting(normalized_result, gwp_perc, fw_perc, rwd_perc):
 
-goal_and_scope = GoalAndScope("EN15804+A2", description = "This study is about huhu")
+    gwp_weighted = normalized_result.get("gwp-total", "a1_a3") * gwp_perc
+    fw_weighted = normalized_result.get("fw", "a1_a3") * fw_perc
+    rwh_weighted = normalized_result.get("rwd", "a1_a3") * rwd_perc
 
-test_study = Study("test-studie")
-oekobaudatfilepath = Path("C:/Users/Cuypers/Documents/dynamic_lca_draft/data/input/inputdata/OBD_2023_I_2024-01-09T12_49_34.csv")
-test_source = OekobaudatCsv("Ökobaudat", oekobaudatfilepath, "EN15804+A2")
-test_study.epd_datamanager.register_source("oekobaudat", test_source)
-test_study.goal_and_scope = goal_and_scope
-test_study.load_calculation_input(input_csv_path)
-test_study.run_calculation("Year Installation for components or occurence for consumption")
+    print(f'GWP_weighted = {gwp_weighted}')
+    print(f'FW_weighted = {fw_weighted}')
+    print(f'RWD_weighted = {rwh_weighted}')
+    print(f'overall = {gwp_weighted + fw_weighted + rwh_weighted}')
 
-test_study.apply_method(method)
+#input file wird geladen
+input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input-doktorandenseminar.CSV"
 
-print(test_study.calculation.result[1996])
+# Studie wird erstellt
+study_doktorandenseminar = Study("Doktorandenseminar")
+
+#goal and scope wird definiert und der Studie zugeordnet (nicht wichtig für Seminar)
+goal_and_scope = GoalAndScope("EN15804+A2", description = "This study is about insulation")
+study_doktorandenseminar.goal_and_scope = goal_and_scope
+
+#Datenbank wird geladen und der Studie zugeordnet
+oekobaudatfilepath = Path.cwd()  / "data" / "input" / "inputdata" / "OBD_2023_I_2024-01-09T12_49_34.csv"
+oekobaudat = OekobaudatCsv("Ökobaudat", oekobaudatfilepath, "EN15804+A2")
+study_doktorandenseminar.epd_datamanager.register_source("oekobaudat", oekobaudat)
+
+#Berechnung wird geladen und gestartet
+study_doktorandenseminar.load_calculation_input(input_csv_path)
+study_doktorandenseminar.run_calculation("Variante")
+
+#Normalisieurngs EPD wird geladen
+normalization_epd = En15804A2Dataset()
+normalization_epd.load_lca_dataset("757297f1-9325-4df4-af51-96510be76bf3", study_doktorandenseminar.epd_datamanager)
+
+#EPS: 757297f1-9325-4df4-af51-96510be76bf3
+#Mineralwolle: 4fa62445-e59f-4874-99e5-49cec91967e0
+
+#Normalisierung wird durchgeführt
+method_tuple_norm = ("normalization", norm.normalize_by_epd, normalization_epd)
+study_doktorandenseminar.apply_method(*method_tuple_norm)
+
+print(study_doktorandenseminar.calculation.other_results["normalization"]["Flachsvlies"])
+
+#Gewichtung wird durchgeführt
+doktorandenseminar_weighting(study_doktorandenseminar.calculation.other_results["normalization"]["Flachsvlies"], 0.8, 0.1, 0.1)
 
 
-#test_study.calculation.run("Category1")
 
 
 
-
-#calculator.import_calculation(input_csv_path)
-
-#test = calculator.calculate("Category1")
-
-
-
-# two_single_categorizations = test.add_study(study_name="2 Single Categorizations",
-#                                             input_csv_path=input_csv_path,
-#                                             used_standard="A2",
-#                                             lca_input_format="csv")  # Alternativ: 'teco_json'
-# tuple_categorization = test.add_study("test categorization",
-#                                       ("Category1", "Year Installation for components or occurence for consumption"),
-#                                       "test categorization 2",
-#                                       study_name="Tuple Categorization",
-#                                       input_csv_path=input_csv_path,
-#                                       used_standard="A2",
-#                                       lca_input_format="csv")
-#
-# example_study = test.add_study(study_name="Nur ein Beispiel",
-#                                input_csv_path=input_csv_path,
-#                                used_standard="A1",
-#                                lca_input_format="teco_json")
-# test.remove_study(study_name="Nur ein Beispiel")
-#
-# two_single_categorizations.add_categorizations("Category1", "Year Disposal")
-# tuple_categorization.remove_categorizations("test categorization", "test categorization 2")
-#
-# two_single_categorizations.exclude_stages("a1", "a2", "c1", "c2")
-# two_single_categorizations.exclude_stages(["b1", "b2", "d"])
-# two_single_categorizations.exclude_indicators("pere", "perm")
-# two_single_categorizations.exclude_indicators(["pert", "penre"])
-#
-# test.calculate_all_studies()
