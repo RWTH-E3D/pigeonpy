@@ -9,7 +9,7 @@ class EpdDataManager(object):
 
     def load_epd(self, epd_dataset, epd_id, source_key = None, standard = None):
         if source_key in self.databases:
-            return self.databases[source_key].load_epd(epd_dataset, edp_id)
+            return self.databases[source_key].load_epd(epd_dataset, epd_id)
         if source_key is None:
             for sk in self.databases:
                 try:
