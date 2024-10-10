@@ -1,4 +1,6 @@
 from data.epddata.source.fileepdsource import FileEpdSource
+from logic.epddataset.en15804A1dataset import En15804A1Dataset
+from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import pandas as pd
 import numpy as np
 
@@ -37,6 +39,7 @@ class OekobaudatCsv(FileEpdSource):
         self.standards = ["EN15804+A1", "EN15804+A2"]
         self.data = None
         self.standard = standard
+        self.template_dataset = En15804A2Dataset() if self.standard == "EN15804+A2" else En15804A1Dataset
 
 
     @staticmethod
@@ -57,9 +60,8 @@ class OekobaudatCsv(FileEpdSource):
             epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
             epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
         except IndexError:
-            raise Exception(f"No dataset for combination of given lca id '{id}', file format "
-                            f"'{data_class.file_format}' and standard En15804+{lca_dataset_object.used_standard} was found. "
-                            f"Please enter a valid lca id or try another file format.")
+            raise Exception(f"No dataset for combination of given lca id '{id}' and standard '{self.standard}' "
+                            f"was found.")
 
         data_array = epd_dataset._data
         grouped = lca_dataset_bind.groupby("Modul")
