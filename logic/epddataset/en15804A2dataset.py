@@ -60,4 +60,4 @@ class En15804A2Dataset(EpdDataset):
             Instance of DataClass with file and data bindings
 
         """
-        epd_data_manager.load_epd(self, epd_id, source, "EN15804+A2")
+        epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source, standard="EN15804+A2")
