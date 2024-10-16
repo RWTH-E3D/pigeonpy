@@ -19,7 +19,8 @@ class EpdDataManager(object):
         if epd_dataset is None:
             epd_dataset = self._create_dataset_object(source_key = source_key)
         if source_key in self.databases:
-            return self.databases[source_key].load_epd(epd_dataset, epd_id)
+            self.databases[source_key].load_epd(epd_dataset, epd_id)
+            return epd_dataset
         if source_key is None:
             for sk in self.databases:
                 try:
