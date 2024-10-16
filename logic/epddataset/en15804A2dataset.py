@@ -27,26 +27,21 @@ class En15804A2Dataset(EpdDataset):
         Value of the reference flow
     ref_flow_unit : str
         Unit of the reference flow
-    used_standard : str
+    standard : str
         Information about the used standard
     _data : ndarray
         Numpy array containing the values for the environmental indicators in the order given by the json files
         for the life cycle stages and indicators
 
     """
-
-    environmental_indicators = []
-    life_cycle_stages = []
-    stages_and_indicators_loaded = False
+    environmental_indicators = EpdDataset.epd_attribute_loader.indicators_a2
+    life_cycle_stages = EpdDataset.epd_attribute_loader.life_cycle_stages
 
     def __init__(self):
 
         super().__init__()
         self._data = np.full((31, 18), 0.0)
-        self.used_standard = "EN15804+A2"
-        if not En15804A2Dataset.stages_and_indicators_loaded:
-            EpdDataset._set_indicators_and_stages(self)
-            En15804A2Dataset.stages_and_indicators_loaded = True
+        self.standard = "EN15804+A2"
 
     def load_lca_dataset(self, epd_id, epd_data_manager, source = None):
         """Method that calls the functions to load a dataset from the file binding into the instance dependent
@@ -60,4 +55,4 @@ class En15804A2Dataset(EpdDataset):
             Instance of DataClass with file and data bindings
 
         """
-        epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source, standard="EN15804+A2")
+        epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source, standard=self.standard)

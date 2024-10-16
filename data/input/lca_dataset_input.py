@@ -29,7 +29,7 @@ def load_lca_dataset_json(lca_dataset_object, given_lca_id, data_class):
 
     except KeyError:
         raise Exception(f"No dataset for combination of given lca id '{given_lca_id}', file format "
-                        f"'{data_class.file_format}' and standard En15804+{lca_dataset_object.used_standard} was found. "
+                        f"'{data_class.file_format}' and standard En15804+{lca_dataset_object.standard} was found. "
                         f"Please enter a valid lca id or try another file format.")
 
     for indicator_index, indicator in enumerate(lca_dataset_object.environmental_indicators):
