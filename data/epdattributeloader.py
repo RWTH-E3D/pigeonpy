@@ -5,9 +5,9 @@ from logic.lifecyclestage import LifeCycleStage
 
 class EpdAttributeLoader:
     def __init__(self):
-        self.indicators_a1_path = Path.cwd() / "data" / "input" / "inputdata" / "indicators_en_15804_a1.json"
-        self.indicators_a2_path = Path.cwd() / "data" / "input" / "inputdata" / "indicators_en_15804_a2.json"
-        self.life_cycle_stages_path = Path.cwd() / "data" / "input" / "inputdata" / "life_cycle_stages_en_15978.json"
+        self.indicators_a1_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a1.json"
+        self.indicators_a2_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a2.json"
+        self.life_cycle_stages_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "life_cycle_stages_en_15978.json"
 
         self.indicators_a1 = None
         self.indicators_a2 = None
