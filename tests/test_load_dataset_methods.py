@@ -1,70 +1,69 @@
-from data.dataclass import DataClass
+from data.epddata.source.oekobaudatcsv import OekobaudatCsv
+from data.epddata.source.tecojsonsource import TecoJson
+from data.epddata.epddatamanager import EpdDataManager
 from logic.epddataset.en15804A1dataset import En15804A1Dataset
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
-from data.input.lca_dataset_input import load_lca_dataset_json
-from data.input.lca_dataset_input import load_lca_dataset_csv
-import numpy as np
-
+from pathlib import Path
 import unittest
 
 
 class TestLoadDatasetMethods(unittest.TestCase):
-    """Test functions from lca_dataset_input.py module"""
+    """Test methods to load datasets from epd sources"""
 
     def setUp(self):
-        self.dataclass_teco_json = DataClass(file_format="teco_json", used_standard="A1")
-        self.teco_json_lca_data_bind = self.dataclass_teco_json.lca_data_bind
-        self.teco_json_lca_data_bind.pop("version")
+        self.epd_datamanager = EpdDataManager()
 
-        self.dataclass_csv_a1 = DataClass(file_format="csv", used_standard="A1")
-        self.csv_a1_lca_data_bind = self.dataclass_csv_a1.lca_data_bind
-        self.csv_a1_lca_data_bind_dropped_duplicates = self.csv_a1_lca_data_bind.drop_duplicates(subset="UUID")
+        self.oekobaudat_filepath = Path.cwd() / ".." / "data" / "input" / "inputdata" / "OBD_2023_I_2024-01-09T12_49_34.csv"
+        self.oekobaudat_a1 = OekobaudatCsv("Ökobaudat_A1", self.oekobaudat_filepath, "EN15804+A1")
+        self.epd_datamanager.register_source("oekobaudat_a1", self.oekobaudat_a1)
+        self.oekobaudat_a1_dropped_duplicates = self.oekobaudat_a1.data.drop_duplicates(subset="UUID")
 
-        self.dataclass_csv_a2 = DataClass(file_format="csv", used_standard="A2")
-        self.csv_a2_lca_data_bind = self.dataclass_csv_a2.lca_data_bind
-        self.csv_a2_lca_data_bind_dropped_duplicates = self.csv_a2_lca_data_bind.drop_duplicates(subset="UUID")
+        self.oekobaudat_a2 = OekobaudatCsv("Ökobaudat_A2", self.oekobaudat_filepath, "EN15804+A2")
+        self.epd_datamanager.register_source("oekobaudat_a2", self.oekobaudat_a2)
+        self.oekobaudat_a2_dropped_duplicates = self.oekobaudat_a2.data.drop_duplicates(subset="UUID")
 
-        self.dataclass_csv_edited_oekobaudat = DataClass(file_format="csv", used_standard="A2")
-        self.dataclass_csv_edited_oekobaudat.path_lca_data = "C:\\Users\\J.K. Rollerblade\\PycharmProjects\\dynamic_lca_draft\\data\\input\\inputdata\\OBD_2023_I_2024-01-09T12_49_34_Strommix_interpoliert.csv"
-        self.dataclass_csv_edited_oekobaudat.load_and_preprocess_csv_binding()
-        self.csv_edited_oekobaudat_lca_data_bind = self.dataclass_csv_edited_oekobaudat.lca_data_bind
-        self.csv_edited_oekobaudat_lca_data_bind_dropped = self.csv_edited_oekobaudat_lca_data_bind.drop_duplicates(subset="UUID")
+        self.oekobaudat_edited_filepath = Path.cwd() / ".." / "data" / "input" / "inputdata" / "OBD_2023_I_2024-01-09T12_49_34_Strommix_interpoliert.csv"
+        self.oekobaudat_edited = OekobaudatCsv("Ökobaudat_edited", self.oekobaudat_edited_filepath, "EN15804+A2")
+        self.epd_datamanager.register_source("oekobaudat_edited", self.oekobaudat_edited)
+        self.oekobaudat_edited_dropped_duplicates = self.oekobaudat_edited.data.drop_duplicates(subset="UUID")
+
+        self.teco_json_filepath = Path.cwd() / ".." / "data" / "input" / "inputdata" / "LcaDataTeco.json"
+        self.teco_json = TecoJson("Teco_json", filepath=self.teco_json_filepath)
+        self.epd_datamanager.register_source("teco_json", self.teco_json)
+        self.teco_json.data.pop("version")
 
         self.test_dataset_a1 = En15804A1Dataset()
         self.test_dataset_a2 = En15804A2Dataset()
 
     def test_teco_json_load_every_datasets(self):
-        for key, value in self.teco_json_lca_data_bind.items():
-            load_lca_dataset_json(self.test_dataset_a1, key, self.dataclass_teco_json)
+        for key in self.teco_json.data:
+            self.test_dataset_a1.load_lca_dataset(key, self.epd_datamanager, source_key="teco_json")
 
     def test_teco_json_invalid_lca_id_given(self):
-        exception_msg = (f"No dataset for combination of given lca id 'test123', file format "
-                        f"'teco_json' and standard En15804+A1 was found. "
-                        f"Please enter a valid lca id or try another file format.")
+        exception_msg = f"No dataset for given epd id 'test123' was found."
         with self.assertRaises(Exception, msg=exception_msg):
-            load_lca_dataset_json(self.test_dataset_a1, "test123", self.dataclass_teco_json)
+            self.test_dataset_a1.load_lca_dataset("test123", self.epd_datamanager, source_key="teco_json")
 
 
     def test_csv_a1_load_every_dataset(self):
         number_of_datasets_a1 = 0
-        for index, row in self.csv_a1_lca_data_bind_dropped_duplicates.iterrows():
+        for index, row in self.oekobaudat_a1_dropped_duplicates.iterrows():
             # print(index)
-            load_lca_dataset_csv(self.test_dataset_a1, row["UUID"], self.dataclass_csv_a1)
+            self.test_dataset_a1.load_lca_dataset(row["UUID"], self.epd_datamanager, source_key="oekobaudat_a1")
             number_of_datasets_a1 += 1
         print(f"Datasets A1: {number_of_datasets_a1}")
 
     def test_csv_a2_load_every_dataset(self):
         number_of_datasets_a2 = 0
-        for index, row in self.csv_a2_lca_data_bind_dropped_duplicates.iterrows():
+        for index, row in self.oekobaudat_a2_dropped_duplicates.iterrows():
             # print(index)
-            load_lca_dataset_csv(self.test_dataset_a2, row["UUID"], self.dataclass_csv_a2)
+            self.test_dataset_a2.load_lca_dataset(row["UUID"], self.epd_datamanager, source_key="oekobaudat_a2")
             number_of_datasets_a2 += 1
         print(f"Datasets A2: {number_of_datasets_a2}")
 
     def test_edited_oekobaudat_load_every_dataset(self):
-        for row in self.csv_edited_oekobaudat_lca_data_bind_dropped.itertuples():
-            #self.test_dataset_a2_ = En15804A2Dataset()
-            load_lca_dataset_csv(self.test_dataset_a2, row.UUID, self.dataclass_csv_edited_oekobaudat)
+        for row in self.oekobaudat_edited_dropped_duplicates.itertuples():
+            self.test_dataset_a2.load_lca_dataset(row.UUID, self.epd_datamanager, source_key="oekobaudat_edited")
 
 
 

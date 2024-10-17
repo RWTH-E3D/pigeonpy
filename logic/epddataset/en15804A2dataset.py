@@ -1,5 +1,4 @@
 from logic.epddataset.epddataset import EpdDataset
-from data.dataclass import DataClass
 from data.epddata.epddatamanager import EpdDataManager
 import numpy as np
 
