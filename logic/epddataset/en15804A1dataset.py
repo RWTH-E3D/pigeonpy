@@ -42,7 +42,7 @@ class En15804A1Dataset(EpdDataset):
         self._data = np.full((25, 18), 0.0)
         self.standard = "EN15804+A1"
 
-    def load_lca_dataset(self, epd_id, epd_data_manager, source = None):
+    def load_lca_dataset(self, epd_id, epd_data_manager, source_key = None):
         """Method that calls the functions to load a dataset from the file binding into the instance dependent
         on the passed file format inside the DataClass instance
 
@@ -54,4 +54,4 @@ class En15804A1Dataset(EpdDataset):
             Instance of DataClass with file and data bindings
 
         """
-        epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source, standard=self.standard)
+        epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source_key, standard=self.standard)
