@@ -151,4 +151,8 @@ class OekobaudatCsv(FileEpdSource):
 
         self.data = lca_data_bind_pd
 
-
+    def contains_dataset(self, epd_id) -> bool:
+        if epd_id in self.data['UUID'].values:
+            return True
+        else:
+            return False
