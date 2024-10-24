@@ -1,7 +1,5 @@
 import numpy as np
-from data.dataclass import DataClass
-from logic.environmentalindicator import EnvironmentalIndicator
-from logic.lifecyclestage import LifeCycleStage
+from data.epdattributeloader import EpdAttributeLoader
 import data.output.lca_data_output as lca_data_output
 
 
@@ -35,6 +33,7 @@ class EpdDataset(object):
     """
     environmental_indicators = None
     life_cycle_stages = None
+    epd_attribute_loader = EpdAttributeLoader()
 
     def __init__(self):
         self.epd_data_id = None
@@ -42,7 +41,7 @@ class EpdDataset(object):
         self.ref_flow_value = None
         self.ref_flow_unit = None
 
-        self.used_standard = None
+        self.standard = None
         self._data = None
 
     def __str__(self):
@@ -51,7 +50,7 @@ class EpdDataset(object):
         row_labels = [indicators.abbreviation for indicators in self.environmental_indicators]
         col_labels = [stages.abbreviation for stages in self.life_cycle_stages]
         data_to_print = np.round(self._data, 4)
-        print(f"\nUsed standard: {self.used_standard}")
+        print(f"\nUsed standard: {self.standard}")
         if self._name is not None:
             print(f"Dataset for '{self._name}':")
         else:
@@ -169,30 +168,6 @@ class EpdDataset(object):
         except ValueError as Error:
             raise ValueError(f"Error when dividing the dataset {self._name} with something. {Error}")
 
-    def _set_indicators_and_stages(self, indicator_list=None, stages_list=None):
-        """Class method to set the class variables for environmental indicators and life cycle stages the first time
-        the class is loaded"""
-
-        tmp_dataclass = DataClass(used_standard=self.used_standard)
-
-        #todo: this functions doesn´t work, cause the indicator_list from the dataclass ist actually a dictonarie
-        #       I hardcoded the key to be "indicators_en15804_a1" to make the example script runable. Yet, this is
-        #       not a fix and the whole handling of importing standars should be remodeled
-
-        indicator_list = indicator_list["indicators_en_15804_a2"] if indicator_list else tmp_dataclass.indicators_bind["indicators_en_15804_a2"]
-        stages_list = stages_list if stages_list else tmp_dataclass.life_cycle_stages_bind
-        print(indicator_list)
-        for indicator in indicator_list:
-            new_indicator = EnvironmentalIndicator(abbreviation=indicator["abbreviation"], name=indicator["name"],
-                                                   unit=indicator["unit"], description=indicator["description"])
-            self.environmental_indicators.append(new_indicator)
-
-        for stage in stages_list:
-            new_stage = LifeCycleStage(abbreviation=stage["abbreviation"], name=stage["name"],
-                                       description=stage["description"])
-            self.life_cycle_stages.append(new_stage)
-
-        del tmp_dataclass
 
     def print__data(self, arr, row_labels=None, col_labels=None):
         """Method that prints the _data array together with the life cycle stages from the class variable

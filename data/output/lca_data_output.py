@@ -58,7 +58,7 @@ def export_dataframe_to_csv(df, path, drop_rows=False, add_uuid=False):
                                columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
 
         temp_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
-        if dataset.used_standard == "A1":
+        if dataset.standard == "EN15804+A1":
             temp_df.insert(0, "Konformität", value="'EN 15804'")
         else:
             temp_df.insert(0, "Konformität", value="'EN 15804+A2'")
@@ -135,7 +135,7 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False)
                              index=[x for x in range(len(dataset.life_cycle_stages))],
                              columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
     export_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
-    if dataset.used_standard == "A1":
+    if dataset.standard == "EN15804+A1":
         export_df.insert(0, "Konformität", value="'EN 15804'")
     else:
         export_df.insert(0, "Konformität", value="'EN 15804+A2'")

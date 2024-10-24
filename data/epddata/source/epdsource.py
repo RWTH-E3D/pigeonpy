@@ -10,3 +10,6 @@ class EpdSource(object):
 
     def load(self):
         pass
+
+    def contains_dataset(self, epd_id) -> bool:
+        pass

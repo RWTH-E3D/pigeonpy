@@ -1,4 +1,3 @@
-from data.dataclass import DataClass
 from logic.calculation.calculation import Calculation
 from logic.calculation.calculator import Calculator
 from logic.calculation.calculationinput import CalculationInput
