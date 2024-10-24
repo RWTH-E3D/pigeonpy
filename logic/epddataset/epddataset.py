@@ -43,6 +43,7 @@ class EpdDataset(object):
 
         self.standard = None
         self._data = None
+        self.history = History()
 
     def __str__(self):
         """Dunder method for a readable representation of a dataset and its data matrix"""
@@ -72,11 +73,18 @@ class EpdDataset(object):
         try:
             if isinstance(other, EpdDataset):
                 new_data = self._data * other._data
+                new_history = History()
+                new_history.entries = self.history.entries
+                new_history.log_operation(f"Multiplied with other dataset: ")
+                new_history.entries = new_history.merge_histories(other)
             else:
                 new_data = self._data * other
+                self.history.log_operation(f"Multiplied by factor: {other}")
+                new_history = self.history
 
             result_epd = type(self)()
             result_epd._data = new_data
+            result_epd.history = new_history
             return result_epd
 
         except TypeError as Error:
@@ -102,8 +110,13 @@ class EpdDataset(object):
             # --> Durch if statement wird verhindert, dass Error ausgelöst wird
             # if isinstance(other, EpdDataset):
             new_data = self._data + other._data
+            new_history = History()
+            new_history.entries = self.history.entries
+            new_history.log_operation(f"Sum calculated with other dataset: ")
+            new_history.entries = new_history.merge_histories(other)
             result_epd = type(self)()
             result_epd._data = new_data
+            result_epd.history = new_history
             return result_epd
 
         except AttributeError as Error:
@@ -128,8 +141,13 @@ class EpdDataset(object):
             # siehe __add__ Methode
             # if isinstance(other, EpdDataset):
             new_data = self._data - other._data
+            new_history = History()
+            new_history.entries = self.history.entries
+            new_history.log_operation(f"Difference calculated with other dataset: ")
+            new_history.entries = new_history.merge_histories(other)
             result_epd = type(self)()
             result_epd._data = new_data
+            result_epd.history = new_history
             return result_epd
 
         except AttributeError as Error:
@@ -154,10 +172,19 @@ class EpdDataset(object):
             if isinstance(other, self.__class__):
                 #Todo: check if
                 new_data = np.divide(self._data, other._data, out=np.zeros_like(self._data), where=other._data != 0.0)
+
+                new_history = History()
+                new_history.entries = self.history.entries
+                new_history.log_operation(f"Divided by other dataset: ")
+                new_history.entries = new_history.merge_histories(other)
             else:
                 new_data = self._data / other
+                self.history.log_operation(f"Divided by factor: {other}")
+                new_history = self.history
+
             result_epd = type(self)()
             result_epd._data = new_data
+            result_epd.history = new_history
             np.seterr(divide='ignore')
             return result_epd
 
@@ -283,3 +310,25 @@ class EpdDataset(object):
             # raise Exception("digits<len(str(num))")
             print(f"Values < column or row labels. Data matrix of dataset may be empty.")
         return ' ' * (digits - len(str(num))) + str(num)
+
+
+class History:
+    def __init__(self):
+        self.initial_source = None
+        self.entries = []
+
+    def add_data_source(self, epd_id, source_key):
+        self.entries.append(f"Dataset '{epd_id}' initialized from source '{source_key}'")
+
+    def log_operation(self, entry):
+        self.entries.append(entry)
+
+    def merge_histories(self, other_dataset):
+        return self.entries + other_dataset.history.entries
+
+    def show_history(self):
+        for entry in self.entries:
+            print(entry + "\n")
+
+    def get_history(self):
+        return self.entries
