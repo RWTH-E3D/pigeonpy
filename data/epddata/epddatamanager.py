@@ -4,6 +4,11 @@ class EpdDataManager(object):
         self.databases = {}
 
     def register_source(self, source_key, source):
+        differing_standards = dict((sk, database) for sk, database in self.databases.items() if database.standard
+                                   != source.standard)
+        if differing_standards:
+            print(f"Warning: The standard of your source ({source_key}, {source.standard}) differs "
+                  f"from the already existing source(s): ({list(differing_standards.keys())}).\n")
         self.databases[source_key] = source
         self.databases[source_key].load()
 
