@@ -39,7 +39,7 @@ class OekobaudatCsv(FileEpdSource):
         self.standards = ["EN15804+A1", "EN15804+A2"]
         self.data = None
         self.standard = standard
-        self.template_dataset = En15804A2Dataset() if self.standard == "EN15804+A2" else En15804A1Dataset
+        self.template_dataset = En15804A2Dataset() if self.standard == "EN15804+A2" else En15804A1Dataset()
 
 
     @staticmethod
