@@ -7,10 +7,18 @@ class Calculation(object):
         self.result = None
         self.other_results = {}
 
-    def run(self, *categorizations, epd_datamanager):
-        if self._calculator is None:
-            self._calculator = Calculator(self.input)
+    def run(self, *categorizations, epd_datamanager, goal_and_scope):
+        self._calculator = self._calculator or Calculator(self.input)
+        original_databases = epd_datamanager.databases
+        if goal_and_scope:
+            compliant_databases = dict((sk, db) for sk, db in epd_datamanager.databases.items() \
+                                       if db.standard == goal_and_scope.standard)
+            if compliant_databases:
+                print(f"Using databases compliant to standard defined in goal and scope: {list(compliant_databases.keys())}")
+                epd_datamanager.databases = compliant_databases
+
         self.result = self._calculator.calculate(*categorizations, epd_datamanager=epd_datamanager)
+        epd_datamanager.databases = original_databases
 
     def load_input(self, filepath):
         self.input = CalculationInput()
