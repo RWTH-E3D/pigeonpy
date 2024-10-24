@@ -9,7 +9,7 @@ class OekobaudatCsv(FileEpdSource):
     a1_aliases = ["'DIN EN 15804'", "'EN 15804'", "'DIN EN 15804' / 'ISO 14025'",
                        "'EN 15804' / 'ISO 14025' / 'OEKOBAUDAT Entry Level Compliance'"]
     a2_aliases = ["'DIN EN 15804+A2'", "'EN 15804+A2'", "'DIN EN 15804+A2' / 'ISO 14025'",
-                       "'EN 15804+A2' / 'ISO 14025'", "'EN 15804+A2' / 'EN 16485'"]
+                       "'EN 15804+A2' / 'ISO 14025'", "'EN 15804+A2' / 'EN 16485'", "'EN 15804+A2 (EF 3.1)'"]
 
     dtype_dict = {"UUID": str,
                        "Name (de)": str,
