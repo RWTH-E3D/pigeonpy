@@ -317,8 +317,9 @@ class History:
         self.initial_source = None
         self.entries = []
 
-    def add_data_source(self, epd_id, source_key):
-        self.entries.append(f"Dataset '{epd_id}' initialized from source '{source_key}'")
+    def add_data_source(self, epd_id, epd_name, source_key):
+        self.initial_source = source_key
+        self.entries.append(f"Dataset '{epd_name}' ({epd_id}) initialized from source '{source_key}'")
 
     def log_operation(self, entry):
         self.entries.append(entry)

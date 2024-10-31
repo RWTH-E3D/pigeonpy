@@ -26,7 +26,7 @@ class EpdDataManager(object):
 
         if source_key in self.databases:
             self.databases[source_key].load_epd(epd_dataset, epd_id)
-            epd_dataset.history.add_data_source(epd_id, source_key)
+            epd_dataset.history.add_data_source(epd_id, epd_dataset._name, source_key)
             return epd_dataset
         else:
             raise ValueError(f"No data source found with source key '{source_key}'")
