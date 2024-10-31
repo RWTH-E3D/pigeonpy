@@ -21,13 +21,13 @@ class TecoJson(FileEpdSource):
     def load_epd(self, epd_dataset, epd_id):
         try:
             lca_dataset_bind = self.data[epd_id]
-            epd_dataset.epd_data_id = epd_id
-            epd_dataset._name = lca_dataset_bind["name"]
-            epd_dataset.ref_flow_unit = lca_dataset_bind["ref_flow"]["unit"]
-            epd_dataset.ref_flow_value = lca_dataset_bind["ref_flow"]["value"]
-
         except KeyError:
             raise KeyError(f"No dataset for given epd id '{epd_id}' was found.")
+
+        epd_dataset.epd_data_id = epd_id
+        epd_dataset._name = lca_dataset_bind["name"]
+        epd_dataset.ref_flow_unit = lca_dataset_bind["ref_flow"]["unit"]
+        epd_dataset.ref_flow_value = lca_dataset_bind["ref_flow"]["value"]
 
         for indicator_index, indicator in enumerate(epd_dataset.environmental_indicators):
             if indicator.abbreviation in lca_dataset_bind.keys():

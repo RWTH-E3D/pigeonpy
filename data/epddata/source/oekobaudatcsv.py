@@ -54,14 +54,14 @@ class OekobaudatCsv(FileEpdSource):
         try:
             lca_dataset_mask = self.data['UUID'].values == id
             lca_dataset_bind = self.data[lca_dataset_mask]
-
-            epd_dataset.epd_data_id = id
-            epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
-            epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
-            epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
         except IndexError:
             raise Exception(f"No dataset for combination of given lca id '{id}' and standard '{self.standard}' "
                             f"was found.")
+
+        epd_dataset.epd_data_id = id
+        epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
+        epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
+        epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
 
         data_array = epd_dataset._data
         grouped = lca_dataset_bind.groupby("Modul")
