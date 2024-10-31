@@ -19,7 +19,7 @@ class EpdDataset(object):
     ----------
     epd_data_id : -
         lca id for the contained dataset
-    _name : -
+    name : -
         Name of the contained dataset
     ref_flow_value : -
         Value of the reference flow
@@ -27,7 +27,7 @@ class EpdDataset(object):
         Unit of the reference flow
     used_standard : -
         Information about the used standard
-    _data : -
+    data : -
         matrix to hold the numerical values of a dataset
 
     """
@@ -37,12 +37,12 @@ class EpdDataset(object):
 
     def __init__(self):
         self.epd_data_id = None
-        self._name = None
+        self.name = None
         self.ref_flow_value = None
         self.ref_flow_unit = None
 
         self.standard = None
-        self._data = None
+        self.data = None
         self.history = History()
 
     def __str__(self):
@@ -50,10 +50,10 @@ class EpdDataset(object):
 
         row_labels = [indicators.abbreviation for indicators in self.environmental_indicators]
         col_labels = [stages.abbreviation for stages in self.life_cycle_stages]
-        data_to_print = np.round(self._data, 4)
+        data_to_print = np.round(self.data, 4)
         print(f"\nUsed standard: {self.standard}")
-        if self._name is not None:
-            print(f"Dataset for '{self._name}':")
+        if self.name is not None:
+            print(f"Dataset for '{self.name}':")
         else:
             print("Processed dataset")
         return f'{self.print__data(data_to_print, row_labels=row_labels, col_labels=col_labels)}'
@@ -72,25 +72,25 @@ class EpdDataset(object):
         """
         try:
             if isinstance(other, EpdDataset):
-                new_data = self._data * other._data
+                new_data = self.data * other.data
                 new_history = History()
                 new_history.entries = self.history.entries
                 new_history.log_operation(f"Multiplied with other dataset: ")
                 new_history.entries = new_history.merge_histories(other)
             else:
-                new_data = self._data * other
+                new_data = self.data * other
                 self.history.log_operation(f"Multiplied by factor: {other}")
                 new_history = self.history
 
             result_epd = type(self)()
-            result_epd._data = new_data
+            result_epd.data = new_data
             result_epd.history = new_history
             return result_epd
 
         except TypeError as Error:
-            raise TypeError(f"Error when multiplying something to dataset {self._name}. {Error}")
+            raise TypeError(f"Error when multiplying something to dataset {self.name}. {Error}")
         except ValueError as Error:
-            raise ValueError(f"Error when multiplying something to dataset {self._name}. {Error}")
+            raise ValueError(f"Error when multiplying something to dataset {self.name}. {Error}")
 
     def __add__(self, other):
         """Method to add two EpdDataset-objects
@@ -109,20 +109,20 @@ class EpdDataset(object):
             # __add__ Methode nur für das Addieren zweier data Matrizen von EpdDataset Objekten und nichts anderes?
             # --> Durch if statement wird verhindert, dass Error ausgelöst wird
             # if isinstance(other, EpdDataset):
-            new_data = self._data + other._data
+            new_data = self.data + other.data
             new_history = History()
             new_history.entries = self.history.entries
             new_history.log_operation(f"Sum calculated with other dataset: ")
             new_history.entries = new_history.merge_histories(other)
             result_epd = type(self)()
-            result_epd._data = new_data
+            result_epd.data = new_data
             result_epd.history = new_history
             return result_epd
 
         except AttributeError as Error:
-            raise AttributeError(f"Error when adding something to the dataset {self._name}. {Error}")
+            raise AttributeError(f"Error when adding something to the dataset {self.name}. {Error}")
         except ValueError as Error:
-            raise ValueError(f"Error when adding something to the dataset {self._name}. {Error}")
+            raise ValueError(f"Error when adding something to the dataset {self.name}. {Error}")
 
     def __sub__(self, other):
         """Method to subtract other EpdDataset from self
@@ -140,20 +140,20 @@ class EpdDataset(object):
         try:
             # siehe __add__ Methode
             # if isinstance(other, EpdDataset):
-            new_data = self._data - other._data
+            new_data = self.data - other.data
             new_history = History()
             new_history.entries = self.history.entries
             new_history.log_operation(f"Difference calculated with other dataset: ")
             new_history.entries = new_history.merge_histories(other)
             result_epd = type(self)()
-            result_epd._data = new_data
+            result_epd.data = new_data
             result_epd.history = new_history
             return result_epd
 
         except AttributeError as Error:
-            raise AttributeError(f"Error when subtracting something from the dataset {self._name}. {Error}")
+            raise AttributeError(f"Error when subtracting something from the dataset {self.name}. {Error}")
         except ValueError as Error:
-            raise ValueError(f"Error when subtracting something from the dataset {self._name}. {Error}")
+            raise ValueError(f"Error when subtracting something from the dataset {self.name}. {Error}")
 
     def __truediv__(self, other):
         """ Function to divide a dataset by a scalar
@@ -171,29 +171,29 @@ class EpdDataset(object):
         try:
             if isinstance(other, self.__class__):
                 #Todo: check if
-                new_data = np.divide(self._data, other._data, out=np.zeros_like(self._data), where=other._data != 0.0)
+                new_data = np.divide(self.data, other.data, out=np.zeros_like(self.data), where=other.data != 0.0)
 
                 new_history = History()
                 new_history.entries = self.history.entries
                 new_history.log_operation(f"Divided by other dataset: ")
                 new_history.entries = new_history.merge_histories(other)
             else:
-                new_data = self._data / other
+                new_data = self.data / other
                 self.history.log_operation(f"Divided by factor: {other}")
                 new_history = self.history
 
             result_epd = type(self)()
-            result_epd._data = new_data
+            result_epd.data = new_data
             result_epd.history = new_history
             np.seterr(divide='ignore')
             return result_epd
 
         except FloatingPointError as Error:
-            raise FloatingPointError(f"Error when dividing the dataset {self._name} with something. {Error}")
+            raise FloatingPointError(f"Error when dividing the dataset {self.name} with something. {Error}")
         except TypeError as Error:
-            raise TypeError(f"Error when dividing the dataset {self._name} with something. {Error}")
+            raise TypeError(f"Error when dividing the dataset {self.name} with something. {Error}")
         except ValueError as Error:
-            raise ValueError(f"Error when dividing the dataset {self._name} with something. {Error}")
+            raise ValueError(f"Error when dividing the dataset {self.name} with something. {Error}")
 
 
     def print__data(self, arr, row_labels=None, col_labels=None):
@@ -249,7 +249,7 @@ class EpdDataset(object):
         """
         id_indicator = self._get_index_indicator(abr_indicator)
         id_life_cycle_stage = self._get_index_life_cycle_stage(abr_life_cycle_stage)
-        return self._data[id_indicator, id_life_cycle_stage]
+        return self.data[id_indicator, id_life_cycle_stage]
 
     def get_indicator(self, abr_indicator):
         """This functions returns a vector of all values of the requested indicator
@@ -266,7 +266,7 @@ class EpdDataset(object):
 
         """
         id_indicator = self._get_index_indicator(abr_indicator)
-        return self._data[id_indicator, :]
+        return self.data[id_indicator, :]
 
     def get_sum(self, abr_indicator, excluded_stages=None):
         """This function sums up all life cycle stages of one indicator to one value, except these given in

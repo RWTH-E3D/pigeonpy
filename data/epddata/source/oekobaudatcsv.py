@@ -59,11 +59,11 @@ class OekobaudatCsv(FileEpdSource):
                             f"was found.")
 
         epd_dataset.epd_data_id = id
-        epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
+        epd_dataset.name = lca_dataset_bind['Name (de)'].iloc[0]
         epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
         epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
 
-        data_array = epd_dataset._data
+        data_array = epd_dataset.data
         grouped = lca_dataset_bind.groupby("Modul")
 
         test_list = [indicator.abbreviation.upper() for indicator in epd_dataset.environmental_indicators]
@@ -80,7 +80,7 @@ class OekobaudatCsv(FileEpdSource):
         if np.count_nonzero(data_array[:, a1_a3_column_index]) == 0:
             data_array[:, a1_a3_column_index] = np.sum(data_array[:, :a1_a3_column_index], axis=1)
 
-        epd_dataset._data = data_array
+        epd_dataset.data = data_array
 
 
     def _load_en15804a1(self):

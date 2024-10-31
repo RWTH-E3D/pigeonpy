@@ -21,16 +21,16 @@ def linear_interpolate(dataset1, dataset2, steps, return_datasets=True):
     interpolated_arrays: list
         Contains the list of interpolated data/ numpy arrays
     """
-    array1 = dataset1._data
-    array2 = dataset2._data
+    array1 = dataset1.data
+    array2 = dataset2.data
     interpolation_results = []
 
     for i in range(1, steps):
         interpolated_array = array1 + i * (array2 - array1) / steps
         if return_datasets:
             interpolated_dataset = type(dataset1)()
-            interpolated_dataset._data = interpolated_array
-            interpolated_dataset._name = f"_interpolated_dataset_{i}"
+            interpolated_dataset.data = interpolated_array
+            interpolated_dataset.name = f"_interpolated_dataset_{i}"
             interpolation_results.append(interpolated_dataset)
         else:
             interpolation_results.append(interpolated_array)
