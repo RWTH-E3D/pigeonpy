@@ -16,7 +16,8 @@ class Study(object):
         self.epd_datamanager = EpdDataManager()
 
     def run_calculation(self, *categorizations):
-        self.calculation.run(*categorizations, epd_datamanager=self.epd_datamanager)
+        self.calculation.run(*categorizations, epd_datamanager=self.epd_datamanager,
+                             goal_and_scope=self.goal_and_scope)
 
 
     def load_calculation_input(self, filepath):

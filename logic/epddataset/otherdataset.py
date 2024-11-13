@@ -10,7 +10,7 @@ class OtherDataset(EpdDataset):
     def __init__(self, used_standard, used_stages=None, used_indicators=None):
 
         super().__init__()
-        self._data = np.ndarray
+        self.data = np.ndarray
         if used_standard == "A1" or used_standard == "A2":
             self.used_standard = used_standard
         else:
@@ -30,5 +30,5 @@ class OtherDataset(EpdDataset):
                                  self.environmental_indicators]
 
         # Uses numpy advanced indexing to extract the desired subset
-        self._data = dataset_object._data[np.ix_(environmental_indices, life_cycle_indices)]
+        self.data = dataset_object.data[np.ix_(environmental_indices, life_cycle_indices)]
 

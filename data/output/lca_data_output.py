@@ -53,7 +53,7 @@ def export_dataframe_to_csv(df, path, drop_rows=False, add_uuid=False):
 
     for index, row in df.items():
         dataset = row
-        temp_df = pd.DataFrame(data=dataset._data.transpose(),
+        temp_df = pd.DataFrame(data=dataset.data.transpose(),
                                index=[x for x in range(len(dataset.life_cycle_stages))],
                                columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
 
@@ -103,8 +103,8 @@ def export_dataframe_to_teco_json(df, path):
         for indicator_index, indicator in enumerate(dataset.environmental_indicators):
             temp_dict[temp_uuid][indicator.abbreviation] = {'unit': indicator.unit}
             for stage_index, stage in enumerate(dataset.life_cycle_stages):
-                if dataset._data[indicator_index][stage_index] != 0.0:
-                    temp_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset._data[indicator_index][
+                if dataset.data[indicator_index][stage_index] != 0.0:
+                    temp_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset.data[indicator_index][
                         stage_index]
 
         export_dict.update(temp_dict)
@@ -129,9 +129,9 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False)
     """
 
     if path is None:
-        path = os.path.join(os.path.dirname(__file__), (dataset._name + ".csv"))
+        path = os.path.join(os.path.dirname(__file__), (dataset.name + ".csv"))
 
-    export_df = pd.DataFrame(data=dataset._data.transpose(),
+    export_df = pd.DataFrame(data=dataset.data.transpose(),
                              index=[x for x in range(len(dataset.life_cycle_stages))],
                              columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
     export_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
@@ -139,7 +139,7 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False)
         export_df.insert(0, "Konformität", value="'EN 15804'")
     else:
         export_df.insert(0, "Konformität", value="'EN 15804+A2'")
-    export_df.insert(0, "Name (de)", value=str(dataset._name))
+    export_df.insert(0, "Name (de)", value=str(dataset.name))
     if add_uuid:
         export_df.insert(0, "UUID", value=str(uuid.uuid1()))
     # drop rows/ life cycle stages where all values are equal to zero
@@ -162,11 +162,11 @@ def export_single_dataset_to_json(dataset, path):
         Path to location where exported file is created containing filename
     """
     if path is None:
-        path = os.path.join(os.path.dirname(__file__), (dataset._name + ".json"))
+        path = os.path.join(os.path.dirname(__file__), (dataset.name + ".json"))
 
     temp_uuid = str(uuid.uuid1())
     # add ref_flow attributes here when meta-data is passed by dunder methods in EpdDataset
-    export_dict = {temp_uuid: {'name': str(dataset._name),
+    export_dict = {temp_uuid: {'name': str(dataset.name),
                                'ref_flow': {
                                    'value': '',
                                    'unit': ''
@@ -175,8 +175,8 @@ def export_single_dataset_to_json(dataset, path):
     for indicator_index, indicator in enumerate(dataset.environmental_indicators):
         export_dict[temp_uuid][indicator.abbreviation] = {'unit': indicator.unit}
         for stage_index, stage in enumerate(dataset.life_cycle_stages):
-            if dataset._data[indicator_index][stage_index] != 0.0:
-                export_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset._data[indicator_index][
+            if dataset.data[indicator_index][stage_index] != 0.0:
+                export_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset.data[indicator_index][
                     stage_index]
 
     with open(path, 'w') as f:

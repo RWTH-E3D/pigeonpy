@@ -41,7 +41,7 @@ class Calculator(object):
         calculated_df = calculated_df.groupby(['category_name'])['epd_dataset'].sum()  # now a series
 
         for index, dataset in calculated_df.items():
-            dataset._name = str(index)
+            dataset.name = str(index)
 
         return calculated_df
 
