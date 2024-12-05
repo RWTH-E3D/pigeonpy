@@ -8,7 +8,7 @@ class EpdDataManager(object):
                                    != source.standard)
         if differing_standards:
             print(f"Warning: The standard of your source ({source_key}, {source.standard}) differs "
-                  f"from the already existing source(s): ({list(differing_standards.keys())}).\n")
+                  f"from the already existing source(s): ({list(differing_standards.keys())}).")
         self.databases[source_key] = source
         self.databases[source_key].load()
 

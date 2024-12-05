@@ -4,6 +4,7 @@ class EpdSource(object):
         self.name = name
         self.standards = None
         self.standard = None
+        self.template_dataset = None
 
     def load_epd(self, epd_dataset, epd_id):
         pass
