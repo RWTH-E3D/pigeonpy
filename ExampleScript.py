@@ -4,6 +4,7 @@ from logic.goalandscope import GoalAndScope
 from data.epddata.source.oekobaudatcsv import OekobaudatCsv
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import logic.methods.normalization as norm
+import time
 
 def doktorandenseminar_weighting(normalized_result, gwp_perc, fw_perc, rwd_perc):
 
@@ -16,6 +17,8 @@ def doktorandenseminar_weighting(normalized_result, gwp_perc, fw_perc, rwd_perc)
     print(f'RWD_weighted = {rwh_weighted}')
     print(f'overall = {gwp_weighted + fw_weighted + rwh_weighted}')
 
+tic = time.time()
+
 #input file wird geladen
 input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input-doktorandenseminar.CSV"
 
@@ -27,7 +30,7 @@ goal_and_scope = GoalAndScope("EN15804+A2", description = "This study is about i
 study_doktorandenseminar.goal_and_scope = goal_and_scope
 
 #Datenbank wird geladen und der Studie zugeordnet
-oekobaudatfilepath = Path.cwd()  / "data" / "input" / "inputdata" / "OBD_2023_I_2024-01-09T12_49_34.csv"
+oekobaudatfilepath = Path.cwd()  / "data" / "input" / "inputdata" / "OBD_2024_I_2024-12-10T09_45_06.csv"
 oekobaudat = OekobaudatCsv("Ökobaudat", oekobaudatfilepath, "EN15804+A2")
 study_doktorandenseminar.epd_datamanager.register_source("oekobaudat", oekobaudat)
 
@@ -37,7 +40,7 @@ study_doktorandenseminar.run_calculation("Variante")
 
 #Normalisieurngs EPD wird geladen
 normalization_epd = En15804A2Dataset()
-normalization_epd.load_lca_dataset("757297f1-9325-4df4-af51-96510be76bf3", study_doktorandenseminar.epd_datamanager)
+normalization_epd.load_lca_dataset("4fa62445-e59f-4874-99e5-49cec91967e0", study_doktorandenseminar.epd_datamanager)
 
 #EPS: 757297f1-9325-4df4-af51-96510be76bf3
 #Mineralwolle: 4fa62445-e59f-4874-99e5-49cec91967e0
@@ -50,6 +53,10 @@ print(study_doktorandenseminar.calculation.other_results["normalization"]["Flach
 
 #Gewichtung wird durchgeführt
 doktorandenseminar_weighting(study_doktorandenseminar.calculation.other_results["normalization"]["Flachsvlies"], 0.8, 0.1, 0.1)
+
+toc = time.time()
+print('dynamic lca draft run in', round((toc - tic), 2), 'seconds')
+
 
 
 
