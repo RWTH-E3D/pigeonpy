@@ -20,7 +20,7 @@ def doktorandenseminar_weighting(normalized_result, gwp_perc, fw_perc, rwd_perc)
 tic = time.time()
 
 #input file wird geladen
-input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input-doktorandenseminar.CSV"
+input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper.csv"
 
 # Studie wird erstellt
 study_doktorandenseminar = Study("Doktorandenseminar")
@@ -36,11 +36,11 @@ study_doktorandenseminar.epd_datamanager.register_source("oekobaudat", oekobauda
 
 #Berechnung wird geladen und gestartet
 study_doktorandenseminar.load_calculation_input(input_csv_path)
-study_doktorandenseminar.run_calculation("Variante")
+study_doktorandenseminar.run_calculation("building_type")
 
 #Normalisieurngs EPD wird geladen
 normalization_epd = En15804A2Dataset()
-normalization_epd.load_lca_dataset("4fa62445-e59f-4874-99e5-49cec91967e0", study_doktorandenseminar.epd_datamanager)
+normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", study_doktorandenseminar.epd_datamanager)
 
 #EPS: 757297f1-9325-4df4-af51-96510be76bf3
 #Mineralwolle: 4fa62445-e59f-4874-99e5-49cec91967e0
@@ -49,10 +49,10 @@ normalization_epd.load_lca_dataset("4fa62445-e59f-4874-99e5-49cec91967e0", study
 method_tuple_norm = ("normalization", norm.normalize_by_epd, normalization_epd)
 study_doktorandenseminar.apply_method(*method_tuple_norm)
 
-print(study_doktorandenseminar.calculation.other_results["normalization"]["Flachsvlies"])
+print(study_doktorandenseminar.calculation.other_results["normalization"]["type 4"])
 
 #Gewichtung wird durchgeführt
-doktorandenseminar_weighting(study_doktorandenseminar.calculation.other_results["normalization"]["Flachsvlies"], 0.8, 0.1, 0.1)
+doktorandenseminar_weighting(study_doktorandenseminar.calculation.other_results["normalization"]["type 4"], 0.8, 0.1, 0.1)
 
 toc = time.time()
 print('dynamic lca draft run in', round((toc - tic), 2), 'seconds')
