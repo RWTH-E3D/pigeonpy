@@ -63,7 +63,7 @@ class OekobaudatCsv(FileEpdSource):
             raise Exception(f"No dataset for combination of given lca id '{id}' and standard '{self.standard}' "
                             f"was found.")
 
-        data_array = epd_dataset._data
+        data_array = epd_dataset.data
         grouped = lca_dataset_bind.groupby("Modul")
 
         test_list = [indicator.abbreviation.upper() for indicator in epd_dataset.environmental_indicators]
