@@ -2,7 +2,8 @@
 
 def normalize_by_epd(calculation, epd):
 
-    return calculation.result / epd
+    for result in calculation.result:
+        return result / epd
 
 
 

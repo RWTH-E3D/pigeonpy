@@ -4,6 +4,11 @@ class EpdDataManager(object):
         self.databases = {}
 
     def register_source(self, source_key, source):
+        differing_standards = dict((sk, database) for sk, database in self.databases.items() if database.standard
+                                   != source.standard)
+        if differing_standards:
+            print(f"Warning: The standard of your source ({source_key}, {source.standard}) differs "
+                  f"from the already existing source(s): ({list(differing_standards.keys())}).")
         self.databases[source_key] = source
         self.databases[source_key].load()
 
@@ -21,6 +26,7 @@ class EpdDataManager(object):
 
         if source_key in self.databases:
             self.databases[source_key].load_epd(epd_dataset, epd_id)
+            epd_dataset.history.add_data_source(epd_id, epd_dataset.name, source_key)
             return epd_dataset
         else:
             raise ValueError(f"No data source found with source key '{source_key}'")

@@ -20,7 +20,7 @@ class En15804A2Dataset(EpdDataset):
     ----------
     epd_data_id : str
         lca id for the contained dataset
-    _name : str
+    name : str
         Name of the contained dataset
     ref_flow_value : float
         Value of the reference flow
@@ -28,7 +28,7 @@ class En15804A2Dataset(EpdDataset):
         Unit of the reference flow
     standard : str
         Information about the used standard
-    _data : ndarray
+    data : ndarray
         Numpy array containing the values for the environmental indicators in the order given by the json files
         for the life cycle stages and indicators
 
@@ -39,7 +39,7 @@ class En15804A2Dataset(EpdDataset):
     def __init__(self):
 
         super().__init__()
-        self._data = np.full((31, 18), 0.0)
+        self.data = np.full((31, 18), 0.0)
         self.standard = "EN15804+A2"
 
     def load_lca_dataset(self, epd_id, epd_data_manager, source_key = None):
