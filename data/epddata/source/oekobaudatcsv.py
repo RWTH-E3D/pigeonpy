@@ -16,7 +16,7 @@ class OekobaudatCsv(FileEpdSource):
         "Name (de)": str,
         "Name (en)": str,
         "Konformität": str,
-        "Referenzjahr": int,
+        "Referenzjahr": "Int64",
         "Bezugseinheit": str,
         "Referenzfluss-Name": str,
         "Modul": str,
