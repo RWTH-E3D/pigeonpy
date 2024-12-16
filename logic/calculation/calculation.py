@@ -15,7 +15,7 @@ class Calculation(object):
         original_databases = epd_datamanager.databases
 
         _set_compliant_databases(epd_datamanager, goal_and_scope)
-        self.result = self._process_categorizations(categorizations, epd_datamanager)
+        self.result = self._process_categorizations(categorizations, epd_datamanager, goal_and_scope.observation_period)
 
         epd_datamanager.databases = original_databases
 
@@ -31,20 +31,28 @@ class Calculation(object):
 
         self._calculator = self._calculator or Calculator(self.input)
 
-    def _process_categorizations(self, categorizations, epd_datamanager):
+    def _process_categorizations(self, categorizations, epd_datamanager, observation_period):
 
         results = [
-            self._run_individual_calculation(categorization, epd_datamanager)
+            self._run_individual_calculation(categorization, epd_datamanager, observation_period)
             for categorization in categorizations
         ]
         return tuple(results)
 
-    def _run_individual_calculation(self, categorization, epd_datamanager):
+    def _run_individual_calculation(self, categorization, epd_datamanager, observation_period):
 
         if isinstance(categorization, tuple):
-            return self._calculator.calculate(*categorization, epd_datamanager=epd_datamanager)
+            return self._calculator.calculate(
+                *categorization,
+                epd_datamanager=epd_datamanager,
+                observation_period=observation_period
+            )
         else:
-            return self._calculator.calculate(categorization, epd_datamanager=epd_datamanager)
+            return self._calculator.calculate(
+                categorization,
+                epd_datamanager=epd_datamanager,
+                observation_period=observation_period
+            )
 
 
 def _set_compliant_databases(epd_datamanager, goal_and_scope):

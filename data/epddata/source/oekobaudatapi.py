@@ -134,7 +134,7 @@ class OekobaudatAPI(ApiEpdSource):
 
         """
         if epd_id in self._fetched_datasets:
-            self._populate_data_array(epd_dataset, self._fetched_datasets[epd_id])
+            self.load_dataset_from_cache(epd_dataset, epd_id)
             return
 
         xml_data = self._single_dataset_request(epd_id)
@@ -143,10 +143,6 @@ class OekobaudatAPI(ApiEpdSource):
 
         if not self._check_compliance(process_dataset, ns):
             raise Exception(f"Trying to load a dataset which is not compliant to the defined standard. '{epd_id}'")
-
-        epd_dataset.name = process_dataset.find(".//default:name/default:baseName", ns).text
-        epd_dataset.epd_data_id = epd_id
-        # Todo: Implement reference flow value and unit by fetching flow with 'referenceToFlowDataSet' -> 'refObjectId'
 
         epd_data = {
             **self._extract_indicator_data(
@@ -157,9 +153,10 @@ class OekobaudatAPI(ApiEpdSource):
             )
         }
 
+        self._set_metadata(epd_dataset, epd_id, process_dataset=process_dataset, ns=ns)
         self._populate_data_array(epd_dataset, epd_data)
 
-        self._fetched_datasets[epd_id] = epd_data
+        self._fetched_datasets[epd_id] = {"name": epd_dataset.name, "data": epd_data}
 
     def _extract_indicator_data(self, process_dataset, ns, xml_base_path, uuid_allocations):
         """Extracts either the "Exchanges" or "LCIAResults" values for the environmental indicators and their life
@@ -207,7 +204,7 @@ class OekobaudatAPI(ApiEpdSource):
 
     def load(self):
         """No need to initiate the API connection because only single dataset requests are possible"""
-        pass
+        return
 
     def contains_dataset(self, epd_id) -> bool:
         """Only returns True for the check in EpdDatamanager, because there is no other way to check the API
@@ -215,6 +212,12 @@ class OekobaudatAPI(ApiEpdSource):
         loading the dataset in the _single_dataset_request() method, which handles the case for wrong epd_ids/ UUIDs
         """
         return True
+
+    def load_dataset_from_cache(self, epd_dataset, epd_id):
+        """Calls methods to set the metadata and indicator data for an epd dataset by utilizing a previously fetched
+        dataset cached in the _fetched_datasets attribute identified by the epd_id/ UUID of the EPD"""
+        self._set_metadata(epd_dataset, epd_id, name=self._fetched_datasets[epd_id].get("name"))
+        self._populate_data_array(epd_dataset, self._fetched_datasets[epd_id].get("data"))
 
     def _single_dataset_request(self, epd_id):
         """Method to perform a single GET request to the dataset endpoint of the API with a given epd_id/ UUID"""
@@ -239,8 +242,19 @@ class OekobaudatAPI(ApiEpdSource):
                 return True
         return False
 
+    @staticmethod
+    def _set_metadata(epd_dataset, epd_id, process_dataset=None, ns=None, name=None):
+        """Sets the metadata attributes in the EpdDataset object either from the XML process_dataset and the associated
+        namespaces or from the cached data directly given by the name argument"""
+        if process_dataset and ns:
+            epd_dataset.name = process_dataset.find(".//default:name/default:baseName", ns).text
+        elif name:
+            epd_dataset.name = name
+        epd_dataset.epd_data_id = epd_id
+        # Todo: Implement reference flow value and unit by fetching flow with 'referenceToFlowDataSet' -> 'refObjectId'
 
-    def _populate_data_array(self, epd_dataset, epd_data):
+    @staticmethod
+    def _populate_data_array(epd_dataset, epd_data):
         """Fills the np data array of the epd_dataset instance with the values from the epd_data dictionary
 
         Parameters
@@ -266,7 +280,8 @@ class OekobaudatAPI(ApiEpdSource):
         if np.count_nonzero(data_array[:, a1_a3_index]) == 0:
             data_array[:, a1_a3_index] = data_array[:, :a1_a3_index].sum(axis=1)
 
-    def _parse_xml(self, xml_data):
+    @staticmethod
+    def _parse_xml(xml_data):
         """Method to parse the xml data in string form (as returned from the API request) and create a namespace
         dictionary using the python xml library
 

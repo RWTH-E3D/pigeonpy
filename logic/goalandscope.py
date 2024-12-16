@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 class GoalAndScope:
     """dataclass to hold information for life cycle stages according to EN 15978"""
     standard: str
+    observation_period: int
     considered_stages: list = field(default_factory=list)
     considered_indicators: list = field(default_factory=list)
     description: str = ""
