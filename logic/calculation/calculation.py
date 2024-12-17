@@ -6,8 +6,10 @@ class Calculation(object):
     def __init__(self):
         self.input = None
         self._calculator = None
-        self.result = None
-        self.other_results = {}
+
+        self.result = {}
+        self.normalized_results = {}
+        self.weighted_result = {}
 
     def run(self, *categorizations, epd_datamanager, goal_and_scope):
 
@@ -15,13 +17,24 @@ class Calculation(object):
         original_databases = epd_datamanager.databases
 
         _set_compliant_databases(epd_datamanager, goal_and_scope)
-        self.result = self._process_categorizations(categorizations, epd_datamanager, goal_and_scope.observation_period)
+
+        self.result.update(
+            self._process_categorizations(
+                categorizations, epd_datamanager, goal_and_scope.observation_period
+            )
+        )
 
         epd_datamanager.databases = original_databases
 
     def load_input(self, filepath):
         self.input = CalculationInput()
         self.input.load(filepath)
+
+    def normalize(self, method):
+        ...
+
+    def weight(self, method):
+        ...
 
     def apply_method(self, method_name, method, *method_arguments):
 
@@ -32,12 +45,12 @@ class Calculation(object):
         self._calculator = self._calculator or Calculator(self.input)
 
     def _process_categorizations(self, categorizations, epd_datamanager, observation_period):
-
-        results = [
-            self._run_individual_calculation(categorization, epd_datamanager, observation_period)
-            for categorization in categorizations
-        ]
-        return tuple(results)
+        results = {}
+        for categorization in categorizations:
+            results[categorization] = self._run_individual_calculation(
+                categorization, epd_datamanager, observation_period
+            )
+        return results
 
     def _run_individual_calculation(self, categorization, epd_datamanager, observation_period):
 
