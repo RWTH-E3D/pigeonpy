@@ -11,20 +11,13 @@ class Lcia(object):
         self.normalized_results = {}
         self.weighted_result = {}
 
-    def run(self, *categorizations, epd_datamanager, goal_and_scope):
-
+    def run(self, *categorizations, epd_datamanager, observation_period):
         self._initialize_calculator()
-        original_databases = epd_datamanager.databases
-
-        _set_compliant_databases(epd_datamanager, goal_and_scope)
-
         self.result.update(
             self._process_categorizations(
-                categorizations, epd_datamanager, goal_and_scope.observation_period
+                categorizations, epd_datamanager, observation_period
             )
         )
-
-        epd_datamanager.databases = original_databases
 
     def load_input(self, filepath):
         self.input = CalculationInput()
@@ -33,12 +26,8 @@ class Lcia(object):
     def normalize(self, method):
         ...
 
-    def weight(self, method):
+    def weight(self, method_name, weighting_factors):
         ...
-
-    def apply_method(self, method_name, method, *method_arguments):
-
-        self.other_results[method_name] = method(self, *method_arguments)
 
     def _initialize_calculator(self):
 
@@ -66,12 +55,3 @@ class Lcia(object):
                 epd_datamanager=epd_datamanager,
                 observation_period=observation_period
             )
-
-
-def _set_compliant_databases(epd_datamanager, goal_and_scope):
-    if goal_and_scope:
-        compliant_databases = dict((sk, db) for sk, db in epd_datamanager.databases.items() \
-                                   if db.standard == goal_and_scope.standard)
-        if compliant_databases:
-            print(f"Using databases compliant to standard defined in goal and scope: {list(compliant_databases.keys())}")
-            epd_datamanager.databases = compliant_databases

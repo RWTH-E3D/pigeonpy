@@ -1,6 +1,4 @@
 from data.epddata.source.apiepdsource import ApiEpdSource
-from logic.epddataset.en15804A1dataset import En15804A1Dataset
-from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import requests
 import numpy as np
 from io import StringIO
@@ -28,19 +26,12 @@ class OekobaudatAPI(ApiEpdSource):
         Name given to the EpdSource
     standards : list
         Available standards for this EpdSource
-    standard : str
-        The standard chosen for the instance of OekobaudatApi
-    template_dataset : EpdDataset
-        An empty instance of an EpdDataset() object to be populated with epd data in the specific instance of this class
-        based on the given standard -> En15804A1Dataset() or En15804A2Dataset()
     _root : str
         The root of the oekobaudat API
     _fetched_datasets: dict
         Used to cache already fetched and processed epd data with the associated UUID as key
     _compliance_uuids: dict
         Reference UUIDs for the compliance systems used for the different standards
-    _lcia_uuid_allocation: dict
-        Uses either one of the lcia_uuid_allocations dictionaries based on the given standard
 
     """
 
@@ -102,12 +93,10 @@ class OekobaudatAPI(ApiEpdSource):
         "b2ad6890-c78d-11e6-9d9d-cec0c932ce01": "sqp"
     }
 
-    def __init__(self, name, standard):
+    def __init__(self, name):
         super().__init__(name)
         self.name = name
         self.standards = ["EN15804+A1", "EN15804+A2"]
-        self.standard = standard
-        self.template_dataset = En15804A2Dataset() if self.standard == "EN15804+A2" else En15804A1Dataset()
 
         self._root = "https://oekobaudat.de/OEKOBAU.DAT/resource"
         self._fetched_datasets = {}  # store already fetched datasets to reduce requests
@@ -119,7 +108,6 @@ class OekobaudatAPI(ApiEpdSource):
                 "d4aa3ec7-b1d7-4a4a-a6cb-37af88dcc902"   # EF 3.1 source dataset
             ]
         }
-        self._lcia_uuid_allocation = self.lcia_uuid_allocations[self.standard]
 
     def load_epd(self, epd_dataset, epd_id):
         """Method to request epd data based on the given epd_id (UUID), process the returned xml data and populate the
@@ -146,10 +134,16 @@ class OekobaudatAPI(ApiEpdSource):
 
         epd_data = {
             **self._extract_indicator_data(
-                process_dataset, ns, ".//default:exchanges/default:exchange", self.exchange_uuid_allocations
+                process_dataset=process_dataset,
+                ns=ns,
+                xml_base_path=".//default:exchanges/default:exchange",
+                uuid_allocations=self.exchange_uuid_allocations
             ),
             **self._extract_indicator_data(
-                process_dataset, ns, ".//default:LCIAResults/default:LCIAResult", self._lcia_uuid_allocation
+                process_dataset=process_dataset,
+                ns=ns,
+                xml_base_path=".//default:LCIAResults/default:LCIAResult",
+                uuid_allocations=self.lcia_uuid_allocations[epd_dataset.standard]
             )
         }
 
@@ -202,9 +196,9 @@ class OekobaudatAPI(ApiEpdSource):
 
         return indicator_data
 
-    def load(self):
+    def load(self, dataset_template):
         """No need to initiate the API connection because only single dataset requests are possible"""
-        return
+        self.dataset_template = dataset_template()
 
     def contains_dataset(self, epd_id) -> bool:
         """Only returns True for the check in EpdDatamanager, because there is no other way to check the API
@@ -238,7 +232,7 @@ class OekobaudatAPI(ApiEpdSource):
         compliance_declarations = dataset.findall(".//{*}referenceToComplianceSystem", namespaces=ns)
         for entry in compliance_declarations:
             compliance = entry.get("refObjectId")
-            if compliance in self._compliance_uuids[self.standard]:
+            if compliance in self._compliance_uuids[self.dataset_template.standard]:
                 return True
         return False
 

@@ -11,10 +11,10 @@ class TecoJson(FileEpdSource):
         super().__init__(name, filepath)
         self.standards = ["EN15804+A1"]
         self.data = None
-        self.standard = "EN15804+A1"
-        self.template_dataset = En15804A1Dataset()
+        self.dataset_template = None
 
-    def load(self):
+    def load(self, dataset_template):
+        self.dataset_template = dataset_template()
         with open(self.filepath, "r+") as f:
             self.data = json.load(f)
 

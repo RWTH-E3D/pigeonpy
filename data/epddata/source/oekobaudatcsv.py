@@ -1,6 +1,4 @@
 from data.epddata.source.fileepdsource import FileEpdSource
-from logic.epddataset.en15804A1dataset import En15804A1Dataset
-from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import pandas as pd
 import numpy as np
 
@@ -36,13 +34,11 @@ class OekobaudatCsv(FileEpdSource):
         "ADPE (A2)": float, "WDP (A2)": float
     }
 
-    def __init__(self, name, filepath, standard):
+    def __init__(self, name, filepath):
         super().__init__(name, filepath)
         self.standards = ["EN15804+A1", "EN15804+A2"]
+        self.dataset_template = None
         self.data = None
-        self.standard = standard
-        self.template_dataset = En15804A2Dataset() if self.standard == "EN15804+A2" else En15804A1Dataset()
-
 
     @staticmethod
     def convert_string_to_1(value, default_value=1.0):
@@ -52,17 +48,17 @@ class OekobaudatCsv(FileEpdSource):
         except ValueError:
             return default_value
 
-    def load_epd(self, epd_dataset, id):
+    def load_epd(self, epd_dataset, epd_id):
         try:
-            lca_dataset_mask = self.data['UUID'].values == id
+            lca_dataset_mask = self.data['UUID'].values == epd_id
             lca_dataset_bind = self.data[lca_dataset_mask]
 
-            epd_dataset.epd_data_id = id
+            epd_dataset.epd_data_id = epd_id
             epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
             epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
             epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
         except IndexError:
-            raise Exception(f"No dataset for combination of given lca id '{id}' and standard '{self.standard}' "
+            raise Exception(f"No dataset for combination of given lca id '{epd_id}' and standard '{epd_dataset.standard}' "
                             f"was found.")
 
         data_array = epd_dataset.data
@@ -131,15 +127,16 @@ class OekobaudatCsv(FileEpdSource):
 
         return lca_data_bind_pd
 
-    def load(self):
-        if self.standard == "EN15804+A1":
+    def load(self, dataset_template):
+        self.dataset_template = dataset_template()
+        if self.dataset_template.standard == "EN15804+A1":
             lca_data_bind_pd = self._load_en15804a1()
 
-        elif self.standard == "EN15804+A2":
+        elif self.dataset_template.standard == "EN15804+A2":
             lca_data_bind_pd = self._load_en15804a2()
 
         else:
-            raise ValueError(f"{self.standard} is not defined in Ökobaudat")
+            raise ValueError(f"{self.dataset_template.standard} is not defined in Ökobaudat")
 
         # missing units exchanged with pcs. (pieces), fits for the current status of the database (09.01.2024)
         lca_data_bind_pd["Bezugseinheit"] = lca_data_bind_pd["Bezugseinheit"].fillna("pcs.")

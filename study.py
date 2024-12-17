@@ -1,27 +1,23 @@
-from logic.lcia.lcia import Calculation
-from logic.lcia.calculator import Calculator
-from logic.lcia.calculationinput import CalculationInput
-from logic.epddataset.epddataset import EpdDataset
-from logic.goalandscope import GoalAndScope
+from logic.lcia.lcia import Lcia
 from data.epddata.epddatamanager import EpdDataManager
-import pandas as pd
+from logic.epddataset.en15804A2dataset import En15804A2Dataset
 
 
 class Study(object):
-    def __init__(self, study_name):
+    def __init__(self, study_name, observation_period, dataset_template=En15804A2Dataset):
 
         self.study_name = study_name
-        self.goal_and_scope = None
-        self.calculation = Calculation()
-        self.epd_datamanager = EpdDataManager()
+        self.observation_period = observation_period
+        self.dataset_template = dataset_template
+        self.lcia = Lcia()
+        self.epd_datamanager = EpdDataManager(dataset_template)
 
     def run_calculation(self, *categorizations):
-        self.calculation.run(*categorizations, epd_datamanager=self.epd_datamanager,
-                             goal_and_scope=self.goal_and_scope)
-
+        self.lcia.run(
+            *categorizations,
+            epd_datamanager=self.epd_datamanager,
+            observation_period=self.observation_period
+        )
 
     def load_calculation_input(self, filepath):
-        self.calculation.load_input(filepath)
-    def apply_method(self, method_name, method, *method_arguments):
-
-        self.calculation.apply_method(method_name, method, *method_arguments)
+        self.lcia.load_input(filepath)

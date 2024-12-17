@@ -1,9 +1,7 @@
 from study import Study
 from pathlib import Path
-from logic.goalandscope import GoalAndScope
 from data.epddata.source.oekobaudatcsv import OekobaudatCsv
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
-import logic.methods.normalization as norm
 import time
 
 def doktorandenseminar_weighting(normalized_result, gwp_perc, fw_perc, rwd_perc):
@@ -20,18 +18,19 @@ def doktorandenseminar_weighting(normalized_result, gwp_perc, fw_perc, rwd_perc)
 tic = time.time()
 
 #input file wird geladen
-input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper.csv"
+input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper+service_life+headers.csv"
 
 # Studie wird erstellt
-study_doktorandenseminar = Study("Doktorandenseminar")
-
-#goal and scope wird definiert und der Studie zugeordnet (nicht wichtig für Seminar)
-goal_and_scope = GoalAndScope("EN15804+A2", observation_period=50, description = "This study is about insulation")
-study_doktorandenseminar.goal_and_scope = goal_and_scope
+standard_dataset = En15804A2Dataset
+study_doktorandenseminar = Study(
+    study_name="Doktorandenseminar",
+    observation_period=50,
+    dataset_template=standard_dataset
+)
 
 #Datenbank wird geladen und der Studie zugeordnet
 oekobaudatfilepath = Path.cwd()  / "data" / "input" / "inputdata" / "OBD_2024_I_2024-12-10T09_45_06.csv"
-oekobaudat = OekobaudatCsv("Ökobaudat", oekobaudatfilepath, "EN15804+A2")
+oekobaudat = OekobaudatCsv("Ökobaudat", oekobaudatfilepath)
 study_doktorandenseminar.epd_datamanager.register_source("oekobaudat", oekobaudat)
 
 #Berechnung wird geladen und gestartet
@@ -46,13 +45,13 @@ normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", study
 #Mineralwolle: 4fa62445-e59f-4874-99e5-49cec91967e0
 
 #Normalisierung wird durchgeführt
-method_tuple_norm = ("normalization", norm.normalize_by_epd, normalization_epd)
-study_doktorandenseminar.apply_method(*method_tuple_norm)
-
-print(study_doktorandenseminar.calculation.other_results["normalization"]["type 4"])
-
-#Gewichtung wird durchgeführt
-doktorandenseminar_weighting(study_doktorandenseminar.calculation.other_results["normalization"]["type 4"], 0.8, 0.1, 0.1)
+# method_tuple_norm = ("normalization", norm.normalize_by_epd, normalization_epd)
+# study_doktorandenseminar.apply_method(*method_tuple_norm)
+#
+# print(study_doktorandenseminar.calculation.other_results["normalization"]["type 4"])
+#
+# #Gewichtung wird durchgeführt
+# doktorandenseminar_weighting(study_doktorandenseminar.calculation.other_results["normalization"]["type 4"], 0.8, 0.1, 0.1)
 
 toc = time.time()
 print('dynamic lca draft run in', round((toc - tic), 2), 'seconds')
