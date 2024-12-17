@@ -1,8 +1,8 @@
-from logic.calculation.calculator import Calculator
-from logic.calculation.calculationinput import CalculationInput
+from logic.lcia.calculator import Calculator
+from logic.lcia.calculationinput import CalculationInput
 
 
-class Calculation(object):
+class Lcia(object):
     def __init__(self):
         self.input = None
         self._calculator = None
