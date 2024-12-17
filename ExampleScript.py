@@ -26,7 +26,7 @@ input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper.
 study_doktorandenseminar = Study("Doktorandenseminar")
 
 #goal and scope wird definiert und der Studie zugeordnet (nicht wichtig für Seminar)
-goal_and_scope = GoalAndScope("EN15804+A2", description = "This study is about insulation")
+goal_and_scope = GoalAndScope("EN15804+A2", observation_period=50, description = "This study is about insulation")
 study_doktorandenseminar.goal_and_scope = goal_and_scope
 
 #Datenbank wird geladen und der Studie zugeordnet

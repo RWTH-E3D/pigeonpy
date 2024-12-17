@@ -81,6 +81,7 @@ class EpdDataset(object):
                 new_data = self.data * other
                 self.history.log_operation(f"Multiplied by factor: {other}")
                 new_history = self.history
+                new_history.initial_name = self.history.initial_name
 
             result_epd = type(self)()
             result_epd.data = new_data
@@ -112,7 +113,7 @@ class EpdDataset(object):
             new_data = self.data + other.data
             new_history = History()
             new_history.entries = self.history.entries
-            new_history.log_operation(f"Sum calculated with other dataset: ")
+            new_history.log_operation(f"Sum calculated with: ")
             new_history.entries = new_history.merge_histories(other)
             result_epd = type(self)()
             result_epd.data = new_data
@@ -315,14 +316,19 @@ class EpdDataset(object):
 class History:
     def __init__(self):
         self.initial_source = None
+        self.initial_name = None
         self.entries = []
 
     def add_data_source(self, epd_id, epd_name, source_key):
         self.initial_source = source_key
+        self.initial_name = epd_name
         self.entries.append(f"Dataset '{epd_name}' ({epd_id}) initialized from source '{source_key}'")
 
-    def log_operation(self, entry):
-        self.entries.append(entry)
+    def log_operation(self, entry, replace_last=False):
+        if replace_last:
+            self.entries[-1] = entry
+        else:
+            self.entries.append(entry)
 
     def merge_histories(self, other_dataset):
         return self.entries + other_dataset.history.entries

@@ -11,28 +11,30 @@ class OekobaudatCsv(FileEpdSource):
     a2_aliases = ["'DIN EN 15804+A2'", "'EN 15804+A2'", "'DIN EN 15804+A2' / 'ISO 14025'",
                        "'EN 15804+A2' / 'ISO 14025'", "'EN 15804+A2' / 'EN 16485'", "'EN 15804+A2 (EF 3.1)'"]
 
-    dtype_dict = {"UUID": str,
-                       "Name (de)": str,
-                       "Name (en)": str,
-                       "Konformität": str,
-                       "Referenzjahr": "Int64",
-                       "Bezugseinheit": str,
-                       "Referenzfluss-Name": str,
-                       "Modul": str,
-                       "PERE": float, "PERM": float, "PERT": float, "PENRE": float, "PENRM": float, "PENRT": float,
-                       "SM": float,
-                       "RSF": float, "NRSF": float, "FW": float, "HWD": float, "NHWD": float, "RWD": float,
-                       "CRU": float,
-                       "MFR": float, "MER": float, "EEE": float, "EET": float, "GWP": float, "ODP": float,
-                       "POCP": float,
-                       "AP": float, "EP": float, "ADPE": float, "ADPF": float,
-                       "AP (A2)": float, "GWPtotal (A2)": float, "GWPbiogenic (A2)": float, "GWPfossil (A2)": float,
-                       "GWPluluc (A2)": float, "ETPfw (A2)": float, "PM (A2)": float, "EPmarine (A2)": float,
-                       "EPfreshwater (A2)": float, "EPterrestrial (A2)": float, "HTPc (A2)": float,
-                       "HTPnc (A2)": float,
-                       "IRP (A2)": float, "SOP (A2)": float, "ODP (A2)": float, "POCP (A2)": float,
-                       "ADPF (A2)": float,
-                       "ADPE (A2)": float, "WDP (A2)": float}
+    dtype_dict = {
+        "UUID": str,
+        "Name (de)": str,
+        "Name (en)": str,
+        "Konformität": str,
+        "Referenzjahr": "Int64",
+        "Bezugseinheit": str,
+        "Referenzfluss-Name": str,
+        "Modul": str,
+        "PERE": float, "PERM": float, "PERT": float, "PENRE": float, "PENRM": float, "PENRT": float,
+        "SM": float,
+        "RSF": float, "NRSF": float, "FW": float, "HWD": float, "NHWD": float, "RWD": float,
+        "CRU": float,
+        "MFR": float, "MER": float, "EEE": float, "EET": float, "GWP": float, "ODP": float,
+        "POCP": float,
+        "AP": float, "EP": float, "ADPE": float, "ADPF": float,
+        "AP (A2)": float, "GWPtotal (A2)": float, "GWPbiogenic (A2)": float, "GWPfossil (A2)": float,
+        "GWPluluc (A2)": float, "ETPfw (A2)": float, "PM (A2)": float, "EPmarine (A2)": float,
+        "EPfreshwater (A2)": float, "EPterrestrial (A2)": float, "HTPc (A2)": float,
+        "HTPnc (A2)": float,
+        "IRP (A2)": float, "SOP (A2)": float, "ODP (A2)": float, "POCP (A2)": float,
+        "ADPF (A2)": float,
+        "ADPE (A2)": float, "WDP (A2)": float
+    }
 
     def __init__(self, name, filepath, standard):
         super().__init__(name, filepath)
