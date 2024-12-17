@@ -3,9 +3,11 @@ from logic.lcia.calculationinput import CalculationInput
 
 
 class Lcia(object):
-    def __init__(self):
+    def __init__(self, dataset_template):
         self.input = None
         self._calculator = None
+
+        self.dataset_template = dataset_template
 
         self.result = {}
         self.normalized_results = {}
@@ -23,8 +25,13 @@ class Lcia(object):
         self.input = CalculationInput()
         self.input.load(filepath)
 
-    def normalize(self, method):
-        ...
+    def normalize(self, method_name, reference_result):
+
+
+        for categorization in self.result:
+            self.normalized_results["method_name"][categorization] = self.result[categorization] / reference_result
+
+
 
     def weight(self, method_name, weighting_factors):
         ...
