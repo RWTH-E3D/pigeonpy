@@ -48,10 +48,48 @@ class En15804A2Dataset(EpdDataset):
 
         Parameters
         ----------
-        given_lca_id : str
+        epd_id : str
             String with LCA id for the dataset to be loaded
-        data_class : DataClass
-            Instance of DataClass with file and data bindings
-
+        epd_data_manager : EpdDataManager
+            Instance of EpdDataManager containing the different epd sources
+        source_key : str
+            If given, the EpdDataManager loads the epd from the source, specified by the source_key
         """
         epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source_key)
+
+    def dimensionless_template(self, name, dataset_template):
+        """Method to create a template for a dataset class with dimensionless environmental indicators inheriting from
+        this class. The created template is used for normalization or weighting methods that result in dimensionless
+        data due to their calculation
+
+        Parameters
+        ----------
+        name : str
+            Specifies the name for the newly created class
+        dataset_template : En15804A2Dataset
+            Serves as template and parent for the newly created class
+
+        Returns
+        ----------
+        dimensionless_dataset_template : type
+            Template to create new classes based on En15804A2Datasets that don't have a unit for the environmental
+            indicators and take a data_array as argument in its constructor
+
+        """
+
+        updated_class_dict = (dict(dataset_template.__dict__))
+
+        def __init__(self, data_array):
+            super().__init__()
+            self.data = data_array
+            self.standard = "EN15804+A2"
+
+        updated_class_dict.update({
+            'environmental_indicators': self.epd_attribute_loader.indicators_a2_dimensionless,
+            '__init__': __init__
+            }
+        )
+        dimensionless_dataset_template = type(
+            name, (dataset_template,), updated_class_dict
+        )
+        return dimensionless_dataset_template
