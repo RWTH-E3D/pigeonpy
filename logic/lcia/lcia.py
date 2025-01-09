@@ -11,7 +11,7 @@ class Lcia(object):
 
         self.result = {}
         self.normalized_results = {}
-        self.weighted_result = {}
+        self.weighted_results = {}
 
     def run(self, *categorizations, epd_datamanager, observation_period):
         self._initialize_calculator()
@@ -20,6 +20,7 @@ class Lcia(object):
                 categorizations, epd_datamanager, observation_period
             )
         )
+        self._calculate_total_result()
 
     def load_input(self, filepath):
         self.input = CalculationInput()
@@ -29,24 +30,22 @@ class Lcia(object):
         ...
 
     def weight(self, method_name, weighting_factors, normalization_method=None):
-        # Auf alle möglichen Ergebnisse anwenden -> overall_result noch gewichten, wenn epd result mit in self.result
-        # gespeichert ist
 
         weighted_dataset_class_template = self.dataset_template().dimensionless_template("weighted_dataset_class",
                                                                                          self.dataset_template)
-        self.weighted_result[method_name] = {}
+        self.weighted_results[method_name] = {}
 
         if normalization_method and normalization_method in self.normalized_results:
             for categorization in self.normalized_results[normalization_method]:
-                self.weighted_result[method_name][categorization] = self.normalized_results[normalization_method][
-                    categorization].multiply(weighting_factors)
+                self._calculate_weighting(self.normalized_results, categorization, method_name, weighting_factors,
+                                          weighted_dataset_class_template)
         elif normalization_method:
-            print("Given normalization method not in normalized results. No weighting with given method possible.")
+            print(f"Given normalization method not in normalized results. "
+                  f"No weighting with given method {normalization_method} possible.")
         else:
             for categorization in self.result:
-                self.weighted_result[method_name][categorization] = self.result[categorization].apply(
-                    lambda dataset: weighted_dataset_class_template(weighting_factors * dataset.data)
-                )
+                self._calculate_weighting(self.result, categorization, method_name, weighting_factors,
+                                          weighted_dataset_class_template)
 
     def _initialize_calculator(self):
 
@@ -58,6 +57,9 @@ class Lcia(object):
             results[categorization] = self._run_individual_calculation(
                 categorization, epd_datamanager, observation_period
             )
+        results["Individual EPD"] = self._run_individual_calculation(
+            "Individual EPD", epd_datamanager, observation_period
+        )
         return results
 
     def _run_individual_calculation(self, categorization, epd_datamanager, observation_period):
@@ -73,4 +75,15 @@ class Lcia(object):
                 categorization,
                 epd_datamanager=epd_datamanager,
                 observation_period=observation_period
+            )
+
+    def _calculate_total_result(self):
+        self.result["Total result"] = self.result["Individual EPD"].sum()
+
+    def _calculate_weighting(self, result, categorization, method_name, weighting_factors, dataset_class_template):
+        if type(result[categorization]) == type(self.dataset_template()):
+            self.weighted_results[method_name][categorization] = result[categorization] * weighting_factors
+        else:
+            self.weighted_results[method_name][categorization] = result[categorization].apply(
+                lambda dataset: dataset_class_template(weighting_factors * dataset.data)
             )

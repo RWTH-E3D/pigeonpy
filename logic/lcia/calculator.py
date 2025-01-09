@@ -57,9 +57,9 @@ class Calculator(object):
             dataset_objects.append(calculated_result_row)
 
         calculated_df = pd.DataFrame(dataset_objects, columns=['Epd_dataset', 'Category_name'])
-        calculated_df = calculated_df.groupby(['Category_name'])['Epd_dataset'].sum()  # pd.Series
+        calculated_series = calculated_df.groupby(['Category_name'], dropna=False)['Epd_dataset'].sum()
 
-        for index, dataset in calculated_df.items():
+        for index, dataset in calculated_series.items():
             dataset.name = str(index)
 
-        return calculated_df
+        return calculated_series

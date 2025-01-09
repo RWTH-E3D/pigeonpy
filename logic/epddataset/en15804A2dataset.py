@@ -79,10 +79,10 @@ class En15804A2Dataset(EpdDataset):
 
         updated_class_dict = (dict(dataset_template.__dict__))
 
-        def __init__(self, data_array):
+        def __init__(self, data_array=None):
             super().__init__()
             self.data = data_array
-            self.standard = "EN15804+A2"
+            self.standard = "EN15804+A2" + f"_{name}"
 
         updated_class_dict.update({
             'environmental_indicators': self.epd_attribute_loader.indicators_a2_dimensionless,
