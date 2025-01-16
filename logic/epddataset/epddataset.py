@@ -179,7 +179,7 @@ class EpdDataset(object):
                 new_history.log_operation(f"Divided by other dataset: ")
                 new_history.entries = new_history.merge_histories(other)
             else:
-                new_data = self.data / other
+                new_data = np.divide(self.data, other, out=np.zeros_like(self.data), where=other != 0.0)
                 self.history.log_operation(f"Divided by factor: {other}")
                 new_history = self.history
 
