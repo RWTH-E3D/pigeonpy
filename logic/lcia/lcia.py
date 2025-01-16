@@ -49,10 +49,6 @@ class Lcia(object):
             self.normalized_results[method_name][categorization] = result[categorization].apply(
                 lambda dataset: dataset_class_template(dataset.data / reference_result)
 
-    def weight(self, method_name, weighting_factors):+
-
-
-
 
     def weight(self, method_name, weighting_factors, normalization_method=None):
 
