@@ -4,6 +4,36 @@ import numpy as np
 
 
 class OekobaudatCsv(FileEpdSource):
+    """Class that contains methods for fetching datasets in XML format from the oekobaudat API and loading them into
+    EpdDataset objects
+
+    Class variables
+    ----------
+    a1_aliases : list
+        Contains the different terminologies used in the Oekobaudat database csv to indicate the standard EN15804+A1
+        for a dataset
+    a2_aliases : list
+        Contains the different terminologies used in the Oekobaudat database csv to indicate the standard EN15804+A2
+        for a dataset
+    dtype_dict : dict
+        Maps the columns of the Oekobaudat csv to dtypes for the file to dataframe processing in pandas
+
+    Attributes
+    ----------
+    name : str
+        Name given to the EpdSource
+    filepath : str
+        Path to the Oekobaudat csv file
+    standards : list
+        Available standards in the Oekobaudat
+    dataset_template: EpdDataset
+        To determine the used standard for the Oekobaudat csv and to create instances of that class in the EpdDataManager
+    data: pd.DataFrame
+        Holds the dataframe containing the processed Oekobaudat csv, i.e. all available datasets for the standard
+        indicated by the dataset_template
+
+    """
+
     a1_aliases = ["'DIN EN 15804'", "'EN 15804'", "'DIN EN 15804' / 'ISO 14025'",
                        "'EN 15804' / 'ISO 14025' / 'OEKOBAUDAT Entry Level Compliance'"]
     a2_aliases = ["'DIN EN 15804+A2'", "'EN 15804+A2'", "'DIN EN 15804+A2' / 'ISO 14025'",
@@ -40,46 +70,72 @@ class OekobaudatCsv(FileEpdSource):
         self.dataset_template = None
         self.data = None
 
-    @staticmethod
-    def convert_string_to_1(value, default_value=1.0):
-        """Helper function to convert values in pd Dataframe"""
-        try:
-            return float(value)
-        except ValueError:
-            return default_value
-
     def load_epd(self, epd_dataset, epd_id):
-        try:
-            lca_dataset_mask = self.data['UUID'].values == epd_id
-            lca_dataset_bind = self.data[lca_dataset_mask]
+        """Loads the EPD data for a given epd_id from the Oekobaudat dataframe into the provided epd_dataset instance
+        by calling associated methods.
 
-            epd_dataset.epd_data_id = epd_id
-            epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
-            epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
-            epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
-        except IndexError:
-            raise Exception(f"No dataset for combination of given lca id '{epd_id}' and standard '{epd_dataset.standard}' "
-                            f"was found.")
+        Parameters
+        ----------
+        epd_dataset : Dataset
+            An instance of the dataset class to load EPD data into.
+        epd_id : str
+            The UUID of the EPD to load.
+        """
+        lca_dataset_bind = self._filter_dataset(epd_id, epd_dataset)
+        self._populate_metadata(epd_dataset, lca_dataset_bind, epd_id)
+        data_array = self._populate_data_array(epd_dataset, lca_dataset_bind)
+        data_array = self._handle_a1_a3_column(epd_dataset, data_array)
 
+        epd_dataset.data = data_array
+
+    def _filter_dataset(self, epd_id, epd_dataset):
+        """Filters the main data for the given epd_id.
+
+        Raises
+        ------
+        ValueError: If no matching dataset is found.
+        """
+        dataset_binding = self.data[self.data['UUID'] == epd_id]
+        if dataset_binding.empty:
+            raise ValueError(
+                f"No dataset found for EPD UUID '{epd_id}' and standard '{epd_dataset.standard}' in loaded version of "
+                f"Oekobaudat csv '{self.filepath.name}'."
+            )
+        return dataset_binding
+
+    @staticmethod
+    def _populate_metadata(epd_dataset, lca_dataset_bind, epd_id):
+        """Populates metadata fields in the EPD dataset."""
+        epd_dataset.epd_data_id = epd_id
+        epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
+        epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
+        epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
+
+    @staticmethod
+    def _populate_data_array(epd_dataset, lca_dataset_bind):
+        """Populates the data array in the EPD dataset using grouped lifecycle stages and indicators."""
         data_array = epd_dataset.data
         grouped = lca_dataset_bind.groupby("Modul")
+        indicator_abbreviations = [ind.abbreviation.upper() for ind in epd_dataset.environmental_indicators]
 
-        test_list = [indicator.abbreviation.upper() for indicator in epd_dataset.environmental_indicators]
-
-        for i, stage in enumerate(epd_dataset.life_cycle_stages):
-            group = grouped.get_group(stage.abbreviation) if stage.abbreviation in grouped.groups else None
-            if group is not None:
-                values = group[test_list].iloc[0].values
-                data_array[:, i] = values
+        for stage_index, stage in enumerate(epd_dataset.life_cycle_stages):
+            if stage.abbreviation in grouped.groups:
+                group = grouped.get_group(stage.abbreviation)
+                values = group[indicator_abbreviations].iloc[0].to_numpy()
+                data_array[:, stage_index] = values
             else:
-                data_array[:, i] = 0.0
+                data_array[:, stage_index] = 0.0
 
+        return data_array
+
+    @staticmethod
+    def _handle_a1_a3_column(epd_dataset, data_array):
+        """Ensures that the A1-A3 column is populated correctly."""
         a1_a3_column_index = [stage.abbreviation for stage in epd_dataset.life_cycle_stages].index("a1_a3")
         if np.count_nonzero(data_array[:, a1_a3_column_index]) == 0:
             data_array[:, a1_a3_column_index] = np.sum(data_array[:, :a1_a3_column_index], axis=1)
 
-        epd_dataset._data = data_array
-
+        return data_array
 
     def _load_en15804a1(self):
         use_columns_a1 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
@@ -103,7 +159,7 @@ class OekobaudatCsv(FileEpdSource):
         use_columns_a2 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
                           "Bezugseinheit", "Referenzfluss-Name", "Modul",
                           "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
-                          # "Additional environmental impact indicators" with high uncertainties (Ökobaudat Manual)
+                          # "Additional environmental impact indicators" with high uncertainties (see Ökobaudat Manual)
                           # -> excluded here (If the use is desired, add to json and column names below!!!)
                           # "HTPc (A2)", "HTPnc (A2)", "PM (A2)", "IRP (A2)", "ETPfw (A2)", "SOP (A2)",
                           "HWD", "NHWD", "RWD", "CRU", "MFR", "MER", "EEE", "EET",
@@ -128,30 +184,55 @@ class OekobaudatCsv(FileEpdSource):
         return lca_data_bind_pd
 
     def load(self, dataset_template):
+        """Loads the section of the Oekobaudat csv database that contains datasets for the respective standard indicated
+         by the dataset template into the data attribute as a pandas Dataframe.
+
+        Parameters
+        ----------
+        dataset_template : EpdDataset
+            Class alias of the dataset class to load EPD data into.
+        """
         self.dataset_template = dataset_template()
         if self.dataset_template.standard == "EN15804+A1":
             lca_data_bind_pd = self._load_en15804a1()
-
         elif self.dataset_template.standard == "EN15804+A2":
             lca_data_bind_pd = self._load_en15804a2()
-
         else:
             raise ValueError(f"{self.dataset_template.standard} is not defined in Ökobaudat")
 
-        # missing units exchanged with pcs. (pieces), fits for the current status of the database (09.01.2024)
-        lca_data_bind_pd["Bezugseinheit"] = lca_data_bind_pd["Bezugseinheit"].fillna("pcs.")
-        # replace missing/ NaN values in indicator columns with zero (0.0)
-        for series_name, series in lca_data_bind_pd.items():
-            if series.dtype.name == "float64":
-                lca_data_bind_pd[series_name] = lca_data_bind_pd[series_name].fillna(0.0)
-        # Transform 'Modul' entries with lower case entries and replace a1-a3 with a1_a3:
-        lca_data_bind_pd["Modul"] = lca_data_bind_pd["Modul"].str.casefold()
-        lca_data_bind_pd["Modul"].replace('a1-a3', 'a1_a3', inplace=True)
-
-        self.data = lca_data_bind_pd
+        self.data = self._clean_and_transform_data(lca_data_bind_pd)
 
     def contains_dataset(self, epd_id) -> bool:
+        """Checks the data attribute containing the pd.DataFrame with the Oekobaudat for existence of a dataset given
+        by the epd_id"""
         if epd_id in self.data['UUID'].values:
             return True
         else:
             return False
+
+    @staticmethod
+    def _clean_and_transform_data(lca_data_bind_pd):
+        """Preprocesses the data by handling missing units, replacing missing indicator values,
+        and transforming the 'Modul' column."""
+        # missing units exchanged with pcs. (pieces), fits for the current status of the database (09.01.2024)
+        lca_data_bind_pd["Bezugseinheit"] = lca_data_bind_pd["Bezugseinheit"].fillna("pcs.")
+
+        # replace missing/ NaN values in indicator columns with zero (0.0)
+        for series_name, series in lca_data_bind_pd.items():
+            if series.dtype.name == "float64":
+                lca_data_bind_pd[series_name] = lca_data_bind_pd[series_name].fillna(0.0)
+
+        # Transform 'Modul' entries with lower case entries and replace a1-a3 with a1_a3:
+        lca_data_bind_pd["Modul"] = lca_data_bind_pd["Modul"].str.casefold()
+        lca_data_bind_pd["Modul"].replace('a1-a3', 'a1_a3', inplace=True)
+
+        return lca_data_bind_pd
+
+    @staticmethod
+    def convert_string_to_1(value, default_value=1.0):
+        """Helper function used while reading the csv file to convert elements in the 'Bezugsgroesse' column of the
+        Oekobaudat csv either into float and if not possible the value 1.0"""
+        try:
+            return float(value)
+        except ValueError:
+            return default_value
