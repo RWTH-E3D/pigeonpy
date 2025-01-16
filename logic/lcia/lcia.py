@@ -47,7 +47,7 @@ class Lcia(object):
             self.normalized_results[method_name][categorization] = self.result[categorization] / reference_result
         else:
             self.normalized_results[method_name][categorization] = result[categorization].apply(
-                lambda dataset: dataset_class_template(dataset.data / reference_result)
+                lambda dataset: dataset_class_template(dataset.data / reference_result))
 
 
     def weight(self, method_name, weighting_factors, normalization_method=None):
