@@ -9,6 +9,8 @@ class Lcia(object):
         self._calculator = None
         self.dataset_template = dataset_template
 
+        self.dataset_template = dataset_template
+
         self.result = {}
         self.normalized_results = {}
         self.weighted_results = {}
@@ -26,8 +28,31 @@ class Lcia(object):
         self.input = CalculationInput()
         self.input.load(filepath)
 
-    def normalize(self, method):
-        ...
+    def normalize(self, method_name, reference_result):
+
+        normalized_dataset_class = self.dataset_template().dimensionless_template("normalized_dataset_class", self.dataset_template)
+        self.normalized_results[method_name] = {}
+
+        for categorization in self.result:
+            self._calculate_normalization(self.result, categorization, method_name, reference_result,
+                                      normalized_dataset_class)
+
+        for categorization in self.result:
+            self.normalized_results["method_name"][categorization] = self.result[categorization] / reference_result
+
+            self.normalized_results["method_name"][categorization] = normalized_dataset_class()
+
+    def _calculate_normalization(self, result, categorization, method_name, reference_result, dataset_class_template):
+        if type(result[categorization]) == type(self.dataset_template()):
+            self.normalized_results[method_name][categorization] = self.result[categorization] / reference_result
+        else:
+            self.normalized_results[method_name][categorization] = result[categorization].apply(
+                lambda dataset: dataset_class_template(dataset.data / reference_result)
+
+    def weight(self, method_name, weighting_factors):+
+
+
+
 
     def weight(self, method_name, weighting_factors, normalization_method=None):
 
