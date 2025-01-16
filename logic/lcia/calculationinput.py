@@ -50,11 +50,12 @@ class CalculationInput(object):
             self._populate_dataframes_dynamically(import_df)
 
     def _load_and_preprocess_csv(self, filepath):
-        """Method to load the input csv into a pandas dataframe, clean UUID column from whitespaces and create an index
-        column"""
+        """Method to load the input csv into a pandas dataframe, clean UUID column from whitespaces, create an index
+        column and a column for the calculation of all individual datasets as a separate categorization"""
         df = (pd.read_csv(filepath, sep=',', encoding='ANSI'))
         df['UUID'] = df['UUID'].str.strip()
         df.insert(0, self._calculation_header[0], df.index)
+        df.insert(len(df.columns), "Individual EPD", df["EPD name"])
         return df
 
     def _populate_dataframes_dynamically(self, import_df):
@@ -81,7 +82,7 @@ class CalculationInput(object):
         self.category_df = pd.concat([pd.DataFrame(entry) for entry in categories])
 
     def _populate_dataframes_positional(self, import_df):
-        """For the case that column names in the input csv differ from those defined in the headers, this for method
+        """For the case that column names in the input csv differ from those defined in the headers, this method
         populates the calculation, categorization and category dataframe based on the positions, not the column names
         so the first 6 columns can be named differently but must respect the correct column order."""
         categorizations = [[idx, col] for idx, col in enumerate(import_df.columns[5:])]
