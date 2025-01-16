@@ -4,6 +4,7 @@ from data.epddata.source.oekobaudatcsv import OekobaudatCsv
 from data.epddata.source.oekobaudatapi import OekobaudatAPI
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
 import time
+import numpy as np # Löschen, wenn Gewichtungsfaktoren über Funktion erstellt werden
 
 tic = time.time()
 
@@ -37,7 +38,13 @@ study_doktorandenseminar.run_calculation("building_type")
 normalization_epd = En15804A2Dataset()
 normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", study_doktorandenseminar.epd_datamanager)
 
-study_doktorandenseminar.lcia.normalize("test_method", normalization_epd)
+study_doktorandenseminar.lcia.normalize("test_normalization", normalization_epd)
+
+weighting_factors = np.full((31, 1), 2.0)
+study_doktorandenseminar.lcia.weight(
+    "test_weighting",
+    weighting_factors=weighting_factors,
+    normalization_method="test_normalization")
 
 toc = time.time()
 print('dynamic lca draft run in', round((toc - tic), 2), 'seconds')

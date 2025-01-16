@@ -37,10 +37,6 @@ class Lcia(object):
             self._calculate_normalization(self.result, categorization, method_name, reference_result,
                                       normalized_dataset_class)
 
-        for categorization in self.result:
-            self.normalized_results[method_name][categorization] = self.result[categorization] / reference_result
-
-            self.normalized_results[method_name][categorization] = normalized_dataset_class()
 
     def _calculate_normalization(self, result, categorization, method_name, reference_result, dataset_class_template):
         if type(result[categorization]) == type(self.dataset_template()):
@@ -58,7 +54,7 @@ class Lcia(object):
 
         if normalization_method and normalization_method in self.normalized_results:
             for categorization in self.normalized_results[normalization_method]:
-                self._calculate_weighting(self.normalized_results, categorization, method_name, weighting_factors,
+                self._calculate_weighting(self.normalized_results[normalization_method], categorization, method_name, weighting_factors,
                                           weighted_dataset_class_template)
         elif normalization_method:
             print(f"Given normalization method not in normalized results. "
@@ -106,5 +102,5 @@ class Lcia(object):
             self.weighted_results[method_name][categorization] = result[categorization] * weighting_factors
         else:
             self.weighted_results[method_name][categorization] = result[categorization].apply(
-                lambda dataset: dataset_class_template((weighting_factors * dataset).data)
+                lambda dataset: dataset_class_template((dataset * weighting_factors).data)
             )
