@@ -39,7 +39,7 @@ class En15804A2Dataset(EpdDataset):
     def __init__(self):
 
         super().__init__()
-        self.data = np.full((31, 18), 0.0)
+        self.data = np.full((len(self.environmental_indicators),len(self.life_cycle_stages)), 0.0)
         self.standard = "EN15804+A2"
 
     def load_lca_dataset(self, epd_id, epd_data_manager, source_key = None):

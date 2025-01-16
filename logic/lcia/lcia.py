@@ -29,6 +29,8 @@ class Lcia(object):
         self.input.load(filepath)
 
     def normalize(self, method_name, reference_result):
+        if isinstance(reference_result, dict):
+            reference_result = self._create_array_from_dict(reference_result)
 
         normalized_dataset_class = self.dataset_template().dimensionless_template("normalized_dataset_class", self.dataset_template)
         self.normalized_results[method_name] = {}
@@ -47,6 +49,8 @@ class Lcia(object):
 
 
     def weight(self, method_name, weighting_factors, normalization_method=None):
+        if isinstance(weighting_factors, dict):
+            weighting_factors = self._create_array_from_dict(weighting_factors)
 
         weighted_dataset_class_template = self.dataset_template().dimensionless_template("weighted_dataset_class",
                                                                                          self.dataset_template)
@@ -104,3 +108,13 @@ class Lcia(object):
             self.weighted_results[method_name][categorization] = result[categorization].apply(
                 lambda dataset: dataset_class_template((dataset * weighting_factors).data)
             )
+
+    def _create_array_from_dict(self, dict_to_be_converted):
+        temp_instance = self.dataset_template()
+        array = temp_instance.data[:, 1]
+        array = array[:, None]  # turn array from shape (x) to shape (x, 1)
+        for attribute_abbreviation in dict_to_be_converted:
+            index = temp_instance._get_index_indicator(attribute_abbreviation)
+            array[index] = dict_to_be_converted[attribute_abbreviation]
+        del temp_instance
+        return array

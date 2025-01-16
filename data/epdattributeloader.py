@@ -4,18 +4,31 @@ from logic.environmentalindicator import EnvironmentalIndicator
 from logic.lifecyclestage import LifeCycleStage
 
 class EpdAttributeLoader:
-    def __init__(self):
+    def __init__(self, environmental_indicators=None, life_cycle_stages=None, dataset_template=None):
         self.indicators_a1_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a1.json"
         self.indicators_a2_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a2.json"
         self.life_cycle_stages_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "life_cycle_stages_en_15978.json"
+        self.environmental_indicators_to_be_used = environmental_indicators
+        self.life_cycle_stages_to_be_used = life_cycle_stages
+        self.dataset_template = dataset_template
 
         self.indicators_a1 = []
         self.indicators_a2 = []
         self.indicators_a1_dimensionless = []
         self.indicators_a2_dimensionless = []
         self.life_cycle_stages = []
+
         self._load_indicators()
         self._load_stages()
+
+        if self.environmental_indicators_to_be_used and self.dataset_template:
+            self.dataset_template.environmental_indicators = self._customize_attributes(
+                self.environmental_indicators_to_be_used, self.dataset_template.environmental_indicators
+            )
+        if self.life_cycle_stages_to_be_used and self.dataset_template:
+            self.dataset_template.life_cycle_stages = self._customize_attributes(
+                self.life_cycle_stages_to_be_used, self.dataset_template.life_cycle_stages
+            )
 
     def _load_indicators(self):
         with open(self.indicators_a1_path) as a1, open(self.indicators_a2_path) as a2:
@@ -39,3 +52,11 @@ class EpdAttributeLoader:
         with open(self.life_cycle_stages_path) as lcs:
             lcs_data = json.load(lcs)['LifeCycleStages']
             self.life_cycle_stages = [LifeCycleStage(**stage) for stage in lcs_data]
+
+    @staticmethod
+    def _customize_attributes(attributes_to_be_used, attributes_to_be_customized):
+        custom_attributes = [
+            attribute for attribute in attributes_to_be_customized
+            if attribute.abbreviation in attributes_to_be_used
+        ]
+        return custom_attributes
