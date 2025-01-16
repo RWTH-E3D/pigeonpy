@@ -9,7 +9,7 @@ class Study(object):
         self.study_name = study_name
         self.observation_period = observation_period
         self.dataset_template = dataset_template
-        self.lcia = Lcia()
+        self.lcia = Lcia(dataset_template)
         self.epd_datamanager = EpdDataManager(dataset_template)
 
     def run_calculation(self, *categorizations):
