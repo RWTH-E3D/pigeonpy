@@ -1,10 +1,11 @@
+import time
 from study import Study
 from pathlib import Path
-from data.epddata.source.oekobaudatcsv import OekobaudatCsv
 from data.epddata.source.oekobaudatapi import OekobaudatAPI
 from logic.epddataset.en15804A2dataset import En15804A2Dataset
-import time
+
 import numpy as np # Löschen, wenn Gewichtungsfaktoren über Funktion erstellt werden
+
 
 tic = time.time()
 
@@ -19,9 +20,6 @@ study_doktorandenseminar = Study(
     dataset_template=standard_dataset
 )
 
-#Datenbank wird geladen und der Studie zugeordnet
-oekobaudatfilepath = Path.cwd()  / "data" / "input" / "inputdata" / "OBD_2024_I_2024-12-10T09_45_06.csv"
-oekobaudat = OekobaudatCsv("Ökobaudat", oekobaudatfilepath)
 
 oekobaudat_api = OekobaudatAPI("Ökobaudat API")
 
@@ -38,13 +36,31 @@ study_doktorandenseminar.run_calculation("building_type")
 normalization_epd = En15804A2Dataset()
 normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", study_doktorandenseminar.epd_datamanager)
 
-study_doktorandenseminar.lcia.normalize("test_normalization", normalization_epd)
+normalization_vector = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                  9220,0,0,0,
+                                  0.022,0,0,0,0,
+                                  31.7,0,0,0]]).transpose()
+
+study_doktorandenseminar.lcia.normalize("test_normalization", normalization_vector)
+
+weighting_factors = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                               0.33,0,0,0,
+                               0.33,0,0,0,0,
+                               0.34,0,0,0]]).transpose()
+
+study_doktorandenseminar.lcia.weight("weighting", weighting_factors, normalization_method = "test_normalization")
 
 weighting_factors = np.full((31, 1), 2.0)
 study_doktorandenseminar.lcia.weight(
     "test_weighting",
     weighting_factors=weighting_factors,
     normalization_method="test_normalization")
+
+print(study_doktorandenseminar.lcia.normalized_results["test_normalization"]["Total result"])
+print(study_doktorandenseminar.lcia.weighted_results["weighting"]["Total result"])
+print(study_doktorandenseminar.lcia.weighted_results["weighting"]["Total result"].get_sum("gwp-total", ["a1", "a2", "a3"]))
+print(study_doktorandenseminar.lcia.weighted_results["weighting"]["Total result"].get_sum("odp", ["a1", "a2", "a3"]))
+print(study_doktorandenseminar.lcia.weighted_results["weighting"]["Total result"].get_sum("pocp", ["a1", "a2", "a3"]))
 
 toc = time.time()
 print('dynamic lca draft run in', round((toc - tic), 2), 'seconds')
