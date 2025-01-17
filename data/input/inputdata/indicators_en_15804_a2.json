@@ -1,0 +1,190 @@
+{
+  "indicators_en_15804_a2": [
+    {
+      "abbreviation": "pere",
+      "name": "Renewable primary energy as energy carrier",
+      "unit": "MJ",
+      "description": "Use of renewable primary energy excluding renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "perm",
+      "name": "Renewable primary energy resources as material utilization",
+      "unit": "MJ",
+      "description": "Use of renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "pert",
+      "name": "Total use of renewable primary energy resources",
+      "unit": "MJ",
+      "description": "Total use of renewable primary energy resources; Input"
+    },
+    {
+      "abbreviation": "penre",
+      "name": "Non-renewable primary energy as energy carrier",
+      "unit": "MJ",
+      "description": "Use of non-renewable primary energy excluding non-renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "penrm",
+      "name": "Non-renewable primary energy as material utilization",
+      "unit": "MJ",
+      "description": "Use of non-renewable primary energy resources used as raw materials; Input"
+    },
+    {
+      "abbreviation": "penrt",
+      "name": "Total use of non-renewable primary energy resources",
+      "unit": "MJ",
+      "description": "Total use of non-renewable primary energy resources; Input"
+    },
+    {
+      "abbreviation": "sm",
+      "name": "Use of secondary material",
+      "unit": "kg",
+      "description": "Use of secondary material; Input"
+    },
+    {
+      "abbreviation": "rsf",
+      "name": "Use of renewable secondary fuels",
+      "unit": "MJ",
+      "description": "Use of renewable secondary fuels; Input"
+    },
+    {
+      "abbreviation": "nrsf",
+      "name": "Use of non renewable secondary fuels",
+      "unit": "MJ",
+      "description": "Use of non renewable secondary fuels; Input"
+    },
+    {
+      "abbreviation": "fw",
+      "name": "Use of net fresh water",
+      "unit": "m^3",
+      "description": "Use of net fresh water; Input"
+    },
+    {
+      "abbreviation": "hwd",
+      "name": "Hazardous waste disposed",
+      "unit": "kg",
+      "description": "Hazardous waste disposed; Output"
+    },
+    {
+      "abbreviation": "nhwd",
+      "name": "Non hazardous waste dispose",
+      "unit": "kg",
+      "description": "Non hazardous waste dispose; Output"
+    },
+    {
+      "abbreviation": "rwd",
+      "name": "Radioactive waste disposed",
+      "unit": "kg",
+      "description": "Radioactive waste disposed; Output"
+    },
+    {
+      "abbreviation": "cru",
+      "name": "Components for re-use",
+      "unit": "kg",
+      "description": "Components for re-use; Output"
+    },
+    {
+      "abbreviation": "mfr",
+      "name": "Materials for recycling",
+      "unit": "kg",
+      "description": "Materials for recycling; Output"
+    },
+    {
+      "abbreviation": "mer",
+      "name": "Materials for energy recovery",
+      "unit": "kg",
+      "description": "Materials for energy recovery; Output"
+    },
+    {
+      "abbreviation": "eee",
+      "name": "Exported electrical energy",
+      "unit": "MJ",
+      "description": "Exported electrical energy; Output"
+    },
+    {
+      "abbreviation": "eet",
+      "name": "Exported thermal energy",
+      "unit": "MJ",
+      "description": "Exported thermal energy; Output"
+    },
+    {
+      "abbreviation": "gwp-total",
+      "name": "Global Warming Potential total",
+      "unit": "kg CO2 eq.",
+      "description": "The total greenhouse gas emissions expressed as carbon dioxide equivalents"
+    },
+    {
+      "abbreviation": "gwp-fossil",
+      "name": "Global Warming Potential fossil fuels",
+      "unit": "kg CO2 eq.",
+      "description": "The greenhouse gas emissions expressed as carbon dioxide equivalents for fossil fuels and materials"
+    },
+    {
+      "abbreviation": "gwp-biogen",
+      "name": "Global Warming Potential biogenic",
+      "unit": "kg CO2 eq.",
+      "description": "The biogenic greenhouse gas emissions expressed as carbon dioxide equivalents"
+    },
+    {
+      "abbreviation": "gwp-luluc",
+      "name": "Global Warming Potential luluc",
+      "unit": "kg CO2 eq.",
+      "description": "The greenhouse gas emissions expressed as carbon dioxide equivalents for land use and land use change"
+    },
+    {
+      "abbreviation": "odp",
+      "name": "Ozone Depletion Potential",
+      "unit": "kg CFC-11 eq.",
+      "description": "The potential of a substance to cause the depletion of the ozone layer"
+    },
+    {
+      "abbreviation": "ap",
+      "name": "Acidification Potential",
+      "unit": "mol H+ eq.",
+      "description": "The potential of a substance to cause acidification of the environment"
+    },
+    {
+      "abbreviation": "ep-freshwater",
+      "name": "Eutrophication Potential - freshwater",
+      "unit": "kg P eq.",
+      "description": "The potential of a substance to cause over-fertilisation of freshwater"
+    },
+    {
+      "abbreviation": "ep-marine",
+      "name": "Eutrophication Potential - marine",
+      "unit": "kg N eq.",
+      "description": "The potential of a substance to cause over-fertilisation of salt water"
+    },
+    {
+      "abbreviation": "ep-terrestrial",
+      "name": "Eutrophication Potential - terrestrial",
+      "unit": "mol N eq.",
+      "description": "The potential of a substance to cause over-fertilisation of land (cumulative)"
+    },
+    {
+      "abbreviation": "pocp",
+      "name": "Photochemical Ozone Creation Potential",
+      "unit": "kg NMVOC eq.",
+      "description": "The potential of a substance to contribute to the formation of ground-level ozone"
+    },
+    {
+      "abbreviation": "adpe",
+      "name": "Abiotic Depletion Potential for non fossil resources",
+      "unit": "kg Sb eq.",
+      "description": "The potential of a substance to cause depletion of abiotic resources (minerals and metals)"
+    },
+    {
+      "abbreviation": "adpf",
+      "name": "Abiotic Depletion Potential for fossil resources",
+      "unit": "MJ",
+      "description": "The potential of a substance to cause depletion of abiotic resources (fossil fuels)"
+    },
+    {
+      "abbreviation": "wdp",
+      "name": "Water Deprivation Potential",
+      "unit": "m^3 world eq. deprived",
+      "description": "The water deprivation potential (user) with a deprivation-weighted water consumption"
+    }
+  ]
+}
