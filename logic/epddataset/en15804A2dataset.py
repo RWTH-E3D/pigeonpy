@@ -57,7 +57,7 @@ class En15804A2Dataset(EpdDataset):
         """
         epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source_key)
 
-    def dimensionless_template(self, name, dataset_template):
+    def dimensionless_template(name, dataset_template):
         """Method to create a template for a dataset class with dimensionless environmental indicators inheriting from
         this class. The created template is used for normalization or weighting methods that result in dimensionless
         data due to their calculation
@@ -85,7 +85,7 @@ class En15804A2Dataset(EpdDataset):
             self.standard = "EN15804+A2" + f"_{name}"
 
         updated_class_dict.update({
-            'environmental_indicators': self.epd_attribute_loader.indicators_a2_dimensionless,
+            'environmental_indicators': dataset_template.epd_attribute_loader.indicators_a2_dimensionless,
             '__init__': __init__
             }
         )

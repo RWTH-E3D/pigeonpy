@@ -32,7 +32,7 @@ class Lcia(object):
         if isinstance(reference_result, dict):
             reference_result = self._create_array_from_dict(reference_result)
 
-        normalized_dataset_class = self.dataset_template().dimensionless_template("normalized_dataset_class", self.dataset_template)
+        normalized_dataset_class = self.dataset_template.dimensionless_template("normalized_dataset_class", self.dataset_template)
         self.normalized_results[method_name] = {}
 
         for categorization in self.result:
@@ -52,7 +52,7 @@ class Lcia(object):
         if isinstance(weighting_factors, dict):
             weighting_factors = self._create_array_from_dict(weighting_factors)
 
-        weighted_dataset_class_template = self.dataset_template().dimensionless_template("weighted_dataset_class",
+        weighted_dataset_class_template = self.dataset_template.dimensionless_template("weighted_dataset_class",
                                                                                          self.dataset_template)
         self.weighted_results[method_name] = {}
 
