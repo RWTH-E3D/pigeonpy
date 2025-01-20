@@ -36,17 +36,12 @@ class Lcia(object):
         self.normalized_results[method_name] = {}
 
         for categorization in self.result:
-            self._calculate_normalization(self.result, categorization, method_name, reference_result,
-                                      normalized_dataset_class)
-
-
-    def _calculate_normalization(self, result, categorization, method_name, reference_result, dataset_class_template):
-        if type(result[categorization]) == self.dataset_template:
-            self.normalized_results[method_name][categorization] = dataset_class_template((self.result[categorization] / reference_result).data)
-        else: #todo: series abfragen
-            self.normalized_results[method_name][categorization] = result[categorization].apply(
-                lambda dataset: dataset_class_template((dataset / reference_result).data))
-
+            if type(self.result[categorization]) == self.dataset_template:
+                self.normalized_results[method_name][categorization] = normalized_dataset_class(
+                    (self.result[categorization] / reference_result).data)
+            else:  # todo: series abfragen
+                self.normalized_results[method_name][categorization] = self.result[categorization].apply(
+                    lambda dataset: normalized_dataset_class((dataset / reference_result).data))
 
     def weight(self, method_name, weighting_factors, normalization_method=None):
         if isinstance(weighting_factors, dict):
