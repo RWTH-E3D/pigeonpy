@@ -6,7 +6,7 @@ from logic.epddataset.en15804A2dataset import En15804A2Dataset
 
 import numpy as np # Löschen, wenn Gewichtungsfaktoren über Funktion erstellt werden
 import pandas as pd
-import matplotlib.pyplot as plt
+
 
 
 tic = time.time()
@@ -53,41 +53,19 @@ normalization_factors = {
 example_study.lcia.normalize("test_normalization", normalization_factors)
 
 # Weighting
-weighting_factors = {
-    "gwp-total": 0.33,
-    "odp": 0.33,
-    "pocp": 0.34
-}
-example_study.lcia.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
-
-
-#print(example_study.lcia.normalized_results["test_normalization"]["building_type"]["type 1"])
-print(example_study.lcia.normalized_results["test_normalization"]["Total result"])
-print(example_study.lcia.normalized_results["test_normalization"]["building_type"]["type 1"])
-
-print(type(example_study.lcia.normalized_results["test_normalization"]["Total result"]))
-print(type(example_study.lcia.normalized_results["test_normalization"]["building_type"]["type 1"]))
-
-print(example_study.lcia.normalized_results["test_normalization"]["building_type"]["type 1"].data[0][1])
-
-
-# weighted results prints
-#print(example_study.lcia.weighted_results["weighting"]["Total result"])
-#print(example_study.lcia.weighted_results["weighting"]["Total result"].get_sum("gwp-total", ["a1", "a2", "a3"]))
-#print(example_study.lcia.weighted_results["weighting"]["Total result"].get_sum("odp", ["a1", "a2", "a3"]))
-#print(example_study.lcia.weighted_results["weighting"]["Total result"].get_sum("pocp", ["a1", "a2", "a3"]))
-
-# weighted results of building types prints
-#print('example_study.lcia.weighted_results["weighting"]["building_type"]["type 1"]: ', example_study.lcia.weighted_results["weighting"]["building_type"]["type 1"])
-
-
+#weighting_factors = {
+#    "gwp-total": 0.33,
+#    "odp": 0.33,
+#    "pocp": 0.34
+#}
+#example_study.lcia.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
 
 # Visualisation
 #data = example_study.lcia.weighted_results["weighting"]["Total result"]    #["a1_a3"]
 data = example_study.lcia.normalized_results["test_normalization"]["building_type"]["type 1"].data[0][1]
 #data = pd.DataFrame(data)
 
-
+"""
 
 # set figure size
 plt.figure(figsize=(20,10))
@@ -144,11 +122,16 @@ plt.show()
 
 
 
-
+"""
 
 
 toc = time.time()
 print('dynamic lca draft run in', round((toc - tic), 2), 'seconds')
+print(example_study.lcia.result["Total result"])
+print(example_study.lcia.normalized_results["test_normalization"]["Total result"])
+print(example_study.lcia.normalized_results["test_normalization"]["building_type"]["type 1"])
+
+
 
 
 

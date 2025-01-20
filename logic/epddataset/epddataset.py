@@ -33,6 +33,7 @@ class EpdDataset(object):
     """
     environmental_indicators = None
     life_cycle_stages = None
+    standard = None
     epd_attribute_loader = EpdAttributeLoader()
 
     def __init__(self):

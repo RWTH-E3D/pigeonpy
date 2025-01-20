@@ -32,7 +32,7 @@ class Lcia(object):
         if isinstance(reference_result, dict):
             reference_result = self._create_array_from_dict(reference_result)
 
-        normalized_dataset_class = self.dataset_template.dimensionless_template("normalized_dataset_class", self.dataset_template)
+        normalized_dataset_class = self.dataset_template.dimensionless_template("normalized_dataset_class")
         self.normalized_results[method_name] = {}
 
         for categorization in self.result:
@@ -41,9 +41,9 @@ class Lcia(object):
 
 
     def _calculate_normalization(self, result, categorization, method_name, reference_result, dataset_class_template):
-        if type(result[categorization]) == type(self.dataset_template()):
-            self.normalized_results[method_name][categorization] = self.result[categorization] / reference_result
-        else:
+        if type(result[categorization]) == self.dataset_template:
+            self.normalized_results[method_name][categorization] = dataset_class_template((self.result[categorization] / reference_result).data)
+        else: #todo: series abfragen
             self.normalized_results[method_name][categorization] = result[categorization].apply(
                 lambda dataset: dataset_class_template((dataset / reference_result).data))
 
@@ -102,7 +102,8 @@ class Lcia(object):
         self.result["Total result"] = self.result["Individual EPD"].sum()
 
     def _calculate_weighting(self, result, categorization, method_name, weighting_factors, dataset_class_template):
-        if type(result[categorization]) == type(self.dataset_template()):
+        if type(result[categorization]) == self.dataset_template:
+            #todo: update in the same way as in calculate normalization?
             self.weighted_results[method_name][categorization] = result[categorization] * weighting_factors
         else:
             self.weighted_results[method_name][categorization] = result[categorization].apply(
