@@ -35,12 +35,12 @@ class En15804A2Dataset(EpdDataset):
     """
     environmental_indicators = EpdDataset.epd_attribute_loader.indicators_a2
     life_cycle_stages = EpdDataset.epd_attribute_loader.life_cycle_stages
+    standard = "EN15804+A2"
 
     def __init__(self):
 
         super().__init__()
         self.data = np.full((len(self.environmental_indicators),len(self.life_cycle_stages)), 0.0)
-        self.standard = "EN15804+A2"
 
     def load_lca_dataset(self, epd_id, epd_data_manager, source_key = None):
         """Method that calls the functions to load a dataset from the file binding into the instance dependent
