@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from data.epdattributeloader import EpdAttributeLoader
 import data.output.lca_data_output as lca_data_output
 
@@ -33,6 +34,7 @@ class EpdDataset(object):
     """
     environmental_indicators = None
     life_cycle_stages = None
+    standard = None
     epd_attribute_loader = EpdAttributeLoader()
 
     def __init__(self):
@@ -41,7 +43,6 @@ class EpdDataset(object):
         self.ref_flow_value = None
         self.ref_flow_unit = None
 
-        self.standard = None
         self.data = None
         self.history = History()
 
@@ -312,6 +313,58 @@ class EpdDataset(object):
             print(f"Values < column or row labels. Data matrix of dataset may be empty.")
         return ' ' * (digits - len(str(num))) + str(num)
 
+    @classmethod
+    def dimensionless_template(cls, name):
+        """Method to create a template for a dataset class with dimensionless environmental indicators inheriting from
+        this class. The created template is used for normalization or weighting methods that result in dimensionless
+        data due to their calculation
+
+        Parameters
+        ----------
+        name : str
+            Specifies the name for the newly created class
+        dataset_template : En15804A2Dataset
+            Serves as template and parent for the newly created class
+
+        Returns
+        ----------
+        dimensionless_dataset_template : type
+            Template to create new classes based on En15804A2Datasets that don't have a unit for the environmental
+            indicators and take a data_array as argument in its constructor
+
+        """
+        #Todo: check, if it is possible to add "data" as an optional parameter to the init of "EpdDataset".
+        # Advantage: no new "init" funciton is neccesary
+
+        #Todo: add function to convert class into specific units (like Euro for monetary Weighting)
+
+        #Todo: check if evry mutable object is copied in a usefull way (like environmetal indicators) with a deepcopy
+
+
+        updated_class_dict = cls.__dict__.copy()
+
+        updated_class_dict["environmental_indicators"] = copy.deepcopy(updated_class_dict["environmental_indicators"])
+
+        for ei in updated_class_dict["environmental_indicators"]:
+            ei.abbreviation = f"{ei.abbreviation}_dimensionless",
+            ei.name = f"{ei.name} dimensionless",
+            ei.unit = "-",
+            ei.description = f"Original description:\n {ei.description}. This Datasets is dimensionless due to the following method: {name}"
+
+        updated_class_dict["standard"] = f"{cls.standard}_{name}"
+        def __init__(self, data_array=None):
+            EpdDataset.__init__(self)
+            # todo: difference between "super" and "EpdDataset.__init__(self)" which one is the right one? :)
+            #super(cls, self).__init__
+            self.data = data_array
+
+        updated_class_dict["__init__"] = __init__
+
+        dimensionless_dataset_template = type(
+            name, (cls,), updated_class_dict
+        )
+        return dimensionless_dataset_template
+
 
 class History:
     def __init__(self):
@@ -339,3 +392,5 @@ class History:
 
     def get_history(self):
         return self.entries
+
+

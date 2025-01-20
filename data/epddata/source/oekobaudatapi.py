@@ -83,6 +83,15 @@ class OekobaudatAPI(ApiEpdSource):
         }
     }
 
+    lcia_name_allocations = {
+        "a7ea142a-9749-11ed-a8fc-0242ac120002": {
+            "Climate change": "gwp-total",
+            "Climate change-Fossil": "gwp-fossil",
+            "Climate change-Biogenic": "gwp-biogen",
+            "Climate change-Land use and land use change": "gwp-luluc"
+        }
+    }
+
     # "Additional environmental impact indicators" with high uncertainties (Ökobaudat Manual)
     not_included_indicators = {
         "b5c602c6-def3-11e6-bf01-fe55135034f3": "pm",
@@ -185,6 +194,12 @@ class OekobaudatAPI(ApiEpdSource):
                 continue
 
             element_name = uuid_allocations.get(element_uuid, "unknown indicator")
+            if element_name == "unknown indicator":
+                allocation = self.lcia_name_allocations.get(element_uuid)
+                if allocation:
+                    short_description = element.find(".//common:shortDescription[@xml:lang='en']", ns).text
+                    element_name = element_name = allocation.get(short_description, element_name)
+
             element_data = indicator_data.setdefault(element_name, {})
 
             for amount in element.findall(".//epd:amount", ns):
@@ -309,3 +324,8 @@ class OekobaudatAPI(ApiEpdSource):
         })
 
         return data_set, data_set.getroot(), namespaces
+
+    def check_unknown_indicators_in_fetched_datasets(self):
+        for loaded_dataset_uuid in self._fetched_datasets:
+            if "unknown indicator" in self._fetched_datasets[loaded_dataset_uuid]:
+                print(f"Unknown indicator found for dataset with uuid: {loaded_dataset_uuid}")
