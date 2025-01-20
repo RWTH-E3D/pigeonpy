@@ -1,6 +1,7 @@
 import pandas as pd
 from logic.lcia.calculator import Calculator
 from logic.lcia.calculationinput import CalculationInput
+from pandas import Series
 
 
 class Lcia(object):
@@ -32,16 +33,19 @@ class Lcia(object):
         if isinstance(reference_result, dict):
             reference_result = self._create_array_from_dict(reference_result)
 
-        normalized_dataset_class = self.dataset_template.dimensionless_template("normalized_dataset_class")
+        normalized_dataset_class = self.dataset_template.dimensionless_template(f"NormalizedDataset{method_name}")
+
         self.normalized_results[method_name] = {}
 
-        for categorization in self.result:
-            if type(self.result[categorization]) == self.dataset_template:
-                self.normalized_results[method_name][categorization] = normalized_dataset_class(
-                    (self.result[categorization] / reference_result).data)
-            else:  # todo: series abfragen
-                self.normalized_results[method_name][categorization] = self.result[categorization].apply(
-                    lambda dataset: normalized_dataset_class((dataset / reference_result).data))
+        normalize_dataset = lambda dataset: normalized_dataset_class((dataset / reference_result).data)
+
+        for categorization, value in self.result.items():
+            if isinstance(value, Series):
+                norm_result = value.apply(normalize_dataset)
+            elif isinstance(value, self.dataset_template)
+                norm_result = normalize_dataset(value)
+
+            self.normalized_results[method_name][categorization] = norm_result
 
     def weight(self, method_name, weighting_factors, normalization_method=None):
         if isinstance(weighting_factors, dict):
