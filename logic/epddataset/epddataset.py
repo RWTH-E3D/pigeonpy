@@ -42,7 +42,6 @@ class EpdDataset(object):
         self.ref_flow_value = None
         self.ref_flow_unit = None
 
-        self.standard = None
         self.data = None
         self.history = History()
 
