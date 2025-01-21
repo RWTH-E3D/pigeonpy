@@ -42,7 +42,7 @@ class Lcia(object):
         for categorization, value in self.result.items():
             if isinstance(value, Series):
                 norm_result = value.apply(normalize_dataset)
-            elif isinstance(value, self.dataset_template)
+            elif isinstance(value, self.dataset_template):
                 norm_result = normalize_dataset(value)
 
             self.normalized_results[method_name][categorization] = norm_result
