@@ -44,6 +44,8 @@ class Lcia(object):
                 norm_result = value.apply(normalize_dataset)
             elif isinstance(value, self.dataset_template):
                 norm_result = normalize_dataset(value)
+            else:
+                norm_result = None
 
             self.normalized_results[method_name][categorization] = norm_result
 
@@ -51,21 +53,22 @@ class Lcia(object):
         if isinstance(weighting_factors, dict):
             weighting_factors = self._create_array_from_dict(weighting_factors)
 
-        weighted_dataset_class_template = self.dataset_template.dimensionless_template("weighted_dataset_class",
-                                                                                         self.dataset_template)
+        weighted_dataset_class = self.dataset_template.dimensionless_template(f"WeightedDataset_{method_name}")
+
         self.weighted_results[method_name] = {}
 
         if normalization_method and normalization_method in self.normalized_results:
-            for categorization in self.normalized_results[normalization_method]:
-                self._calculate_weighting(self.normalized_results[normalization_method], categorization, method_name, weighting_factors,
-                                          weighted_dataset_class_template)
+            self._calculate_weighting(
+                self.normalized_results[normalization_method],
+                method_name, weighting_factors, weighted_dataset_class
+            )
         elif normalization_method:
-            print(f"Given normalization method not in normalized results. "
-                  f"No weighting with given method {normalization_method} possible.")
+            print(f"Method '{normalization_method}' not in normalized results. No weighting possible.")
         else:
-            for categorization in self.result:
-                self._calculate_weighting(self.result, categorization, method_name, weighting_factors,
-                                          weighted_dataset_class_template)
+            self._calculate_weighting(
+                self.result,
+                method_name, weighting_factors, weighted_dataset_class
+            )
 
     def _initialize_calculator(self):
 
@@ -100,21 +103,27 @@ class Lcia(object):
     def _calculate_total_result(self):
         self.result["Total result"] = self.result["Individual EPD"].sum()
 
-    def _calculate_weighting(self, result, categorization, method_name, weighting_factors, dataset_class_template):
-        if type(result[categorization]) == self.dataset_template:
-            #todo: update in the same way as in calculate normalization?
-            self.weighted_results[method_name][categorization] = result[categorization] * weighting_factors
-        else:
-            self.weighted_results[method_name][categorization] = result[categorization].apply(
-                lambda dataset: dataset_class_template((dataset * weighting_factors).data)
-            )
+    def _calculate_weighting(self, result, method_name, weighting_factors, weighted_dataset_class):
+        """Method to eliminate duplication"""
+        weight_dataset = lambda dataset: weighted_dataset_class((dataset * weighting_factors).data)
+
+        for categorization, value in result.items():
+            if isinstance(value, Series):
+                weighted_result = value.apply(weight_dataset)
+            elif isinstance(value, self.dataset_template):
+                weighted_result = weight_dataset(value)
+            else:
+                weighted_result = None
+            self.weighted_results[method_name][categorization] = weighted_result
 
     def _create_array_from_dict(self, dict_to_be_converted):
+        """Converts a dictionary mapping the normalization or weighting factors to their associated indicator into
+        a numpy array with the factors being in the correct index based on the dataset array."""
         temp_instance = self.dataset_template()
-        array = temp_instance.data[:, 1]
-        array = array[:, None]  # turn array from shape (x) to shape (x, 1)
-        for attribute_abbreviation in dict_to_be_converted:
-            index = temp_instance._get_index_indicator(attribute_abbreviation)
-            array[index] = dict_to_be_converted[attribute_abbreviation]
-        del temp_instance
+        array = temp_instance.data[:, 1][:, None]  # Turn array from shape (x) to shape (x, 1)
+
+        for abbreviation, value in dict_to_be_converted.items():
+            index = temp_instance._get_index_indicator(abbreviation)
+            array[index] = value
+
         return array

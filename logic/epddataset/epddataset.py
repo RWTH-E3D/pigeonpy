@@ -323,13 +323,11 @@ class EpdDataset(object):
         ----------
         name : str
             Specifies the name for the newly created class
-        dataset_template : En15804A2Dataset
-            Serves as template and parent for the newly created class
 
         Returns
         ----------
         dimensionless_dataset_template : type
-            Template to create new classes based on En15804A2Datasets that don't have a unit for the environmental
+            Template to create new classes based on cls that have a custom unit for the environmental
             indicators and take a data_array as argument in its constructor
 
         """
@@ -346,9 +344,9 @@ class EpdDataset(object):
         updated_class_dict["environmental_indicators"] = copy.deepcopy(updated_class_dict["environmental_indicators"])
 
         for ei in updated_class_dict["environmental_indicators"]:
-            ei.abbreviation = f"{ei.abbreviation}_dimensionless",
-            ei.name = f"{ei.name} dimensionless",
-            ei.unit = "-",
+            ei.abbreviation = f"{ei.abbreviation}_dimensionless"
+            ei.name = f"{ei.name} dimensionless"
+            ei.unit = "-"
             ei.description = f"Original description:\n {ei.description}. This Datasets is dimensionless due to the following method: {name}"
 
         updated_class_dict["standard"] = f"{cls.standard}_{name}"
