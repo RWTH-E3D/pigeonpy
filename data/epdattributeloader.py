@@ -14,8 +14,6 @@ class EpdAttributeLoader:
 
         self.indicators_a1 = []
         self.indicators_a2 = []
-        self.indicators_a1_dimensionless = []
-        self.indicators_a2_dimensionless = []
         self.life_cycle_stages = []
 
         self._load_indicators()
@@ -35,18 +33,12 @@ class EpdAttributeLoader:
             a1_data = json.load(a1)['indicators_en_15804_a1']
             a2_data = json.load(a2)['indicators_en_15804_a2']
 
-            def process_indicators(data, indicators_list, dimensionless_list):
+            def process_indicators(data, indicators_list):
                 for indicator in data:
                     indicators_list.append(EnvironmentalIndicator(**indicator))
-                    dimensionless_list.append(EnvironmentalIndicator(
-                        abbreviation=indicator["abbreviation"],
-                        name=indicator["name"],
-                        unit="-",
-                        description=indicator["description"]
-                    ))
 
-            process_indicators(a1_data, self.indicators_a1, self.indicators_a1_dimensionless)
-            process_indicators(a2_data, self.indicators_a2, self.indicators_a2_dimensionless)
+            process_indicators(a1_data, self.indicators_a1)
+            process_indicators(a2_data, self.indicators_a2)
 
     def _load_stages(self):
         with open(self.life_cycle_stages_path) as lcs:
