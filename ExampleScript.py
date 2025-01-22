@@ -1,13 +1,8 @@
 import time
-from study import Study
+from study.study import Study
 from pathlib import Path
 from data.epddata.source.oekobaudatapi import OekobaudatAPI
-from logic.epddataset.en15804A2dataset import En15804A2Dataset
-
-import numpy as np # Löschen, wenn Gewichtungsfaktoren über Funktion erstellt werden
-import pandas as pd
-
-
+from epd.epddataset.en15804A2dataset import En15804A2Dataset
 
 tic = time.time()
 

@@ -1,7 +1,7 @@
 from data.epddata.epddatamanager import EpdDataManager
 from data.epdattributeloader import EpdAttributeLoader
-from logic.lcia.lcia import Lcia
-from logic.epddataset.en15804A2dataset import En15804A2Dataset
+from study.lcia.lcia import Lcia
+from epd.epddataset.en15804A2dataset import En15804A2Dataset
 
 
 class Study(object):

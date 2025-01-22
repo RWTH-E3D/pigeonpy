@@ -1,6 +1,5 @@
-import pandas as pd
-from logic.lcia.calculator import Calculator
-from logic.lcia.calculationinput import CalculationInput
+from study.lcia.calculator import Calculator
+from study.lcia.calculationinput import CalculationInput
 from pandas import Series
 
 

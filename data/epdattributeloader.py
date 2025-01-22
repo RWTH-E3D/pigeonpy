@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
-from logic.environmentalindicator import EnvironmentalIndicator
-from logic.lifecyclestage import LifeCycleStage
+from epd.environmentalindicator import EnvironmentalIndicator
+from epd.lifecyclestage import LifeCycleStage
 
 class EpdAttributeLoader:
     def __init__(self, environmental_indicators=None, life_cycle_stages=None, dataset_template=None):
