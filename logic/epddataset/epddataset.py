@@ -39,13 +39,13 @@ class EpdDataset(object):
     standard = None
     epd_attribute_loader = EpdAttributeLoader()
 
-    def __init__(self):
+    def __init__(self, data=None, name=None):
         self.epd_data_id = None
-        self.name = None
+        self.name = name
         self.ref_flow_value = None
         self.ref_flow_unit = None
 
-        self.data = None
+        self.data = data
         self.history = History()
 
     def __str__(self):
@@ -315,7 +315,7 @@ class EpdDataset(object):
         return ' ' * (digits - len(str(num))) + str(num)
 
     @classmethod
-    def dimensionless_template(cls, name):
+    def dimensionless_template(cls, name, resulting_unit):
         """Method to create a template for a dataset class with dimensionless environmental indicators inheriting from
         this class. The created template is used for normalization or weighting methods that result in dimensionless
         data due to their calculation
@@ -324,6 +324,8 @@ class EpdDataset(object):
         ----------
         name : str
             Specifies the name for the newly created class
+        resulting_unit : str
+            Declared unit for the environmental indicators
 
         Returns
         ----------
@@ -332,32 +334,22 @@ class EpdDataset(object):
             indicators and take a data_array as argument in its constructor
 
         """
-        #Todo: check, if it is possible to add "data" as an optional parameter to the init of "EpdDataset".
-        # Advantage: no new "init" funciton is neccesary
 
-        #Todo: add function to convert class into specific units (like Euro for monetary Weighting)
+        updated_class_dict = EpdDataset.__dict__.copy()
 
-        #Todo: check if evry mutable object is copied in a usefull way (like environmetal indicators) with a deepcopy
+        updated_class_dict["environmental_indicators"] = copy.deepcopy(cls.environmental_indicators)
+        updated_class_dict["life_cycle_stages"] = copy.deepcopy(cls.life_cycle_stages)
 
-
-        updated_class_dict = cls.__dict__.copy()
-
-        updated_class_dict["environmental_indicators"] = copy.deepcopy(updated_class_dict["environmental_indicators"])
-
+        # Todo: Normalizing with a unit like m^2 would lead to the unit being only m^2 while it should be
+        #  "indicator unit / m^2"
         for ei in updated_class_dict["environmental_indicators"]:
             ei.abbreviation = f"{ei.abbreviation}_dimensionless"
             ei.name = f"{ei.name} dimensionless"
-            ei.unit = "-"
-            ei.description = f"Original description:\n {ei.description}. This Datasets is dimensionless due to the following method: {name}"
+            ei.unit = resulting_unit
+            ei.description = (f"Original description:\n {ei.description}. "
+                              f"This Datasets is dimensionless due to the following method: {name}")
 
         updated_class_dict["standard"] = f"{cls.standard}_{name}"
-        def __init__(self, data_array=None):
-            EpdDataset.__init__(self)
-            # todo: difference between "super" and "EpdDataset.__init__(self)" which one is the right one? :)
-            #super(cls, self).__init__
-            self.data = data_array
-
-        updated_class_dict["__init__"] = __init__
 
         dimensionless_dataset_template = type(
             name, (cls,), updated_class_dict

@@ -29,15 +29,20 @@ class Lcia(object):
         self.input = CalculationInput()
         self.input.load(filepath)
 
-    def normalize(self, method_name, reference_result):
+    def normalize(self, method_name, reference_result, resulting_unit='-'):
         if isinstance(reference_result, dict):
             reference_result = self._create_array_from_dict(reference_result)
 
-        normalized_dataset_class = self.dataset_template.dimensionless_template(f"NormalizedDataset{method_name}")
+        normalized_dataset_class = self.dataset_template.dimensionless_template(
+            f"NormalizedDataset_{method_name}", resulting_unit
+        )
 
         self.normalized_results[method_name] = {}
 
-        normalize_dataset = lambda dataset: normalized_dataset_class((dataset / reference_result).data)
+        normalize_dataset = lambda dataset: normalized_dataset_class(
+            data = (dataset / reference_result).data,
+            name = dataset.name + "_normalized"
+        )
 
         for categorization, value in self.result.items():
             if isinstance(value, Series):
@@ -49,11 +54,13 @@ class Lcia(object):
 
             self.normalized_results[method_name][categorization] = norm_result
 
-    def weight(self, method_name, weighting_factors, normalization_method=None):
+    def weight(self, method_name, weighting_factors, normalization_method=None, resulting_unit='-'):
         if isinstance(weighting_factors, dict):
             weighting_factors = self._create_array_from_dict(weighting_factors)
 
-        weighted_dataset_class = self.dataset_template.dimensionless_template(f"WeightedDataset_{method_name}")
+        weighted_dataset_class = self.dataset_template.dimensionless_template(
+            f"WeightedDataset_{method_name}", resulting_unit
+        )
 
         self.weighted_results[method_name] = {}
 
@@ -102,10 +109,14 @@ class Lcia(object):
 
     def _calculate_total_result(self):
         self.result["Total result"] = self.result["Individual EPD"].sum()
+        self.result["Total result"].name = "Total result"
 
     def _calculate_weighting(self, result, method_name, weighting_factors, weighted_dataset_class):
         """Method to eliminate duplication"""
-        weight_dataset = lambda dataset: weighted_dataset_class((dataset * weighting_factors).data)
+        weight_dataset = lambda dataset: weighted_dataset_class(
+            data = (dataset * weighting_factors).data,
+            name = dataset.name + "_weighted"
+        )
 
         for categorization, value in result.items():
             if isinstance(value, Series):
