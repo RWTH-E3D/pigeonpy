@@ -15,6 +15,10 @@ class EpdDataset(object):
         Empty list for environmental indicators
     life_cycle_stages : list
         Empty list for life cycle stages
+    standard : str
+        The standard associated with a dataset
+    epd_attribute_loader : EpdAttributeLoader
+        Responsible for loading the environmental indicators and life cycle stages
 
     Attributes
     ----------
@@ -26,8 +30,6 @@ class EpdDataset(object):
         Value of the reference flow
     ref_flow_unit : -
         Unit of the reference flow
-    used_standard : -
-        Information about the used standard
     data : -
         matrix to hold the numerical values of a dataset
 
@@ -172,7 +174,6 @@ class EpdDataset(object):
         np.seterr(divide='raise')
         try:
             if isinstance(other, self.__class__):
-                #Todo: check if
                 new_data = np.divide(self.data, other.data, out=np.zeros_like(self.data), where=other.data != 0.0)
 
                 new_history = History()

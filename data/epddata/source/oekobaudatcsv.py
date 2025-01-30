@@ -192,7 +192,7 @@ class OekobaudatCsv(FileEpdSource):
         dataset_template : EpdDataset
             Class alias of the dataset class to load EPD data into.
         """
-        self.dataset_template = dataset_template()
+        self.dataset_template = dataset_template
         if self.dataset_template.standard == "EN15804+A1":
             lca_data_bind_pd = self._load_en15804a1()
         elif self.dataset_template.standard == "EN15804+A2":
