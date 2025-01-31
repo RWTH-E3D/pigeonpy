@@ -15,6 +15,8 @@ class En15804A2Dataset(EpdDataset):
         A list containing the life cycle stages as instances of the LifeCycleStage class
     stages_and_indicators_loaded : boolean
         States whether the indicators and stages are already loaded, changes the first time the class is loaded to True
+    standard : str
+        Information about the used standard
 
     Attributes
     ----------
@@ -26,8 +28,6 @@ class En15804A2Dataset(EpdDataset):
         Value of the reference flow
     ref_flow_unit : str
         Unit of the reference flow
-    standard : str
-        Information about the used standard
     data : ndarray
         Numpy array containing the values for the environmental indicators in the order given by the json files
         for the life cycle stages and indicators

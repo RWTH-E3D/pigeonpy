@@ -130,9 +130,6 @@ class OekobaudatAPI(ApiEpdSource):
             UUID associated to the epd dataset to be loaded
 
         """
-        if epd_id in self._fetched_datasets:
-            self.load_dataset_from_cache(epd_dataset, epd_id)
-            return
 
         xml_data = self._single_dataset_request(epd_id)
 
@@ -158,8 +155,6 @@ class OekobaudatAPI(ApiEpdSource):
 
         self._set_metadata(epd_dataset, epd_id, process_dataset=process_dataset, ns=ns)
         self._populate_data_array(epd_dataset, epd_data)
-
-        self._fetched_datasets[epd_id] = {"name": epd_dataset.name, "data": epd_data}
 
     def _extract_indicator_data(self, process_dataset, ns, xml_base_path, uuid_allocations):
         """Extracts either the "Exchanges" or "LCIAResults" values for the environmental indicators and their life
@@ -198,7 +193,7 @@ class OekobaudatAPI(ApiEpdSource):
                 allocation = self.lcia_name_allocations.get(element_uuid)
                 if allocation:
                     short_description = element.find(".//common:shortDescription[@xml:lang='en']", ns).text
-                    element_name = element_name = allocation.get(short_description, element_name)
+                    element_name = allocation.get(short_description, element_name)
 
             element_data = indicator_data.setdefault(element_name, {})
 
@@ -222,12 +217,6 @@ class OekobaudatAPI(ApiEpdSource):
         """
         return True
 
-    def load_dataset_from_cache(self, epd_dataset, epd_id):
-        """Calls methods to set the metadata and indicator data for an epd dataset by utilizing a previously fetched
-        dataset cached in the _fetched_datasets attribute identified by the epd_id/ UUID of the EPD"""
-        self._set_metadata(epd_dataset, epd_id, name=self._fetched_datasets[epd_id].get("name"))
-        self._populate_data_array(epd_dataset, self._fetched_datasets[epd_id].get("data"))
-
     def _single_dataset_request(self, epd_id):
         """Method to perform a single GET request to the dataset endpoint of the API with a given epd_id/ UUID"""
         try:
@@ -243,7 +232,7 @@ class OekobaudatAPI(ApiEpdSource):
 
     def _check_compliance(self, dataset, ns) -> bool:
         """Checks the compliance UUIDs in the XML file of the epd for compliance with the defined standard in the class
-        instance and the associated compliance UUIDs"""
+        instance and the associated compliance UUIDs (see attributes)"""
         compliance_declarations = dataset.findall(".//{*}referenceToComplianceSystem", namespaces=ns)
         for entry in compliance_declarations:
             compliance = entry.get("refObjectId")
@@ -326,6 +315,10 @@ class OekobaudatAPI(ApiEpdSource):
         return data_set, data_set.getroot(), namespaces
 
     def check_unknown_indicators_in_fetched_datasets(self):
+        """
+        Only for testing: Check the fetched datasets for any indicators that could not be allocated with the allocations
+        present in the indicator allocations (see attributes)
+        """
         for loaded_dataset_uuid in self._fetched_datasets:
             if "unknown indicator" in self._fetched_datasets[loaded_dataset_uuid]:
                 print(f"Unknown indicator found for dataset with uuid: {loaded_dataset_uuid}")
