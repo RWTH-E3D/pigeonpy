@@ -19,7 +19,7 @@ class Calculator(object):
     def __init__(self, calculation_input):
         self.calc_in = calculation_input
 
-    def calculate(self, *categorizations, epd_datamanager, observation_period):
+    def calculate(self, *partitions, epd_datamanager, observation_period):
         """Method for category based calculation of datasets
 
         Loads the datasets based on the UUIDs, multiplies them with the value defined in the input csv and sums up
@@ -27,7 +27,7 @@ class Calculator(object):
 
         Parameters
         ----------
-        *categorizations: str
+        *partitions: str
             The category name(s) as strings according to which the calculation will be made
         epd_datamanager: EpdDatamanager
             Instance of the EpdDatamanager containing the databases with Epd datasets for calculation
@@ -42,7 +42,7 @@ class Calculator(object):
         """
 
         self.calc_in.calculate_component_replacements(observation_period)
-        calc_df = self.calc_in.select_by_categorization(*categorizations)
+        calc_df = self.calc_in.select_by_partition(*partitions)
 
         dataset_objects = []
         for index, row in calc_df.iterrows():
