@@ -343,7 +343,7 @@ class EpdDataset(object):
         # Todo: Normalizing with a unit like m^2 would lead to the unit being only m^2 while it should be
         #  "indicator unit / m^2"
         for ei in updated_class_dict["environmental_indicators"]:
-            ei.abbreviation = f"{ei.abbreviation}_dimensionless"
+            ei.abbreviation = f"{ei.abbreviation}"
             ei.name = f"{ei.name} dimensionless"
             ei.unit = resulting_unit
             ei.description = (f"Original description:\n {ei.description}. "
