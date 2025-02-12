@@ -1,10 +1,10 @@
-from logic.epddataset.epddataset import EpdDataset
+from epd.epddataset.epddataset import EpdDataset
 from data.epddata.epddatamanager import EpdDataManager
 import numpy as np
 
 
-class En15804A1Dataset(EpdDataset):
-    """Class that contains information for a Dataset according to standard EN 15804+A1 and inherits from EpdDataset
+class En15804A2Dataset(EpdDataset):
+    """Class that contains information for a Dataset according to standard EN 15804+A2 and inherits from EpdDataset
     class
 
     Class variables
@@ -33,14 +33,15 @@ class En15804A1Dataset(EpdDataset):
         for the life cycle stages and indicators
 
     """
-    environmental_indicators = EpdDataset.epd_attribute_loader.indicators_a1
+    environmental_indicators = EpdDataset.epd_attribute_loader.indicators_a2
     life_cycle_stages = EpdDataset.epd_attribute_loader.life_cycle_stages
-    standard = "EN15804+A1"
+    standard = "EN15804+A2"
 
     def __init__(self):
 
         super().__init__()
         self.data = np.full((len(self.environmental_indicators),len(self.life_cycle_stages)), 0.0)
+
 
     def load_lca_dataset(self, epd_id, epd_data_manager, source_key = None):
         """Method that calls the functions to load a dataset from the file binding into the instance dependent
@@ -56,3 +57,5 @@ class En15804A1Dataset(EpdDataset):
             If given, the EpdDataManager loads the epd from the source, specified by the source_key
         """
         epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source_key)
+
+

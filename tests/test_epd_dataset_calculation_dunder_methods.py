@@ -1,6 +1,6 @@
-from logic.epddataset.epddataset import EpdDataset
-from logic.epddataset.en15804A1dataset import En15804A1Dataset
-from logic.epddataset.en15804A2dataset import En15804A2Dataset
+from epd.epddataset.epddataset import EpdDataset
+from epd.epddataset.en15804A1dataset import En15804A1Dataset
+from epd.epddataset.en15804A2dataset import En15804A2Dataset
 import numpy as np
 
 import unittest

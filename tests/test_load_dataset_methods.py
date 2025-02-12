@@ -2,8 +2,8 @@ from data.epddata.source.oekobaudatcsv import OekobaudatCsv
 from data.epddata.source.tecojsonsource import TecoJson
 from data.epddata.source.oekobaudatapi import OekobaudatAPI
 from data.epddata.epddatamanager import EpdDataManager
-from logic.epddataset.en15804A1dataset import En15804A1Dataset
-from logic.epddataset.en15804A2dataset import En15804A2Dataset
+from epd.epddataset.en15804A1dataset import En15804A1Dataset
+from epd.epddataset.en15804A2dataset import En15804A2Dataset
 from utility import get_latest_oekobaudat_csv
 from pathlib import Path
 import unittest

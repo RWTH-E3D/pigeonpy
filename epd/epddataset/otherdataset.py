@@ -1,4 +1,4 @@
-from logic.epddataset.epddataset import EpdDataset
+from epd.epddataset.epddataset import EpdDataset
 import numpy as np
 
 
