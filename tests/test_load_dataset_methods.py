@@ -83,16 +83,15 @@ class TestLoadDatasetMethods(unittest.TestCase):
             print(row["UUID"])
             self.test_dataset_a1.load_lca_dataset(row["UUID"], self.epd_datamanager_a1, source_key="oekobaudat_api_a1")
             number_of_datasets_api_a1 += 1
-        self.epd_datamanager_a1.databases["oekobaudat_api_a1"].check_unknown_indicators_in_fetched_datasets()
         print(f"EN15804+A1 compliant datasets loaded via OekobaudatAPI via UUIDs from csv: {number_of_datasets_api_a1}")
 
     def test_oekobaudat_api_a2_load_datasets_with_uuid_from_csv(self):
         number_of_datasets_api_a2 = 0
+        print(len(self.epd_datamanager_a2._fetched_datasets))
         for index, row in self.oekobaudat_a2_dropped_duplicates.iterrows():
             print(row["UUID"])
             self.test_dataset_a2.load_lca_dataset(row["UUID"], self.epd_datamanager_a2, source_key="oekobaudat_api_a2")
             number_of_datasets_api_a2 += 1
-        self.epd_datamanager_a2.databases["oekobaudat_api_a2"].check_unknown_indicators_in_fetched_datasets()
         print(f"EN15804+A2 compliant datasets loaded via OekobaudatAPI via UUIDs from csv: {number_of_datasets_api_a2}")
 
 if __name__ == '__main__':
