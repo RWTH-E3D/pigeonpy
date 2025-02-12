@@ -1,3 +1,5 @@
+from unittest.mock import inplace
+
 from data.epddata.source.fileepdsource import FileEpdSource
 import pandas as pd
 import numpy as np
@@ -224,8 +226,7 @@ class OekobaudatCsv(FileEpdSource):
 
         # Transform 'Modul' entries with lower case entries and replace a1-a3 with a1_a3:
         lca_data_bind_pd["Modul"] = lca_data_bind_pd["Modul"].str.casefold()
-        lca_data_bind_pd["Modul"].replace('a1-a3', 'a1_a3', inplace=True)
-
+        lca_data_bind_pd.replace({'Modul': 'a1-a3'}, 'a1_a3', inplace=True)
         return lca_data_bind_pd
 
     @staticmethod
