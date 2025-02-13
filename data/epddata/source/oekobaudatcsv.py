@@ -34,6 +34,10 @@ class OekobaudatCsv(FileEpdSource):
         Holds the dataframe containing the processed Oekobaudat csv, i.e. all available datasets for the standard
         indicated by the dataset_template
 
+    Parameters
+    ----------
+    filepath : Path or str
+        Path to the oekobaudat csv file
     """
 
     a1_aliases = ["'DIN EN 15804'", "'EN 15804'", "'DIN EN 15804' / 'ISO 14025'",

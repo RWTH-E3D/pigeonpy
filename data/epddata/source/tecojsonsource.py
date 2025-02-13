@@ -18,6 +18,11 @@ class TecoJson(FileEpdSource):
     data : dict
         Contains the EPD data in form of a dictionary using the uuids as key
     dataset_template : EpdDataset
+
+    Parameters
+    ----------
+    filepath : Path or str
+        Path to the oekobaudat csv file. Defaults to: Path.cwd()  / "data" / "input" / "inputdata" / "LcaDataTeco.json"
     """
 
     def __init__(self, name, filepath=None):
