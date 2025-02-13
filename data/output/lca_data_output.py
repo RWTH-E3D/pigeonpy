@@ -143,8 +143,8 @@ def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False)
     if add_uuid:
         export_df.insert(0, "UUID", value=str(uuid.uuid1()))
     # drop rows/ life cycle stages where all values are equal to zero
-    help_column_index = export_df.columns.get_loc('pere')
     if drop_rows:
+        help_column_index = export_df.columns.get_loc('Modul') + 1
         export_df = export_df[~export_df.iloc[:, help_column_index:].isin([0]).all(axis=1)]
 
     export_df.to_csv(path, sep=';', index=False)

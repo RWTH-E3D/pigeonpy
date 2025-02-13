@@ -10,27 +10,27 @@ class En15804A2Dataset(EpdDataset):
     Class variables
     ----------
     environmental_indicators : list
-        A list containing the environmental indicators as instances of the EnvironmentalIndicator class
+        A list containing the environmental indicators as instances of the EnvironmentalIndicator class taken from the
+        EpdAttributeLoader
     life_cycle_stages : list
-        A list containing the life cycle stages as instances of the LifeCycleStage class
-    stages_and_indicators_loaded : boolean
-        States whether the indicators and stages are already loaded, changes the first time the class is loaded to True
+        A list containing the life cycle stages as instances of the LifeCycleStage class taken from the
+        EpdAttributeLoader
     standard : str
-        Information about the used standard
+        Specifies the standard of this class -> EN15804+A2
 
     Attributes
     ----------
     epd_data_id : str
-        lca id for the contained dataset
+        lca id/ uuid for the contained dataset
     name : str
-        Name of the contained dataset
+        Name of the dataset
     ref_flow_value : float
         Value of the reference flow
     ref_flow_unit : str
         Unit of the reference flow
     data : ndarray
-        Numpy array containing the values for the environmental indicators in the order given by the json files
-        for the life cycle stages and indicators
+        Numpy array containing the values for the environmental indicators in the order defined by the json files
+        for the life cycle stages and environmental indicators
 
     """
     environmental_indicators = EpdDataset.epd_attribute_loader.indicators_a2
@@ -44,8 +44,7 @@ class En15804A2Dataset(EpdDataset):
 
 
     def load_lca_dataset(self, epd_id, epd_data_manager, source_key = None):
-        """Method that calls the functions to load a dataset from the file binding into the instance dependent
-        on the passed file format inside the DataClass instance
+        """Calls method from EpdDataManager to load a dataset from a source into the instance.
 
         Parameters
         ----------
