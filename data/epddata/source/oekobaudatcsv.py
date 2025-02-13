@@ -1,3 +1,5 @@
+from unittest.mock import inplace
+
 from data.epddata.source.fileepdsource import FileEpdSource
 import pandas as pd
 import numpy as np
@@ -32,6 +34,10 @@ class OekobaudatCsv(FileEpdSource):
         Holds the dataframe containing the processed Oekobaudat csv, i.e. all available datasets for the standard
         indicated by the dataset_template
 
+    Parameters
+    ----------
+    filepath : Path or str
+        Path to the oekobaudat csv file
     """
 
     a1_aliases = ["'DIN EN 15804'", "'EN 15804'", "'DIN EN 15804' / 'ISO 14025'",
@@ -224,8 +230,7 @@ class OekobaudatCsv(FileEpdSource):
 
         # Transform 'Modul' entries with lower case entries and replace a1-a3 with a1_a3:
         lca_data_bind_pd["Modul"] = lca_data_bind_pd["Modul"].str.casefold()
-        lca_data_bind_pd["Modul"].replace('a1-a3', 'a1_a3', inplace=True)
-
+        lca_data_bind_pd.replace({'Modul': 'a1-a3'}, 'a1_a3', inplace=True)
         return lca_data_bind_pd
 
     @staticmethod
