@@ -213,7 +213,8 @@ class OekobaudatAPI(ApiEpdSource):
                     short_description = element.find(".//common:shortDescription[@xml:lang='en']", ns).text
                     element_name = allocation.get(short_description, element_name)
                 else:
-                    print(f"Unknown indicator found for dataset '{process_dataset.find(".//common:UUID", ns).text}: '"
+                    dataset_uuid = process_dataset.find(".//common:UUID", ns).text
+                    print(f"Unknown indicator found for dataset '{dataset_uuid}: '"
                           f"Unable to allocate indicator uuid '{element_uuid}' to indicator")
 
             element_data = indicator_data.setdefault(element_name, {})
@@ -246,7 +247,8 @@ class OekobaudatAPI(ApiEpdSource):
                     uuid in self.lcia_uuid_allocations[self.standards[1]]) or (uuid in self.not_included_indicators):
                 continue
             else:
-                print(f"Unknown indicator found: '{uuid}', '{lcia_method.find(".//sapi:name[@xml:lang='en']", ns).text}'")
+                lcia_method_name = lcia_method.find(".//sapi:name[@xml:lang='en']", ns).text
+                print(f"Unknown indicator found: '{uuid}', '{lcia_method_name}'")
 
     def contains_dataset(self, epd_id) -> bool:
         """Only returns True for the check in EpdDatamanager, because there is no other way to check the API
