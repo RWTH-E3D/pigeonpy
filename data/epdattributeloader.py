@@ -4,7 +4,58 @@ from epd.environmentalindicator import EnvironmentalIndicator
 from epd.lifecyclestage import LifeCycleStage
 
 class EpdAttributeLoader:
-    def __init__(self, environmental_indicators=None, life_cycle_stages=None, dataset_template=None):
+    """Handles the loading of environmental indicators and life cycle stages from the json files into lists containing
+    EnvironmentalIndicator and LifeCycleStages instances. It is also responsible for handling the customization of
+    attributes.
+
+    Every EpdDataset class holds one EpdAttributeLoader instance that is responsible for assigning the environmental
+    indicators and life cycle stages to the EpdDataset class and subclasses associated class variables. For the case of
+    custom attributes the EpdAttributeLoader of the class is exchanged with a new EpdAttributeLoader containing the
+    wished attributes (see study class).
+
+    Attributes
+    ----------
+    indicators_a1_path : str
+        Path to the environmental indicator json for the EN15804+A1 standard
+    indicators_a2_path : str
+        Path to the environmental indicator json for the EN15804+A2 standard
+    life_cycle_stages_path : str
+        Path to the life cycle stages json according to the EN15804 standard
+    environmental_indicators_to_be_used : list
+        If it is specified and not None, it contains the environmental indicator abbreviations that are defined for the
+        study. It defaults to None, i.e. all environmental indicators from the standard/ json file are used.
+    life_cycle_stages_to_be_used : list
+        If it is specified and not None, it contains the life cycle stage abbreviations that are defined for the
+        study. It defaults to None, i.e. all life cycle stages from the standard/ json file are used.
+    dataset_template : EpdDataset
+        Not an instance of EpdDataset but the EpdDataset class itself (typically a subclass of EpdDataset used to
+        indicate the standard for a study).
+    indicators_a1 : list
+        Contains the EnvironmentalIndicator objects for all available indicators of the EN15804+A1 standard in the json
+        file. Gets assigned when an instance is created.
+    indicators_a2 : list
+        Contains the EnvironmentalIndicator objects for all available indicators of the EN15804+A2 standard in the json
+        file. Gets assigned when an instance is created.
+    life_cycle_stages : list
+        Contains the LifeCycleStage objects for all available indicators of the EN15804 standard in the json file. Gets
+        assigned when an instance is created.
+
+    Parameters
+    ----------
+    environmental_indicators : list
+        If it is specified and not None, it contains the environmental indicator abbreviations that are defined for the
+        study. It defaults to None, i.e. all environmental indicators from the standard/ json file are used.
+    life_cycle_stages : list
+        If it is specified and not None, it contains the life cycle stage abbreviations that are defined for the
+        study. It defaults to None, i.e. all life cycle stages from the standard/ json file are used.
+    dataset_template : EpdDataset
+        Not an instance of EpdDataset but the EpdDataset class itself (typically a subclass of EpdDataset to indicate
+        the standard). If it is specified (together with environmental_indicators and life_cycle_stages), it is used to
+        customize the indicators and life cycle stages for the dataset_template (changes are present in the whole study
+        instance/ scope) based on the given environmental_indicators and life_cycle_stages.
+    """
+
+    def __init__(self, environmental_indicators: list = None, life_cycle_stages: list = None, dataset_template = None):
         self.indicators_a1_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a1.json"
         self.indicators_a2_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a2.json"
         self.life_cycle_stages_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "life_cycle_stages_en_15978.json"
@@ -21,14 +72,18 @@ class EpdAttributeLoader:
 
         if self.environmental_indicators_to_be_used and self.dataset_template:
             self.dataset_template.environmental_indicators = self._customize_attributes(
-                self.environmental_indicators_to_be_used, self.dataset_template.environmental_indicators
+                self.environmental_indicators_to_be_used,
+                self.dataset_template.environmental_indicators
             )
         if self.life_cycle_stages_to_be_used and self.dataset_template:
             self.dataset_template.life_cycle_stages = self._customize_attributes(
-                self.life_cycle_stages_to_be_used, self.dataset_template.life_cycle_stages
+                self.life_cycle_stages_to_be_used,
+                self.dataset_template.life_cycle_stages
             )
 
     def _load_indicators(self):
+        """Opens the json files containing environmental indicators and loads the data into EnvironmentalIndicator
+        objects which are then appended to the associated list."""
         with open(self.indicators_a1_path) as a1, open(self.indicators_a2_path) as a2:
             a1_data = json.load(a1)['indicators_en_15804_a1']
             a2_data = json.load(a2)['indicators_en_15804_a2']
@@ -41,12 +96,31 @@ class EpdAttributeLoader:
             process_indicators(a2_data, self.indicators_a2)
 
     def _load_stages(self):
+        """Opens the json file containing the life cycle stages and loads the data into LifeCycleStage objects which
+        are then appended to the associated list."""
         with open(self.life_cycle_stages_path) as lcs:
             lcs_data = json.load(lcs)['LifeCycleStages']
             self.life_cycle_stages = [LifeCycleStage(**stage) for stage in lcs_data]
 
     @staticmethod
     def _customize_attributes(attributes_to_be_used, attributes_to_be_customized):
+        """Takes the existing list of attributes (environmental indicators or life cycle stages) and creates a new list
+        containing only the objects of the attributes given by the attribute abbreviations in the attributes_to_be_used
+        parameter.
+
+        Parameters
+        ----------
+        attributes_to_be_used : list
+            Contains the wished attributes as a list of abbreviations
+        attributes_to_be_customized : list
+            Contains the current attributes (complete list of attributes).
+
+        Returns
+        -------
+        custom_attributes : list
+            Contains the objects of the attributes for all attribute abbreviations given with the attributes_to_be_used
+            list.
+        """
         custom_attributes = [
             attribute for attribute in attributes_to_be_customized
             if attribute.abbreviation in attributes_to_be_used

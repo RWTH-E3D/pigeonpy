@@ -4,33 +4,33 @@ import numpy as np
 
 
 class En15804A1Dataset(EpdDataset):
-    """Class that contains information for a Dataset according to standard EN 15804+A1 and inherits from EpdDataset
+    """Class that contains information for a dataset according to standard EN 15804+A1 and inherits from EpdDataset
     class
 
     Class variables
     ----------
     environmental_indicators : list
-        A list containing the environmental indicators as instances of the EnvironmentalIndicator class
+        A list containing the environmental indicators as instances of the EnvironmentalIndicator class taken from the
+        EpdAttributeLoader
     life_cycle_stages : list
-        A list containing the life cycle stages as instances of the LifeCycleStage class
-    stages_and_indicators_loaded : boolean
-        States whether the indicators and stages are already loaded, changes the first time the class is loaded to True
+        A list containing the life cycle stages as instances of the LifeCycleStage class taken from the
+        EpdAttributeLoader
     standard : str
-        Information about the used standard
+        Specifies the standard of this class -> EN15804+A1
 
     Attributes
     ----------
     epd_data_id : str
-        lca id for the contained dataset
+        lca id/ uuid for the contained dataset
     name : str
-        Name of the contained dataset
+        Name of the dataset
     ref_flow_value : float
         Value of the reference flow
     ref_flow_unit : str
         Unit of the reference flow
     data : ndarray
-        Numpy array containing the values for the environmental indicators in the order given by the json files
-        for the life cycle stages and indicators
+        Numpy array containing the values for the environmental indicators in the order defined by the json files
+        for the life cycle stages and environmental indicators
 
     """
     environmental_indicators = EpdDataset.epd_attribute_loader.indicators_a1

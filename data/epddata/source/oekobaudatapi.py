@@ -4,6 +4,7 @@ import numpy as np
 from io import StringIO
 import xml.etree.ElementTree as ET
 
+
 class OekobaudatAPI(ApiEpdSource):
     """Class that contains methods for fetching datasets in XML format from the oekobaudat API and loading them into
     EpdDataset objects
@@ -16,9 +17,15 @@ class OekobaudatAPI(ApiEpdSource):
     lcia_uuid_allocations : dict
         A mapping for the LCIA result (gwp-total, gwp-fossil, etc.) reference UUIDs to the abbreviation of the indicator
         name used in the environmental indicator json files separated by the associated standard
+    lcia_name_allocations : dict
+        For the case that multiple indicators have the same UUID in the XML file, the mapping in this dict uses said
+        UUID as identification to then map the indicator names used in the XML file to the indicator abbreviations used
+        here
     not_included_indicators : dict
         A mapping for the environmental indicators of the EN15804+A2 standard which are not calculated in this tool,
         because of the high uncertainties (Ökobaudat Manual)
+    compliance_uuids: dict
+        Reference UUIDs for the compliance systems used for the different standards
 
     Attributes
     ----------
@@ -28,10 +35,6 @@ class OekobaudatAPI(ApiEpdSource):
         Available standards for this EpdSource
     _root : str
         The root of the oekobaudat API
-    _fetched_datasets: dict
-        Used to cache already fetched and processed epd data with the associated UUID as key
-    _compliance_uuids: dict
-        Reference UUIDs for the compliance systems used for the different standards
 
     """
 
@@ -71,6 +74,10 @@ class OekobaudatAPI(ApiEpdSource):
             "5f635281-343e-44fb-83df-1971b155e6b6": "gwp-fossil",
             "2356e1ab-0185-4db5-86e5-16de51c7485c": "gwp-biogen",
             "4331bbdb-978a-490d-8707-eeb047f01a55": "gwp-luluc",
+            "a7ea142a-9749-11ed-a8fc-0242ac120002": "gwp-total",
+            "a7ea19c0-9749-11ed-a8fc-0242ac120002": "gwp-fossil",
+            "a7ea186c-9749-11ed-a8fc-0242ac120002": "gwp-biogen",
+            "a7ea1ae2-9749-11ed-a8fc-0242ac120002": "gwp-luluc",
             "b5c629d6-def3-11e6-bf01-fe55135034f3": "odp",
             "b5c611c6-def3-11e6-bf01-fe55135034f3": "ap",
             "b53ec18f-7377-4ad3-86eb-cc3f4f276b2b": "ep-freshwater",
@@ -94,12 +101,23 @@ class OekobaudatAPI(ApiEpdSource):
 
     # "Additional environmental impact indicators" with high uncertainties (Ökobaudat Manual)
     not_included_indicators = {
+        "fb774615-0575-45de-9a89-1ded92f19770": "gwp-iobc/ghg",
         "b5c602c6-def3-11e6-bf01-fe55135034f3": "pm",
         "b5c632be-def3-11e6-bf01-fe55135034f3": "ir",
         "ee1082d1-b0f7-43ca-a1f0-21e2a4a74511": "etp-fw",
+        "05316e7a-b254-4bea-9cf0-6bf33eb5c630": "etp-fw",
         "2299222a-bbd8-474f-9d4f-4dd1f18aea7c": "htp-c",
         "3af763a5-b7a1-48c9-9cee-1f223481fcef": "htp-nc",
+        "7cfdcfcf-b222-4b26-888a-a55f9fbf7ac8": "htp-nc",
         "b2ad6890-c78d-11e6-9d9d-cec0c932ce01": "sqp"
+    }
+
+    compliance_uuids = {
+        "EN15804+A1": "b00f9ec0-7874-11e3-981f-0800200c9a66",
+        "EN15804+A2": [
+            "c0016b33-8cf7-415c-ac6e-deba0d21440d",  # Environmental Footprint (EF) 3.0 source dataset
+            "d4aa3ec7-b1d7-4a4a-a6cb-37af88dcc902"  # EF 3.1 source dataset
+        ]
     }
 
     def __init__(self, name):
@@ -108,26 +126,18 @@ class OekobaudatAPI(ApiEpdSource):
         self.standards = ["EN15804+A1", "EN15804+A2"]
 
         self._root = "https://oekobaudat.de/OEKOBAU.DAT/resource"
-        self._fetched_datasets = {}  # store already fetched datasets to reduce requests
-
-        self._compliance_uuids = {
-            "EN15804+A1": "b00f9ec0-7874-11e3-981f-0800200c9a66",
-            "EN15804+A2": [
-                "c0016b33-8cf7-415c-ac6e-deba0d21440d",  # Environmental Footprint (EF) 3.0 source dataset
-                "d4aa3ec7-b1d7-4a4a-a6cb-37af88dcc902"   # EF 3.1 source dataset
-            ]
-        }
 
     def load_epd(self, epd_dataset, epd_id):
-        """Method to request epd data based on the given epd_id (UUID), process the returned xml data and populate the
-        given epd_dataset instance with the processed epd_data
+        """Carries out method calls to request epd data based on the given epd_id (UUID), process/ parse the returned
+        xml file, extract indicator data out of the xml file and populate the given epd_dataset instance with the
+        extracted indicator data.
 
         Parameters
         ----------
         epd_dataset : EpdDataset
-            Instance of either En15804A1Dataset or En15804A2Dataset class
+            Instance of a child class of EpdDataset
         epd_id : str
-            UUID associated to the epd dataset to be loaded
+            UUID for the epd dataset to be loaded
 
         """
 
@@ -157,8 +167,11 @@ class OekobaudatAPI(ApiEpdSource):
         self._populate_data_array(epd_dataset, epd_data)
 
     def _extract_indicator_data(self, process_dataset, ns, xml_base_path, uuid_allocations):
-        """Extracts either the "Exchanges" or "LCIAResults" values for the environmental indicators and their life
-        cycle stages out of the xml file
+        """Extracting environmental indicator data out of the fetched dataset xml file by using pythons xml library,
+        either for the "Exchanges" (pere, perm, etc.) or for the "LCIAResults" (gwp-total, odp, etc.) part of the
+        XML file by distinguishing the two cases based on the given xml_base_path and uuid_allocation.
+        The extracted epd data gets checked for any unknown indicators, i.e. a failed allocation of the indicator in the
+        xml file to an indicator known to the program.
 
         Parameters
         ----------
@@ -167,7 +180,7 @@ class OekobaudatAPI(ApiEpdSource):
         ns : dict
             Namespace dictionary for the xml file
         xml_base_path : str
-            Xml path to either the "exchanges" part of the epd (pere, perm, etc.) or to the "LCIAResults" (gwp-total, etc.)
+            XML path to either the "exchanges" part of the epd or to the "LCIAResults"
         uuid_allocations : dict
             The allocation needed for the specific call of the method
 
@@ -182,33 +195,60 @@ class OekobaudatAPI(ApiEpdSource):
         elements = process_dataset.findall(xml_base_path, ns)
 
         for element in elements:
-            element_uuid = element.find("./default:referenceToFlowDataSet", ns).get("refObjectId") if "exchanges" in xml_base_path \
-                else element.find("./default:referenceToLCIAMethodDataSet", ns).get("refObjectId")
+            element_uuid = element.find(
+                "./default:referenceToFlowDataSet", ns
+            ).get("refObjectId") if "exchanges" in xml_base_path \
+                else element.find(
+                "./default:referenceToLCIAMethodDataSet", ns
+            ).get("refObjectId")
 
             if element.find(".//epd:amount", ns) is None or element_uuid in self.not_included_indicators:
                 continue
 
             element_name = uuid_allocations.get(element_uuid, "unknown indicator")
             if element_name == "unknown indicator":
+                # If no indicator for element_uuid found in uuid_allocations try allocation by unique name
                 allocation = self.lcia_name_allocations.get(element_uuid)
                 if allocation:
                     short_description = element.find(".//common:shortDescription[@xml:lang='en']", ns).text
                     element_name = allocation.get(short_description, element_name)
+                else:
+                    dataset_uuid = process_dataset.find(".//common:UUID", ns).text
+                    print(f"Unknown indicator found for dataset '{dataset_uuid}: '"
+                          f"Unable to allocate indicator uuid '{element_uuid}' to indicator")
 
             element_data = indicator_data.setdefault(element_name, {})
 
             for amount in element.findall(".//epd:amount", ns):
-                module = amount.get(f"{{{ns['epd']}}}module").replace("-", "_").lower()  # value of ns['epd'] = http://www.iai.kit.edu/EPD/2013
+                # value of ns['epd'] = http://www.iai.kit.edu/EPD/2013
+                module = amount.get(f"{{{ns['epd']}}}module").replace("-", "_").lower()
                 if amount.text is not None:
-                    element_data[module] = element_data.setdefault(module, float(amount.text or 0.0))  # setdefault() -> Always use first scenrio if multiple exist
+                    element_data[module] = element_data.setdefault(module, float(amount.text or 0.0))
+                    # setdefault() -> Always use first life cycle scenario if multiple exist
 
             indicator_data.update(element_data)
 
         return indicator_data
 
     def load(self, dataset_template):
-        """No need to initiate the API connection because only single dataset requests are possible"""
-        self.dataset_template = dataset_template()
+        """Checks the lcia uuid allocations by requesting the lcia methods (basically indicators) used in the latest
+        Ökobaudat datastock and prints out unidentified indicators. Datastocks are different versions of the database.
+        No additional need to initiate an API connection because only single dataset requests are possible."""
+        self.dataset_template = dataset_template
+
+        latest_datastock_uuid = self._uuid_from_latest_datastock()
+
+        lcia_methods_xml_data = self._make_request(self._root + f"/datastocks/{latest_datastock_uuid}/lciamethods").text
+        process_tree, process_dataset, ns = self._parse_xml(lcia_methods_xml_data)
+
+        for lcia_method in process_dataset.findall(".//l:LCIAMethod", ns):
+            uuid = lcia_method.find(".//sapi:uuid", ns).text
+            if (uuid in self.lcia_uuid_allocations[self.standards[0]]) or (
+                    uuid in self.lcia_uuid_allocations[self.standards[1]]) or (uuid in self.not_included_indicators):
+                continue
+            else:
+                lcia_method_name = lcia_method.find(".//sapi:name[@xml:lang='en']", ns).text
+                print(f"Unknown indicator found: '{uuid}', '{lcia_method_name}'")
 
     def contains_dataset(self, epd_id) -> bool:
         """Only returns True for the check in EpdDatamanager, because there is no other way to check the API
@@ -217,34 +257,50 @@ class OekobaudatAPI(ApiEpdSource):
         """
         return True
 
-    def _single_dataset_request(self, epd_id):
-        """Method to perform a single GET request to the dataset endpoint of the API with a given epd_id/ UUID"""
-        try:
-            response = requests.get(self._dataset_endpoint(epd_id))
-            response.raise_for_status()
-            return response.text
-        except (requests.ConnectionError, requests.HTTPError) as error:
-            raise Exception(f"Error during fetch of dataset with id '{epd_id}': {error}")
+    def _uuid_from_latest_datastock(self):
+        """Perform API request with URL for the datastock endpoint (Datastocks are different database versions).
+        The uuid for the datastock is needed for other requests."""
+        available_datastocks = self._make_request(self._root + "/datastocks?format=JSON")
+        # request returns dictionary with list of dictionaries as only entry with the key 'dataStock'
+        uuid_from_latest_datastock = available_datastocks.json().get(
+            'dataStock',
+            list(available_datastocks.json().values())[0]
+        )[-1].get("uuid")
+        return uuid_from_latest_datastock
 
-    def _dataset_endpoint(self, uuid, response_format="XML"):
-        """Creates the URL for the dataset endpoint"""
-        return self._root + f"/processes/{uuid}?format={response_format}"
+    def _single_dataset_request(self, uuid, response_format="XML"):
+        """Calls method to perform API request with the URL for the dataset endpoint of the API. Returns the XML text
+        of the response."""
+        response = self._make_request(self._root + f"/processes/{uuid}?format={response_format}")
+        if response.status_code != 200:
+            raise Exception(f"Request of dataset with uuid '{uuid}' not successful. {response.text}")
+        return response.text
 
     def _check_compliance(self, dataset, ns) -> bool:
         """Checks the compliance UUIDs in the XML file of the epd for compliance with the defined standard in the class
-        instance and the associated compliance UUIDs (see attributes)"""
+        instance and the associated compliance UUIDs (see class variables)"""
         compliance_declarations = dataset.findall(".//{*}referenceToComplianceSystem", namespaces=ns)
         for entry in compliance_declarations:
             compliance = entry.get("refObjectId")
-            if compliance in self._compliance_uuids[self.dataset_template.standard]:
+            if compliance in self.compliance_uuids[self.dataset_template.standard]:
                 return True
         return False
+
+    @staticmethod
+    def _make_request(request_url):
+        """Method to perform a single http request to the API endpoint given in the request url."""
+        try:
+            response = requests.get(request_url)
+            response.raise_for_status()
+        except (requests.ConnectionError, requests.HTTPError) as error:
+            raise Exception(f"Error during http request: {error}")
+        return response
 
     @staticmethod
     def _set_metadata(epd_dataset, epd_id, process_dataset=None, ns=None, name=None):
         """Sets the metadata attributes in the EpdDataset object either from the XML process_dataset and the associated
         namespaces or from the cached data directly given by the name argument"""
-        if process_dataset and ns:
+        if (process_dataset is not None) and (ns is not None):
             epd_dataset.name = process_dataset.find(".//default:name/default:baseName", ns).text
         elif name:
             epd_dataset.name = name
@@ -258,7 +314,7 @@ class OekobaudatAPI(ApiEpdSource):
         Parameters
         ----------
         epd_dataset : EpdDataset
-            Instance of either En15804A1Dataset or En15804A2Dataset class
+            Instance of EpdDataset class
         epd_data : dict
             Contains the environmental indicators as keys for dictionaries which contain the life cycle stages and the
             associated amount as key/ value pairs
@@ -313,12 +369,3 @@ class OekobaudatAPI(ApiEpdSource):
         })
 
         return data_set, data_set.getroot(), namespaces
-
-    def check_unknown_indicators_in_fetched_datasets(self):
-        """
-        Only for testing: Check the fetched datasets for any indicators that could not be allocated with the allocations
-        present in the indicator allocations (see attributes)
-        """
-        for loaded_dataset_uuid in self._fetched_datasets:
-            if "unknown indicator" in self._fetched_datasets[loaded_dataset_uuid]:
-                print(f"Unknown indicator found for dataset with uuid: {loaded_dataset_uuid}")

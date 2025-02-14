@@ -19,16 +19,16 @@ class Calculator(object):
     def __init__(self, calculation_input):
         self.calc_in = calculation_input
 
-    def calculate(self, *categorizations, epd_datamanager, observation_period):
-        """Method for category based calculation of datasets
+    def calculate(self, *partitions, epd_datamanager, observation_period):
+        """Method for subset based calculation of datasets
 
         Loads the datasets based on the UUIDs, multiplies them with the value defined in the input csv and sums up
-        every dataset with the same category name.
+        every dataset with the same subset name.
 
         Parameters
         ----------
-        *categorizations: str
-            The category name(s) as strings according to which the calculation will be made
+        *partitions: str
+            The subset name(s) as strings according to which the calculation will be made
         epd_datamanager: EpdDatamanager
             Instance of the EpdDatamanager containing the databases with Epd datasets for calculation
         observation_period: int
@@ -37,12 +37,12 @@ class Calculator(object):
         Returns
         ----------
         calculated_df: pd.Series
-            Contains the category or category combination as index and the associated calculation result in the form
+            Contains the subset or subset combination as index and the associated calculation result in the form
             of an EpdDataset object
         """
 
         self.calc_in.calculate_component_replacements(observation_period)
-        calc_df = self.calc_in.select_by_categorization(*categorizations)
+        calc_df = self.calc_in.select_by_partition(*partitions)
 
         dataset_objects = []
         for index, row in calc_df.iterrows():
@@ -52,12 +52,12 @@ class Calculator(object):
 
             calculated_result_row = {
                 'Epd_dataset': dataset_object,
-                'Category_name': row['Category_name']
+                'Subset_name': row['Subset_name']
             }
             dataset_objects.append(calculated_result_row)
 
-        calculated_df = pd.DataFrame(dataset_objects, columns=['Epd_dataset', 'Category_name'])
-        calculated_series = calculated_df.groupby(['Category_name'], dropna=False)['Epd_dataset'].sum()
+        calculated_df = pd.DataFrame(dataset_objects, columns=['Epd_dataset', 'Subset_name'])
+        calculated_series = calculated_df.groupby(['Subset_name'], dropna=False)['Epd_dataset'].sum()
 
         for index, dataset in calculated_series.items():
             dataset.name = str(index)
