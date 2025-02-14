@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.ticker import MaxNLocator
 
 
 tic = time.time()
@@ -67,8 +68,10 @@ example_study.lcia.weight("test_weighting", weighting_factors, normalization_met
 ###########################################################################
 
 # Daten sammeln
-print('example_study.lcia.weighted_results["test_weighting"]["Total result"]: ', example_study.lcia.weighted_results["test_weighting"]["Total result"])
+#print('example_study.lcia.weighted_results["test_weighting"]["Total result"]: ', example_study.lcia.weighted_results["test_weighting"]["Total result"])
+print('example_study.lcia.weighted_results["test_weighting"]["Total result"]: ', example_study.lcia.weighted_results["test_weighting"]["building_type"]["type 1"])
 
+building_types = ["type 1", "type 2", "type 3", "type 4"]
 life_cycle_stages=["a1_a3", "c1", "c2", "c3", "c4", "d"]                        #"b6",
 environmental_indicators=["gwp-total", "odp", "pocp"]
 
@@ -76,46 +79,46 @@ environmental_indicators=["gwp-total", "odp", "pocp"]
 
 # Dictionary zur Speicherung der Ergebnisse
 results = {}
-colums = ['environmental_indicator', 'numerical_value', 'life_cycle_stage']
+colums = ['environmental_indicator', 'numerical_value', 'life_cycle_stage', 'building_type']
 df = pd.DataFrame(columns=colums)
 
-# Iteration über die Umweltindikatoren
-for stage in life_cycle_stages:
-    # Neue Liste für den aktuellen life_cycle_stage im Dictionary erstellen
-    results[stage] = []  # Leere Liste für jeden stage
-    #print("stage: ", stage)
+# Iteration über die Gebäudetypen
+for type in building_types:
+    #example_study.lcia.weighted_results["test_weighting"]["building_type"][type]
 
-    # Iteration über die Lebenszyklusphasen
+    # Iteration über die Umweltindikatoren
+    for stage in life_cycle_stages:
+        # Neue Liste für den aktuellen life_cycle_stage im Dictionary erstellen
+        results[stage] = []  # Leere Liste für jeden stage
+        #print("stage: ", stage)
+
+        # Iteration über die Lebenszyklusphasen
+        for indicator in environmental_indicators:
+            #value = example_study.lcia.weighted_results["test_weighting"]["Total result"].get(indicator, stage)
+            value = example_study.lcia.weighted_results["test_weighting"]["building_type"][type].get(indicator, stage)
+            #print("indicator: ", indicator)
+            results[stage].append(value)
+            new_index = len(df)
+            df.loc[new_index] = [indicator, value, stage, type]
+
+for type in building_types:
+    # c1_c4 berechnen und an DataFrame anfügen
     for indicator in environmental_indicators:
-        value = example_study.lcia.weighted_results["test_weighting"]["Total result"].get(indicator, stage)
-        #print("indicator: ", indicator)
-        results[stage].append(value)
-        new_index = len(df)
-        df.loc[new_index] = [indicator, value, stage]
+        filtered_df = df[(df['building_type'] == type) & (df['environmental_indicator'] == indicator)
+                         & (df['life_cycle_stage'].isin(['c1', 'c2', 'c3', 'c4']))]
+        # Werte für c1 bis c4 aufsummieren
+        sum = filtered_df['numerical_value'].sum()
+        new_row_df = pd.DataFrame([{'environmental_indicator' : indicator,
+                        'numerical_value' : sum,
+                        'life_cycle_stage' : 'c1_c4',
+                                  'building_type' : type}])
+        df = pd.concat([df, new_row_df], ignore_index=True)
+        #print("df: ", df)
 
-# c1_c4 berechnen und an DataFrame anfügen
-for indicator in environmental_indicators:
-    filtered_df = df[(df['environmental_indicator'] == indicator) & (df['life_cycle_stage'].isin(['c1', 'c2', 'c3', 'c4']))]
-
-    # Werte für c1 bis c4 aufsummieren
-    sum = filtered_df['numerical_value'].sum()
-
-    new_row_df = pd.DataFrame([{'environmental_indicator' : indicator,
-                    'numerical_value' : sum,
-                    'life_cycle_stage' : 'c1_c4'}])
-
-    df = pd.concat([df, new_row_df], ignore_index=True)
-
-# Zeilen mit C1, C2, c3, und c4 löschen (nur noch c1_c4 behalten)
+# Zeilen mit c1, c2, c3, und c4 löschen (nur noch c1_c4 behalten)
 for c in ['c1', 'c2', 'c3', 'c4']:
     df = df[df['life_cycle_stage'] != c]
-print("df: ", df)
-
-print("df: ", df)
-
-
-#print("Die Summe der gwp-total Werte für c1, c2 und c3 ist:", sum_gwp_total)
-
+#print("df: ", df)
 
 """
 # Ausgabe der Ergebnisse für jeden Indikator
@@ -138,14 +141,9 @@ for indicator in environmental_indicators:
 for indicator, gwp_total in results.items():
     print(f"Werte für {indicator}: {gwp_total}")"""
 
-print("results: ", results)
+#print("results: ", results)
 
-# Anzahl der Indikatoren und Lebenszyklusphasen
-num_indicators = len(environmental_indicators)
-num_stages = len(life_cycle_stages)
-
-
-# The following is a helper function that given the angle at which the bar is positioned and the offset used in the barchart, determines the rotation and alignment of the labels.
+# angle for bar positioning and the offset used in the barchart, determines the rotation and alignment of the labels.
 def get_label_rotation(angle, offset):
     # Rotation must be specified in degrees :(
     rotation = np.rad2deg(angle + offset)
@@ -156,6 +154,11 @@ def get_label_rotation(angle, offset):
         alignment = "left"
     return rotation, alignment
 
+def calculate_label_offset(value):
+    if value <= 0:
+        return 0
+    else:   # value > 0:
+        return value
 
 # This is the function that actually adds the labels (with ax.text()) to the plot:
 def add_labels(angles, values, labels, offset, ax):
@@ -172,7 +175,7 @@ def add_labels(angles, values, labels, offset, ax):
         # And finally add the text
         ax.text(
             x=angle,
-            y=value + padding,
+            y= padding + calculate_label_offset(value),
             s=label,
             ha=alignment,
             va="center",
@@ -181,8 +184,7 @@ def add_labels(angles, values, labels, offset, ax):
         )
 
 
-# All this part is like the code above
-# First of all, let's create ANGLES, which give the positions where bars are located. The numerical_value array contains the heights of the bars, and environmental_indicator stores the labels.
+# Create ANGLES, which give the positions where bars are located. The numerical_value array contains the heights of the bars, and environmental_indicator stores the labels.
 numerical_value = df["numerical_value"].values
 environmental_indicator = df["environmental_indicator"].values
 life_cycle_stage = df["life_cycle_stage"].values
@@ -209,28 +211,45 @@ for size in GROUPS_SIZE:
 
 fig, ax = plt.subplots(figsize=(20, 10), subplot_kw={"projection": "polar"})
 #fig, ax = plt.subplots(figsize=(20, 10), subplot_kw={"projection": "3d"})
+ax.set_title("Normalized and Weighted LCA Results")
 ax.set_theta_offset(OFFSET)
-#ax.set_ylim(-100, 100)
-#ax.set_frame_on(False)
+# Äußere Kreislinie als Umrandung des Diagramms
+ax.set_frame_on(True)
 ax.xaxis.grid(False)
-ax.yaxis.grid(False)
+ax.yaxis.grid(True)
+y_ticks = np.arange(min(numerical_value), max(numerical_value) + 1)
 ax.set_xticks([])
-ax.set_yticks([])
+ax.set_yticks(y_ticks)
+ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
 
-#GROUPS_SIZE = [len(i[1]) for i in df.groupby("group")]
-COLORS = [f"C{i}" for i, size in enumerate(GROUPS_SIZE) for _ in range(size)]
+
+#COLORS = [f"C{i}" for i, size in enumerate(GROUPS_SIZE) for _ in range(size)]
+colors = {
+    'type 1': 'red',
+    'type 2': 'blue',
+    'type 3': 'green',
+    'type 4': 'orange'
+}
+# Farben für jeden Building_type im DataFrame zuordnen
+df['color'] = df['building_type'].map(colors)
+
+
+# Drucke das gesamte DataFrame
+print("df: ", df)
+
+# Legende hinzufügen
+handles = [plt.Line2D([0], [0], color=colors[key], lw=4) for key in colors]
+labels = list(colors.keys())
+ax.legend(handles, labels)
 
 ax.bar(
-    ANGLES[IDXS], numerical_value, width=WIDTH, color=COLORS,
+    ANGLES[IDXS], numerical_value, width=WIDTH, color=df['color'],
     edgecolor="white", linewidth=2
 )
 
 add_labels(ANGLES[IDXS], numerical_value, environmental_indicator, OFFSET, ax)
 
-# Extra customization below here --------------------
-
-# This iterates over the sizes of the groups adding reference
-# lines and annotations.
+# This iterates over the sizes of the groups adding reference lines and annotations.
 
 group_names = np.unique(life_cycle_stage)
 
@@ -245,16 +264,6 @@ for group, size in zip(group_names, GROUPS_SIZE):
         np.mean(x1), -20, group, color="#333333", fontsize=14,
         fontweight="bold", ha="center", va="center"
     )
-
-    # Add reference lines at 20, 40, 60, and 80
-    x2 = np.linspace(ANGLES[offset], ANGLES[offset + PAD - 1], num=50)
-    ax.plot(x2, [20] * 50, color="#bebebe", lw=0.8)
-    ax.plot(x2, [40] * 50, color="#bebebe", lw=0.8)
-    ax.plot(x2, [60] * 50, color="#bebebe", lw=0.8)
-    ax.plot(x2, [80] * 50, color="#bebebe", lw=0.8)
-
-    # 3D Plot
-    #x3 = np.linspace(ANGLES[offset], ANGLES[offset + PAD - 1], num=50)
 
     offset += size + PAD
 
