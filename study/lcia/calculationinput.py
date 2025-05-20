@@ -104,7 +104,8 @@ class CalculationInput(object):
 
     def calculate_component_replacements(self, observation_period):
         """Calculates the amount of replacements for every entry of the input dataframe based on the observation period
-        specified in the Goal and Scope of the study"""
+        specified in the study object. The divided number is rounded to the next bigger integer and then subtracted by 1.
+        """
         self.calculation_df["Replacements"] = np.ceil(observation_period / self.calculation_df["Service life"]) - 1
 
     def select_by_partition(self, *partitions):

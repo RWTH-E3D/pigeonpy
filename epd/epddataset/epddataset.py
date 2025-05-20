@@ -386,27 +386,56 @@ class EpdDataset(object):
 
 
 class History:
+    """Class for logging operations and calculations performed on EpdDataset objects. Every operation or calculation
+    step creates a text element that is appended to the 'entries' attribute. An instance gets initialized every time a
+    EpdDataset object is created.
+
+    Attributes
+    ----------
+    initial_source : str
+        Contains the name of the source that was used to load EPD data into the EpdDataset object.
+    initial_name : str
+        The name of the Epd whose data was loaded into the EpdDataset object.
+    entries : list
+        Contains string objects for every operation/ calculation step.
+    """
     def __init__(self):
         self.initial_source = None
         self.initial_name = None
         self.entries = []
 
     def add_data_source(self, epd_id, epd_name, source_key):
+        """Creates the first entry and sets the objects attributes.
+
+        Parameters
+        ----------
+        epd_id : str
+            The UUID of the EPD
+        epd_name : str
+            The name of the EPD
+        source_key :
+            The user defined name/ key of the EpdSource object given when registering the source, not the one given when
+            creating the source.
+        """
         self.initial_source = source_key
         self.initial_name = epd_name
         self.entries.append(f"Dataset '{epd_name}' ({epd_id}) initialized from source '{source_key}'")
 
     def log_operation(self, entry, replace_last=False):
+        """Adds a given entry to the entries list with the option to replace the last entry with the given entry."""
         if replace_last:
             self.entries[-1] = entry
         else:
             self.entries.append(entry)
 
     def merge_histories(self, other_dataset):
+        """Merges the logs of two individual EpdDataset objects together, i.e. when 2 datasets are calculated with each
+        other."""
         self.entries += other_dataset.history.entries
         # return self.entries + other_dataset.history.entries
 
     def show_history(self):
+        """Prints every entry in the entries list and adds empty lines between them"""
         for entry in self.entries:
             print(entry + "\n")
 

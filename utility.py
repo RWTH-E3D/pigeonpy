@@ -41,6 +41,15 @@ def linear_interpolate(dataset1, dataset2, steps, return_datasets=True):
 
 
 def get_latest_oekobaudat_csv():
+    """Function that requests the csv download for the latest export of the Oekobaudat database. It fetches the
+    available datastocks (different database versions) of the Oekobaudat, chooses the latest one and proceeds to request
+    its CSV file.
+
+    Returns
+    -------
+    datastock_csv_filepath : Path
+        The path to the downloaded database in CSV format
+    """
 
     root = "https://oekobaudat.de/OEKOBAU.DAT/resource"
     datastocks_endpoint = root + "/datastocks?format=JSON"
@@ -57,6 +66,18 @@ def get_latest_oekobaudat_csv():
     return datastock_csv_filepath
 
 def _fetch_latest_datastock(endpoint):
+    """Requests the latest datastock from the associated API endpoint.
+
+    Parameters
+    ----------
+    endpoint : str
+        URL to the API endpoint
+
+    Returns
+    -------
+    available_datastocks[-1] : str
+        The last entry from the available datastocks list which is the UUID for the latest available datastock
+    """
     try:
         response = requests.get(endpoint)
         response.raise_for_status()
@@ -66,6 +87,20 @@ def _fetch_latest_datastock(endpoint):
         raise Exception(f"Error fetching datastocks from {endpoint}: {error}")
 
 def _fetch_datastock_csv(root, uuid):
+    """Requests the datastock identified by the given UUID and returns it as text content.
+
+    Parameters
+    ----------
+    root : str
+        The URL to the CSV export endpoint for a datastock
+    uuid : str
+        The UUID that indicates the datastock
+
+    Returns
+    -------
+    response.text : str
+        Contains the CSV content
+    """
     datastock_csv_export_endpoint = f"{root}/datastocks/{uuid}/exportCSV"
     try:
         response = requests.get(datastock_csv_export_endpoint)
@@ -75,6 +110,7 @@ def _fetch_datastock_csv(root, uuid):
         raise Exception(f"Error downloading CSV from {datastock_csv_export_endpoint}: {error}")
 
 def _save_csv_file(csv_content, filename):
+    """Saves the CSV content to a file in the project directory."""
     filepath = Path.cwd() / f"{filename}.csv"
     with open(filepath, 'w') as f:
         f.write(csv_content)

@@ -16,6 +16,8 @@ def include_replacements(dataset_object, replacements):
 
 
 class Calculator(object):
+    """Every conducted LCIA holds one Calculator object and calculation input (file) that is given during initialization.
+    """
     def __init__(self, calculation_input):
         self.calc_in = calculation_input
 
