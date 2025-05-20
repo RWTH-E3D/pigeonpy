@@ -152,7 +152,7 @@ class CalculationInput(object):
             index='Calculation_id', columns='Partition_name', values='Subset_name'
             )
             .reset_index()
-            .fillna('')
+            .where(pd.notna(subset_values_df), '')  #Replacing NaN values with empty string
         )
         combined_categories_pivot_df['Subset_name'] = combined_categories_pivot_df[list(partitions)].apply(tuple, axis=1)
         calc_df = self.calculation_df.merge(
