@@ -68,7 +68,8 @@ class CalculationInput(object):
                            f"Columns must include: '{self._calculation_header[1:]}'. {error}")
         categories = []
         partitions = []
-        for partition_idx, partition_name in enumerate(import_df.columns[len(self._calculation_header):]):
+
+        for partition_idx, partition_name in enumerate(import_df.drop(columns=self._calculation_header).columns):
             partitions.append([partition_idx, partition_name])
             subset_dict = {
                 self._subset_header[0]: calculations[self._calculation_header[0]].values.tolist(),
