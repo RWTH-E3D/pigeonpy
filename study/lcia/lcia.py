@@ -58,8 +58,8 @@ class Lcia(object):
         """
         self._initialize_calculator()
         self.result.update(
-            self._process_categorizations(
-                categorizations, epd_datamanager, observation_period
+            self._process_partitions(
+                partitions, epd_datamanager, observation_period
             )
         )
         self._calculate_total_result()
@@ -108,7 +108,7 @@ class Lcia(object):
             name = dataset.name + "_normalized"
         )
 
-        for categorization, value in self.result.items():
+        for partition, value in self.result.items():
             if isinstance(value, Series):
                 norm_result = value.apply(normalize_dataset)
             elif isinstance(value, self.dataset_template):
@@ -116,7 +116,7 @@ class Lcia(object):
             else:
                 norm_result = None
 
-            self.normalized_results[method_name][categorization] = norm_result
+            self.normalized_results[method_name][partition] = norm_result
 
     def weight(self, method_name, weighting_factors, normalization_method=None, resulting_unit='-'):
         """Performs a weighting calculation of the indicator impacts based on the given weighting_factors argument.
@@ -188,9 +188,9 @@ class Lcia(object):
             Contains the calculation results for the given partitions.
         """
         results = {}
-        for categorization in categorizations:
-            results[categorization] = self._run_individual_calculation(
-                categorization, epd_datamanager, observation_period
+        for partition in partitions:
+            results[partition] = self._run_individual_calculation(
+                partition, epd_datamanager, observation_period
             )
         results["Individual EPD"] = self._run_individual_calculation(
             "Individual EPD", epd_datamanager, observation_period
@@ -202,13 +202,13 @@ class Lcia(object):
         of single string partition or tuple partition and returns the calculated pd.Series object."""
         if isinstance(partition, tuple):
             return self._calculator.calculate(
-                *categorization,
+                *partition,
                 epd_datamanager=epd_datamanager,
                 observation_period=observation_period
             )
         else:
             return self._calculator.calculate(
-                categorization,
+                partition,
                 epd_datamanager=epd_datamanager,
                 observation_period=observation_period
             )
@@ -226,14 +226,14 @@ class Lcia(object):
             name = dataset.name + "_weighted"
         )
 
-        for categorization, value in result.items():
+        for partition, value in result.items():
             if isinstance(value, Series):
                 weighted_result = value.apply(weight_dataset)
             elif isinstance(value, self.dataset_template):
                 weighted_result = weight_dataset(value)
             else:
                 weighted_result = None
-            self.weighted_results[method_name][categorization] = weighted_result
+            self.weighted_results[method_name][partition] = weighted_result
 
     def _create_array_from_dict(self, dict_to_be_converted):
         """Converts a dictionary mapping the normalization or weighting factors to their associated indicator into

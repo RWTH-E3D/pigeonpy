@@ -63,7 +63,7 @@ class Study(object):
     def run_calculation(self, *partitions):
         """Starts the calculation process based on the partitions given as the argument."""
         self.lcia.run(
-            *categorizations,
+            *partitions,
             epd_datamanager=self.epd_datamanager,
             observation_period=self.observation_period
         )
