@@ -298,29 +298,34 @@ class EpdDataset(object):
         id_indicator = self._get_index_indicator(abr_indicator)
         return self.data[id_indicator, :]
 
-    def get_sum(self, abr_indicator, excluded_stages=None):
-        """This function sums up all life cycle stages of one indicator to one value, except these given in
-        'excluded_stages'
+    def get_sum(self, abr_indicator=None, excluded_stages=None):
+        """This method sums up the indicator values over the life cycle stages. If the abr_indicator argument is
+        specified, only the sum for this indicator is returned and if nothing is specified, a vector containing the sums
+        for every indicator available is returned. With the excluded_stages argument, one can define a list with
+        life cycle stages that should not be included in the calculation of the sum(s).
 
         Parameters
         ----------
         abr_indicator: str
-            the abbreviation of the requested indicator
+            The abbreviation of the requested indicator. If None, all indicators are summed up.
         excluded_stages: list
-            Contains abbreviations of the life cycle stages that should not be added up
+            Contains abbreviations of the life cycle stages that should not be summed up
 
         Returns
         -------
-        sum: float
+        sum: float or np.ndarray
             sum of all life cycle stages ot the requested indicator, except these given in "excluded_stages"
         """
-        excluded_value = 0
-
         if excluded_stages is not None:
-            for stage in excluded_stages:
-                excluded_value += self.get(abr_indicator, stage)
+            column_indexes_to_exclude = [self._get_index_life_cycle_stage(stage_abr) for stage_abr in excluded_stages]
+            data_copy = np.delete(self.data, column_indexes_to_exclude, axis=1)
+        else:
+            data_copy = np.copy(self.data)
 
-        return self.get_indicator(abr_indicator).sum() - excluded_value
+        if abr_indicator is not None:
+            return data_copy[self._get_index_indicator(abr_indicator), :].sum()
+        else:
+            return data_copy.sum(axis=1)
 
     def _get_index_life_cycle_stage(self, abr_life_cycle_stage):
         """Returns the index of the life cycle stage given by abbreviation for the data array."""
@@ -370,7 +375,7 @@ class EpdDataset(object):
         updated_class_dict["environmental_indicators"] = copy.deepcopy(cls.environmental_indicators)
         updated_class_dict["life_cycle_stages"] = copy.deepcopy(cls.life_cycle_stages)
 
-        # Todo: Normalizing with a unit like m^2 would lead to the unit being only m^2 while it should be
+        # Todo: Using a unit like m^2 would lead to the unit being only m^2 while it should be
         #  "indicator unit / m^2"
         for ei in updated_class_dict["environmental_indicators"]:
             ei.abbreviation = f"{ei.abbreviation}"
