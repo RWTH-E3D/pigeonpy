@@ -28,7 +28,7 @@ example_study = Study(
 )
 
 
-oekobaudat_api = OekobaudatAPI("Ökobaudat API")
+oekobaudat_api = OekobaudatAPI()
 
 # example_study.epd_datamanager.register_source("oekobaudat", oekobaudat)
 example_study.epd_datamanager.register_source("oekobaudat API", oekobaudat_api)

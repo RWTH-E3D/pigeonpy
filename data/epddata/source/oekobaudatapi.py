@@ -29,8 +29,6 @@ class OekobaudatAPI(ApiEpdSource):
 
     Attributes
     ----------
-    name : str
-        Name given to the EpdSource
     standards : list
         Available standards for this EpdSource
     _root : str
@@ -120,9 +118,8 @@ class OekobaudatAPI(ApiEpdSource):
         ]
     }
 
-    def __init__(self, name):
-        super().__init__(name)
-        self.name = name
+    def __init__(self):
+        super().__init__()
         self.standards = ["EN15804+A1", "EN15804+A2"]
 
         self._root = "https://oekobaudat.de/OEKOBAU.DAT/resource"

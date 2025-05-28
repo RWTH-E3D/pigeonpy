@@ -1,5 +1,3 @@
-from unittest.mock import inplace
-
 from data.epddata.source.fileepdsource import FileEpdSource
 import pandas as pd
 import numpy as np
@@ -22,8 +20,6 @@ class OekobaudatCsv(FileEpdSource):
 
     Attributes
     ----------
-    name : str
-        Name given to the EpdSource
     filepath : str
         Path to the Oekobaudat csv file
     standards : list
@@ -70,8 +66,8 @@ class OekobaudatCsv(FileEpdSource):
         "ADPE (A2)": float, "WDP (A2)": float
     }
 
-    def __init__(self, name, filepath):
-        super().__init__(name, filepath)
+    def __init__(self, filepath):
+        super().__init__(filepath)
         self.standards = ["EN15804+A1", "EN15804+A2"]
         self.dataset_template = None
         self.data = None

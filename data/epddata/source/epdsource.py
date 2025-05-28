@@ -3,16 +3,13 @@ class EpdSource(object):
 
     Attributes
     ----------
-    name : str
-        Given name for the EPD source
     standards : list
         Contains available standards of the EPD source
     dataset_template : EpdDataset
         Alias for EpdDataset class to specify the standard used for the respective EPD source among other things
 
     """
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
         self.standards = None
         self.dataset_template = None
 

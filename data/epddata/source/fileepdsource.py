@@ -1,6 +1,8 @@
 from data.epddata.source.epdsource import EpdSource
+
+
 class FileEpdSource(EpdSource):
 
-    def __init__(self, name, filepath):
-        super().__init__(name)
+    def __init__(self, filepath):
+        super().__init__()
         self.filepath = filepath

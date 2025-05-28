@@ -8,8 +8,6 @@ class TecoJson(FileEpdSource):
 
     Attributes
     ----------
-    name : str
-        The name for the instance.
     filepath : str or Path
         The path to the JSON file containing the EPD data. Defaults to
         'data/input/inputdata/LcaDataTeco.json' in the current working directory.
@@ -25,10 +23,10 @@ class TecoJson(FileEpdSource):
         Path to the oekobaudat csv file. Defaults to: Path.cwd()  / "data" / "input" / "inputdata" / "LcaDataTeco.json"
     """
 
-    def __init__(self, name, filepath=None):
+    def __init__(self, filepath=None):
         if not filepath:
             filepath = Path.cwd()  / "data" / "input" / "inputdata" / "LcaDataTeco.json"
-        super().__init__(name, filepath)
+        super().__init__(filepath)
         self.standards = ["EN15804+A1"]
         self.data = None
         self.dataset_template = None
