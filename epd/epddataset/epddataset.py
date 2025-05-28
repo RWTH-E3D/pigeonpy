@@ -91,8 +91,9 @@ class EpdDataset(object):
         except ValueError as e:
             raise ValueError(f"Multiplication failed for dataset '{self.name}'. Possible shape mismatch. {e}")
         except TypeError as e:
-            raise TypeError(f"Error when multiplying data array \n'{other.data}' \nof dataset {other.name} with data "
-                            f"array \n{self.data} \nof dataset {self.name}. {e}")
+            raise TypeError(f"Error when multiplying data array \n'{self.data}' \nof dataset {self.name} with multiplier"
+                            f"\nname: {other.name if isinstance(other, EpdDataset) else 'scalar'} "
+                            f"\n{other.data if isinstance(other, EpdDataset) else other} \n{e}")
 
         result_epd.history = self.history
 
@@ -194,11 +195,12 @@ class EpdDataset(object):
         try:
             result_epd.data = np.divide(self.data, divisor, out=np.zeros_like(self.data), where=divisor != 0.0)
         except ValueError as e:
-            raise ValueError(f"Division of dataset '{self.name}' with dataset '{other.name}' failed. "
+            raise ValueError(f"Division of dataset '{self.name}' with Divisor '{other}' failed. "
                              f"Possible shape mismatch. {e}")
         except TypeError as e:
-            raise TypeError(f"Error when dividing data array \n'{self.data}' \nof dataset {self.name} with data "
-                            f"array \n{other.data} \nof dataset {other.name}. {e}")
+            raise TypeError(f"Error when dividing data array \n'{self.data}' \nof dataset {self.name} with Divisor "
+                            f"\nname: {other.name if isinstance(other, EpdDataset) else 'scalar'} "
+                            f"\n{other.data if isinstance(other, EpdDataset) else other} \n{e}")
         np.seterr(divide='ignore')
 
         result_epd.history = self.history

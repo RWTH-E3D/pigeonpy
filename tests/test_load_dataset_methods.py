@@ -94,5 +94,8 @@ class TestLoadDatasetMethods(unittest.TestCase):
             number_of_datasets_api_a2 += 1
         print(f"EN15804+A2 compliant datasets loaded via OekobaudatAPI via UUIDs from csv: {number_of_datasets_api_a2}")
 
+    def tearDown(self):
+        self.latest_oekobaudat_dl.unlink()
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

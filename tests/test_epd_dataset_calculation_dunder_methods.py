@@ -50,7 +50,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
             self.a1_2_En15804A1_class + self.a2_2_En15804A2_class
 
     def test_add_single_value(self):
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class + 5
             self.a1_2_En15804A1_class + 'test'
 
@@ -81,7 +81,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
             self.a1_2_En15804A1_class - self.a2_2_En15804A2_class
 
     def test_sub_single_value(self):
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class - 5
             self.a1_2_En15804A1_class - 'test'
 
@@ -127,6 +127,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
     def test_mul_raise_type_error(self):
         with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class * 'test'
+            self.a1_2_En15804A1_class * np.full((10,10), 'abc')
 
 
     """Tests for __truediv__ method"""
@@ -148,17 +149,13 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
         self.assertTrue((help_object.data == result).all())
         self.assertEqual((self.a1_1_EpdDataset_class - self.a1_2_En15804A1_class).data.all(), result.all())
 
-    def test_truediv_division_by_zero(self):
-        with self.assertRaises(FloatingPointError):
-            self.a1_2_En15804A1_class / 0.0
-
     def test_truediv_type_error(self):
         with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class / 'test'
             self.a1_2_En15804A1_class / self.a1_1_EpdDataset_class
+            self.a1_2_En15804A1_class / np.full((10, 10), 'abc')
 
     def test_truediv_value_error(self):
-        # Maybe delete because unnecessary
         with self.assertRaises(ValueError):
             self.a1_2_En15804A1_class / self.a2_2_En15804A2_class.data
 
