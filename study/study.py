@@ -1,6 +1,7 @@
 from data.epddata.epddatamanager import EpdDataManager
 from data.epdattributeloader import EpdAttributeLoader
 from study.lcia.lcia import Lcia
+from epd.epddataset.epddataset import EpdDataset
 from epd.epddataset.en15804A2dataset import En15804A2Dataset
 
 
@@ -38,7 +39,7 @@ class Study(object):
     life_cycle_stages : list
         A list of abbreviations for the life cycle stages which, if specified, define the life cycle stages used in the
         study. Defaults to None
-    dataset_template : EpdDataset
+    dataset_template : type[EpdDataset()]
         Subclass of EpdDataset (not an instance/ no parentheses). Defaults to En15804A2Dataset which then serves as the standard for the
         study.
     """
@@ -52,13 +53,16 @@ class Study(object):
 
         self.study_name = study_name
         self.observation_period = observation_period
+
+        if isinstance(dataset_template, EpdDataset):
+            raise Exception("dataset_template must be the class itself, not an instance, i.e. type(EpdDataset()).")
         self.dataset_template = dataset_template
 
         if environmental_indicators or life_cycle_stages:
             self._customize_dataset_template(environmental_indicators, life_cycle_stages)
 
-        self.lcia = Lcia(dataset_template)
-        self.epd_datamanager = EpdDataManager(dataset_template)
+        self.lcia = Lcia(self.dataset_template)
+        self.epd_datamanager = EpdDataManager(self.dataset_template)
 
     def run_calculation(self, *partitions):
         """Starts the calculation process based on the partitions given as the argument."""
