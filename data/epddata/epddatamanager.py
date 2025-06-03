@@ -75,7 +75,7 @@ class EpdDataManager(object):
         self.databases[source_key].load_epd(epd_dataset, epd_id)
         epd_dataset.history.add_data_source(epd_id, epd_dataset.name, source_key)
 
-        self._fetched_datasets[epd_id] = {"name": epd_dataset.name, "data": epd_dataset.data.copy()}
+        self._cache_dataset_content(epd_id, epd_dataset)
 
         return epd_dataset
 
@@ -83,8 +83,21 @@ class EpdDataManager(object):
         """Returns an instance of the dataset_template"""
         return self.dataset_template()
 
+    def _cache_dataset_content(self, epd_id, epd_dataset):
+        """Saves the content from the epd_dataset to the _fetched_datasets dictionary with the UUID as key."""
+        self._fetched_datasets[epd_id] = {
+            "name": epd_dataset.name,
+            "data": epd_dataset.data.copy(),
+            "initial_source": epd_dataset.history.initial_source
+        }
+
     def _load_from_cache(self, epd_id, epd_dataset):
         """Assigns name and data of an already loaded dataset from the dictionary that caches already loaded datasets
         to another instance."""
         epd_dataset.name = self._fetched_datasets[epd_id].get("name")
         epd_dataset.data = self._fetched_datasets[epd_id].get("data").copy()
+        epd_dataset.history.add_data_source(
+            epd_id,
+            epd_dataset.name,
+            self._fetched_datasets[epd_id].get("initial_source")
+        )
