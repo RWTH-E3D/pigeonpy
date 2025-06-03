@@ -47,14 +47,14 @@ class EpdDataset(object):
     standard = None
     epd_attribute_loader = EpdAttributeLoader()
 
-    def __init__(self, data=None, name=None):
+    def __init__(self, data=None, name=None, history=None):
         self.epd_data_id = None
         self.name = name
         self.ref_flow_value = None
         self.ref_flow_unit = None
 
         self.data = data
-        self.history = History()
+        self.history = history or History()
 
     def __str__(self):
         """Dunder method for a readable representation of a dataset and its data matrix"""
@@ -101,7 +101,7 @@ class EpdDataset(object):
             result_epd.history.log_operation("Multiplied with other dataset: ")
             result_epd.history.merge_histories(other_dataset=other)
         else:
-            result_epd.history.log_operation(f"Multiplied with factor: {other}")
+            result_epd.history.log_operation(f"Multiplied with factor(s): {other}")
 
         return result_epd
 
@@ -209,7 +209,7 @@ class EpdDataset(object):
             result_epd.history.log_operation("Divided by other dataset: ")
             result_epd.history.merge_histories(other_dataset=other)
         else:
-            result_epd.history.log_operation(f"Divided by factor: {other}")
+            result_epd.history.log_operation(f"Divided by factor(s): {other}")
 
         return result_epd
 
