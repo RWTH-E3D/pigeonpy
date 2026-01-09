@@ -132,6 +132,13 @@ class TestStudySystem(unittest.TestCase):
         self.assertAlmostEqual(test_study.lcia.result["partition2"]["subsetA"].get("gwp", "a1_a3"), gwp_a1_a3_subsetA)
         self.assertAlmostEqual(test_study.lcia.result["partition2"]["subsetB"].get("gwp", "a1_a3"), gwp_a1_a3_subsetB)
 
+        gwp_a1_a3_subset2B_normalized = gwp_a1_a3_subset2B / normalization_factors["gwp"]
+        self.assertAlmostEqual(test_study.lcia.normalized_results["test_normalization"][("partition1", "partition2")][("subset2", "subsetB")].get("gwp", "a1_a3"),gwp_a1_a3_subset2B_normalized)
+
+        gwp_a1_a3_subsset2B_weighted = gwp_a1_a3_subset2B_normalized * weighting_factors["gwp"]
+        self.assertAlmostEqual(test_study.lcia.weighted_results["test_weighting"][("partition1", "partition2")][
+                                   ("subset2", "subsetB")].get("gwp", "a1_a3"), gwp_a1_a3_subsset2B_weighted)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
