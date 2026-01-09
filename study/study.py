@@ -65,7 +65,14 @@ class Study(object):
         self.epd_datamanager = EpdDataManager(self.dataset_template)
 
     def run_calculation(self, *partitions):
-        """Starts the calculation process based on the partitions given as the argument."""
+        """Starts the calculation process based on the partitions given as the argument.
+
+        Parameters
+        ----------
+        partitions : tuple
+            Contains the partitions according to which the calculation is made. Can be a single string, tuple or a
+            combination of strings and tuples.
+        """
         self.lcia.run(
             *partitions,
             epd_datamanager=self.epd_datamanager,
