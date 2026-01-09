@@ -81,5 +81,57 @@ class TestStudySystem(unittest.TestCase):
             pocp_c2_total_weighted)
         self.assertAlmostEqual(test_study.lcia.weighted_results["test_weighting"]["Total result"].get("gwp", "d"), 0)
 
+    def test_study_system_testcase1_partitions(self):
+        # normalization
+        normalization_factors = {
+            "gwp": 9220,
+            "odp": 0.022,
+            "pocp": 31.7
+        }
+
+        # Weighting
+        weighting_factors = {
+            "gwp": 0.33,
+            "odp": 0.33,
+            "pocp": 0.34
+        }
+
+        input_json_path = Path.cwd() / "test_data" / "Teco_EN15804A1_testcase1.json"
+        input_csv_path = Path.cwd() / "test_data" / "input_testcase1.csv"
+        test_study = Study(
+            study_name="test_study",
+            environmental_indicators=["gwp", "pocp", "odp"],
+            life_cycle_stages=["a1_a3", "c2", "d"],
+            observation_period=50,
+            dataset_template=En15804A1Dataset
+        )
+
+        teco_json = TecoJson(input_json_path)
+
+        test_study.epd_datamanager.register_source("teco_json", teco_json)
+
+        test_study.load_calculation_input(input_csv_path)
+        test_study.run_calculation("partition1", ("partition1", "partition2"), "partition2")
+
+        test_study.lcia.normalize("test_normalization", normalization_factors)
+        test_study.lcia.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
+
+        gwp_a1_a3_subset1 = 1.4 * 3.5
+        gwp_a1_a3_subset2 = 1 * 3.5 + 1.3 * 3 + 1 * 3
+        gwp_a1_a3_subset1A = 1.4 * 3.5
+        gwp_a1_a3_subset2B = 1 * 3.5
+        gwp_a1_a3_subset2A = 1.3 * 3 + 1 * 3
+        gwp_a1_a3_subsetA = 1.4 * 3.5 + 1.3 * 3 + 1* 3
+        gwp_a1_a3_subsetB = 1 * 3.5
+
+        self.assertAlmostEqual(test_study.lcia.result["partition1"]["subset1"].get("gwp", "a1_a3"), gwp_a1_a3_subset1)
+        self.assertAlmostEqual(test_study.lcia.result["partition1"]["subset2"].get("gwp", "a1_a3"), gwp_a1_a3_subset2)
+        self.assertAlmostEqual(test_study.lcia.result[("partition1", "partition2")][("subset1", "subsetA")].get("gwp", "a1_a3"), gwp_a1_a3_subset1A)
+        self.assertAlmostEqual(test_study.lcia.result[("partition1", "partition2")][("subset2", "subsetB")].get("gwp", "a1_a3"), gwp_a1_a3_subset2B)
+        self.assertAlmostEqual(test_study.lcia.result[("partition1", "partition2")][("subset2", "subsetA")].get("gwp", "a1_a3"), gwp_a1_a3_subset2A)
+        self.assertAlmostEqual(test_study.lcia.result["partition2"]["subsetA"].get("gwp", "a1_a3"), gwp_a1_a3_subsetA)
+        self.assertAlmostEqual(test_study.lcia.result["partition2"]["subsetB"].get("gwp", "a1_a3"), gwp_a1_a3_subsetB)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
