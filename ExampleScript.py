@@ -15,7 +15,7 @@ from matplotlib.ticker import MaxNLocator
 tic = time.time()
 
 #input file wird geladen
-input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper+service_life+headers.csv"
+input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper+replacement_cycle+headers.csv"
 
 # Studie wird erstellt
 standard_dataset = En15804A2Dataset
