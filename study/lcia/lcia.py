@@ -41,7 +41,7 @@ class Lcia(object):
 
     def run(self, *partitions, epd_datamanager, observation_period):
         """Starts the calculation process by initializing the calculator, calculating the partition-based results, the
-        "Total result" and the "Individual EPD" result (each EPD multiplied with the given amount in the input csv file)
+        "Total result" and the "unique_epd" result (each EPD multiplied with the given amount in the input csv file)
          of the study.
 
         Parameters
@@ -183,8 +183,8 @@ class Lcia(object):
         self._calculator = self._calculator or Calculator(self.input)
 
     def _process_partitions(self, partitions, epd_datamanager, observation_period):
-        """Iterates through the partitions and creates the result for the "Individual EPD" calculation that contains
-        an entry for every individual EPD present in the input.
+        """Iterates through the partitions and creates the result for the "unique_epd" calculation that contains
+        an entry for every unique EPD present in the input.
 
         Parameters
         ----------
@@ -200,8 +200,8 @@ class Lcia(object):
             results[partition] = self._run_individual_calculation(
                 partition, epd_datamanager, observation_period
             )
-        results["Individual EPD"] = self._run_individual_calculation(
-            "Individual EPD", epd_datamanager, observation_period
+        results["unique_epd"] = self._run_individual_calculation(
+            "unique_epd", epd_datamanager, observation_period
         )
         return results
 
@@ -222,8 +222,8 @@ class Lcia(object):
             )
 
     def _calculate_total_result(self):
-        """Calculates the total result of the study as one single EpdDataset by summing over the Individual Epd result."""
-        self.result["Total result"] = self.result["Individual EPD"].sum()
+        """Calculates the total result of the study as one single EpdDataset by summing over the unique_epd result."""
+        self.result["Total result"] = self.result["unique_epd"].sum()
         self.result["Total result"].name = "Total result"
 
     def _calculate_weighting(self, result, method_name, weighting_factors, weighted_dataset_class):

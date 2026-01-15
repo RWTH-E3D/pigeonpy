@@ -63,7 +63,7 @@ class CalculationInput(object):
 
         df['#uuid'] = df['#uuid'].str.strip()
         df.insert(0, self._calculation_header[0], df.index)
-        df.insert(len(df.columns), "Individual EPD", df["#epd_name"])
+        df.insert(len(df.columns), "unique_epd", df["#epd_name"])
         return df
 
     def _populate_dataframes(self, import_df):
