@@ -18,12 +18,13 @@ class Lcia(object):
         Subclass of EpdDataset (not an instance) that serves as a template for creating instances and extract standard
         based metadata.
     result : dict
-        Dictionary containing a Series for every given partition and the Total results. Partition names or "Total result"
-        are the .keys
-    normalized_results : dict
-        Contains the normalized results in the same form as the result attribute
-    weighted_results : dict
-        Contains the weighted results in the same form as the result attribute
+        Dictionary containing dictionaries for the "indicator_values" as result of the standard calculation and, if
+        normalization and/or weighting is calculated, their results are saved as dictionaries with the given name
+        for the normalization/weighting method as their key.
+        The resulting datasets can be accessed through their respective partition and the subset name, i.e.:
+        <study_name>.lcia.result[<"indicator_values"/<normalization method name>/<weighting method name>>][<partition name>][<subset name>]
+        E.g.:
+        example_study.lcia.result["test_normalization"]["building_type"]["type 1"]
 
     Parameters
     ----------
@@ -36,12 +37,10 @@ class Lcia(object):
         self.dataset_template = dataset_template
 
         self.result = {}
-        self.normalized_results = {}
-        self.weighted_results = {}
 
     def run(self, *partitions, epd_datamanager, observation_period):
         """Starts the calculation process by initializing the calculator, calculating the partition-based results, the
-        "Total result" and the "unique_epd" result (each EPD multiplied with the given amount in the input csv file)
+        "total_result" and the "unique_epd" (each EPD multiplied with the given amount in the input csv file) result
          of the study.
 
         Parameters
@@ -58,9 +57,7 @@ class Lcia(object):
         """
         self._initialize_calculator()
         self.result.update(
-            self._process_partitions(
-                partitions, epd_datamanager, observation_period
-            )
+            {"indicator_values": self._process_partitions(partitions, epd_datamanager, observation_period)}
         )
         self._calculate_total_result()
 
@@ -101,7 +98,7 @@ class Lcia(object):
             f"NormalizedDataset_{method_name}", resulting_unit
         )
 
-        self.normalized_results[method_name] = {}
+        self.result[method_name] = {}
 
         normalize_dataset = lambda dataset: normalized_dataset_class(
             data = (dataset / reference_result).data,
@@ -114,7 +111,7 @@ class Lcia(object):
             )
             return dataset
 
-        for partition, value in self.result.items():
+        for partition, value in self.result["indicator_values"].items():
             if isinstance(value, Series):
                 norm_result = value.apply(log_normalization)
                 norm_result = norm_result.apply(normalize_dataset)
@@ -124,7 +121,7 @@ class Lcia(object):
             else:
                 norm_result = None
 
-            self.normalized_results[method_name][partition] = norm_result
+            self.result[method_name][partition] = norm_result
 
     def weight(self, method_name, weighting_factors, normalization_method=None, resulting_unit='-'):
         """Performs a weighting calculation of the indicator impacts based on the given weighting_factors argument.
@@ -162,18 +159,18 @@ class Lcia(object):
             f"WeightedDataset_{method_name}", resulting_unit
         )
 
-        self.weighted_results[method_name] = {}
+        self.result[method_name] = {}
 
-        if normalization_method and normalization_method in self.normalized_results:
+        if normalization_method and normalization_method in self.result:
             self._calculate_weighting(
-                self.normalized_results[normalization_method],
+                self.result[normalization_method],
                 method_name, weighting_factors, weighted_dataset_class
             )
         elif normalization_method:
             print(f"Method '{normalization_method}' not in normalized results. No weighting possible.")
         else:
             self._calculate_weighting(
-                self.result,
+                self.result["indicator_results"],
                 method_name, weighting_factors, weighted_dataset_class
             )
 
@@ -222,9 +219,9 @@ class Lcia(object):
             )
 
     def _calculate_total_result(self):
-        """Calculates the total result of the study as one single EpdDataset by summing over the unique_epd result."""
-        self.result["Total result"] = self.result["unique_epd"].sum()
-        self.result["Total result"].name = "Total result"
+        """Calculates the total_result of the study as one single EpdDataset by summing over the unique_epd result."""
+        self.result["indicator_values"]["total_result"] = self.result["indicator_values"]["unique_epd"].sum()
+        self.result["indicator_values"]["total_result"].name = "total_result"
 
     def _calculate_weighting(self, result, method_name, weighting_factors, weighted_dataset_class):
         """Method to eliminate duplication. Calculates the weighting for the given result which is either the result
@@ -249,7 +246,8 @@ class Lcia(object):
                 weighted_result = weight_dataset(weighted_result)
             else:
                 weighted_result = None
-            self.weighted_results[method_name][partition] = weighted_result
+
+            self.result[method_name][partition] = weighted_result
 
     def _create_array_from_dict(self, dict_to_be_converted):
         """Converts a dictionary mapping the normalization or weighting factors to their associated indicator into

@@ -68,8 +68,7 @@ example_study.lcia.weight("test_weighting", weighting_factors, normalization_met
 ###########################################################################
 
 # Daten sammeln
-#print('example_study.lcia.weighted_results["test_weighting"]["Total result"]: ', example_study.lcia.weighted_results["test_weighting"]["Total result"])
-print('example_study.lcia.weighted_results["test_weighting"]["Total result"]: ', example_study.lcia.weighted_results["test_weighting"]["building_type"]["type 1"])
+print('example_study.lcia.result["test_weighting"]["building_type"]["type 1"]: ', example_study.lcia.result["test_weighting"]["building_type"]["type 1"])
 
 building_types = ["type 1", "type 2", "type 3", "type 4"]
 life_cycle_stages=["a1_a3", "c1", "c2", "c3", "c4", "d"]                        #"b6",
@@ -94,8 +93,7 @@ for type in building_types:
 
         # Iteration über die Lebenszyklusphasen
         for indicator in environmental_indicators:
-            #value = example_study.lcia.weighted_results["test_weighting"]["Total result"].get(indicator, stage)
-            value = example_study.lcia.weighted_results["test_weighting"]["building_type"][type].get(indicator, stage)
+            value = example_study.lcia.result["test_weighting"]["building_type"][type].get(indicator, stage)
             #print("indicator: ", indicator)
             results[stage].append(value)
             new_index = len(df)
