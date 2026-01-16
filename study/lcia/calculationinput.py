@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 
 class CalculationInput(object):
@@ -22,15 +21,17 @@ class CalculationInput(object):
         Header for the partition_df
     """
     def __init__(self):
-        self._calculation_header = ["Calculation_id", "Amount", "UUID", "EPD name", "Comment", "Service life"]
-        self._subset_header = ["Calculation_id", "Subset_name", "Partition_id"]
-        self._partition_header = ["Partition_id", "Partition_name"]
+        self._calculation_header = ["calculation_id", "#amount", "#uuid", "#epd_name", "#comment", "#replacement_cycle"]
+        self._mandatory_columns = ["#amount", "#uuid", "#epd_name"]
+
+        self._subset_header = ["calculation_id", "subset_name", "partition_id"]
+        self._partition_header = ["partition_id", "partition_name"]
 
         self.calculation_df = None
         self.subset_df = None
         self.partition_df = None
 
-    def load(self, filepath, individual_column_names=False):
+    def load(self, filepath):
         """Method to set the class attributes (dataframes with calculation info, partitions, categories)
         based on the input csv
 
@@ -38,34 +39,44 @@ class CalculationInput(object):
         ----------
         filepath : str
             Path to the input csv file
-        individual_column_names : bool
-            If False, matches columns by names defined in calculation header; otherwise, uses predefined positions.
         """
-
         import_df = self._load_and_preprocess_csv(filepath)
 
-        if individual_column_names:
-            self._populate_dataframes_positional(import_df)
-        else:
-            self._populate_dataframes_dynamically(import_df)
+        self._populate_dataframes(import_df)
 
     def _load_and_preprocess_csv(self, filepath):
         """Method to load the input csv into a pandas dataframe, clean UUID column from whitespaces, create an index
-        column and a column for the calculation of all individual datasets as a separate partition"""
-        df = (pd.read_csv(filepath, sep=',', encoding='ANSI'))
-        df['UUID'] = df['UUID'].str.strip()
-        df.insert(0, self._calculation_header[0], df.index)
-        df.insert(len(df.columns), "Individual EPD", df["EPD name"])
-        return df
+        column and a column for the calculation of all individual datasets as a separate partition
 
-    def _populate_dataframes_dynamically(self, import_df):
-        """Populate the dataframes for calculation, subset and partition dynamically based on the defined
-        headers"""
+        Parameters
+        ----------
+        filepath: str
+            Path to the input csv file
+        """
+        df = (pd.read_csv(filepath, sep=',', encoding='ANSI'))
+
         try:
-            calculations = import_df[self._calculation_header].copy()
+            df[self._mandatory_columns]
         except KeyError as error:
             raise KeyError(f"Column names from input csv do not match the specifications for obligatory column names."
-                           f"Columns must include: '{self._calculation_header[1:]}'. {error}")
+                           f"Columns must include: '{self._mandatory_columns}'. {error}")
+
+        df['#uuid'] = df['#uuid'].str.strip()
+        df.insert(0, self._calculation_header[0], df.index)
+        df.insert(len(df.columns), "unique_epd", df["#epd_name"])
+        return df
+
+    def _populate_dataframes(self, import_df):
+        """Populate the dataframes for calculation, subset and partition based on the defined headers.
+
+        Parameters
+        ----------
+        import_df: pd.DataFrame
+            The loaded and preprocessed csv as dataframe
+        """
+        cols_to_copy = [c for c in self._calculation_header if c in import_df]
+        calculations = import_df[cols_to_copy].copy()
+
         categories = []
         partitions = []
 
@@ -81,32 +92,6 @@ class CalculationInput(object):
         self.calculation_df = calculations
         self.partition_df = pd.DataFrame(partitions, columns=self._partition_header)
         self.subset_df = pd.concat([pd.DataFrame(entry) for entry in categories])
-
-    def _populate_dataframes_positional(self, import_df):
-        """For the case that column names in the input csv differ from those defined in the headers, this method
-        populates the calculation, partition and subset dataframe based on the positions, not the column names
-        so the first 6 columns can be named differently but must respect the correct column order."""
-        partitions = [[idx, col] for idx, col in enumerate(import_df.columns[5:])]
-        categories = []
-        calculations = []
-
-        for idx, row in import_df.iloc[:, :5].iterrows():
-            calculations.append([idx] + row.tolist())
-
-        for col_idx, col_name in partitions:
-            col_values = import_df.iloc[:, col_idx + 5]
-            for idx, val in enumerate(col_values):
-                categories.append([idx, val, col_idx])
-
-        self.calculation_df = pd.DataFrame(calculations, columns=self._calculation_header)
-        self.subset_df = pd.DataFrame(categories, columns=self._subset_header)
-        self.partition_df = pd.DataFrame(partitions, columns=self._partition_header)
-
-    def calculate_component_replacements(self, observation_period):
-        """Calculates the amount of replacements for every entry of the input dataframe based on the observation period
-        specified in the study object. The divided number is rounded to the next bigger integer and then subtracted by 1.
-        """
-        self.calculation_df["Replacements"] = np.ceil(observation_period / self.calculation_df["Service life"]) - 1
 
     def select_by_partition(self, *partitions):
         """Method to create a dataframe for the calculation which additionally contains the subset or subset
@@ -128,37 +113,46 @@ class CalculationInput(object):
 
     def _filter_by_single_partition(self, partition):
         """Creates/ Returns a dataframe for the calculator by joining the initial calculation dataframe (created by
-        loading the input) with the subset values of the  according to which the datasets will be
-        calculated"""
+        loading the input) with the subset values of the partition according to which the datasets will be
+        calculated
+
+        Parameters
+        ----------
+        partition: str
+            Name of the partition
+        """
         chosen_partition = self.partition_df.query(
-            "Partition_name == @partition"
+            "partition_name == @partition"
         )
         associated_subset_values = pd.merge(
-            self.subset_df, chosen_partition, on="Partition_id", how='inner'
+            self.subset_df, chosen_partition, on="partition_id", how='inner'
         )
         return pd.merge(
-            self.calculation_df, associated_subset_values, on="Calculation_id", how='inner'
+            self.calculation_df, associated_subset_values, on="calculation_id", how='inner'
         )
 
     def _filter_by_multiple_partitions(self, partitions):
         """Creates/ Returns a dataframe for the calculator by joining the initial calculation dataframe (created by
         loading the input) with the subset values of the partition combination according to which the datasets
-        will be calculated."""
+        will be calculated.
 
+        partitions: tuple
+            Contains the strings of the partitions for the partition combination
+        """
         subset_values_df = self.subset_df.merge(
-            self.partition_df, on='Partition_id'
+            self.partition_df, on='partition_id'
         )
         combined_categories_pivot_df = (
             subset_values_df.pivot(
-            index='Calculation_id', columns='Partition_name', values='Subset_name'
+            index='calculation_id', columns='partition_name', values='subset_name'
             )
             .reset_index()
         )
         combined_categories_pivot_df = combined_categories_pivot_df.where(pd.notna(combined_categories_pivot_df), '')
 
-        combined_categories_pivot_df['Subset_name'] = combined_categories_pivot_df[list(partitions)].apply(tuple, axis=1)
+        combined_categories_pivot_df['subset_name'] = combined_categories_pivot_df[list(partitions)].apply(tuple, axis=1)
         calc_df = self.calculation_df.merge(
-            combined_categories_pivot_df, on='Calculation_id', how='left'
+            combined_categories_pivot_df, on='calculation_id', how='left'
         )
-        calc_df.insert(2, "Partition_name", ' '.join(partitions))
+        calc_df.insert(2, "partition_name", ' '.join(partitions))
         return calc_df
