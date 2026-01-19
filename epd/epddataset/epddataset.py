@@ -341,6 +341,13 @@ class EpdDataset(object):
                 return index
         raise KeyError(f"There is no indicator {abr_indicator}")
 
+    def sum_to_stage(self, stage):
+        indicator_sums = self.data.sum(axis = 1)
+        self.data = np.zeros_like(self.data)
+        stage_id = self._get_index_life_cycle_stage(stage)
+        self.data[:, stage_id] = indicator_sums
+        #todo: Find out whether it makes more sense to overwrite self.data or return a new data record and adjust it if necessary.
+
     @staticmethod
     def format__1(digits, num):
         """Formats each field of the printed data array, so it has the correct width. Digits parameter gives maximum for
