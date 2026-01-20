@@ -1,3 +1,5 @@
+import copy
+
 from data.epddata.epddatamanager import EpdDataManager
 from data.epdattributeloader import EpdAttributeLoader
 from study.lcia.lcia import Lcia
@@ -85,6 +87,22 @@ class Study(object):
 
     def _customize_dataset_template(self, indicators, stages):
         """If environmental_indicators or life_cycle_stages are given during initialization of the study this method
-        alters the dataset_template so it only contains the desired indicators and life cycle stages."""
-        attribute_loader = EpdAttributeLoader(indicators, stages, self.dataset_template)
-        self.dataset_template.epd_attribute_loader = attribute_loader
+        creates a new subclass of the dataset_template containing only the desired indicators and life cycle stages,
+        leaving the original template class unchanged."""
+        # Create a new subclass to avoid mutating the original template class
+        custom_class = type(
+            f"{self.dataset_template.__name__}_custom",
+            (self.dataset_template,),
+            {
+                "environmental_indicators": copy.deepcopy(self.dataset_template.environmental_indicators),
+                "life_cycle_stages": copy.deepcopy(self.dataset_template.life_cycle_stages),
+                "standard": self.dataset_template.standard,
+            }
+        )
+
+        # Let EpdAttributeLoader filter the attributes on the NEW class
+        attribute_loader = EpdAttributeLoader(indicators, stages, custom_class)
+        custom_class.epd_attribute_loader = attribute_loader
+
+        # Update to use the new custom class
+        self.dataset_template = custom_class
