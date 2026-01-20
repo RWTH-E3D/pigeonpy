@@ -53,7 +53,10 @@ class CalculationInput(object):
         filepath: str
             Path to the input csv file
         """
-        df = (pd.read_csv(filepath, sep=',', encoding='ANSI'))
+        df = pd.read_csv(filepath, sep=',', encoding='ANSI')
+
+        df = df.dropna(how='all')
+        df = df.reset_index(drop=True)
 
         try:
             df[self._mandatory_columns]
