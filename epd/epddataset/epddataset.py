@@ -22,7 +22,7 @@ class EpdDataset(object):
 
     Attributes
     ----------
-    epd_data_id : str
+    epd_id : str
         lca id for the contained dataset
     name : str
         Name of the contained dataset
@@ -48,7 +48,7 @@ class EpdDataset(object):
     epd_attribute_loader = EpdAttributeLoader()
 
     def __init__(self, data=None, name=None, history=None):
-        self.epd_data_id = None
+        self.epd_id = None
         self.name = name
         self.ref_flow_value = None
         self.ref_flow_unit = None

@@ -301,7 +301,7 @@ class OekobaudatAPI(ApiEpdSource):
             epd_dataset.name = process_dataset.find(".//default:name/default:baseName", ns).text
         elif name:
             epd_dataset.name = name
-        epd_dataset.epd_data_id = epd_id
+        epd_dataset.epd_id = epd_id
         # Todo: Implement reference flow value and unit by fetching flow with 'referenceToFlowDataSet' -> 'refObjectId'
 
     @staticmethod
