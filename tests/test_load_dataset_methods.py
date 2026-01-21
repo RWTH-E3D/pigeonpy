@@ -1,6 +1,6 @@
 from data.epddata.source.oekobaudatcsv import OekobaudatCsv
 from data.epddata.source.tecojsonsource import TecoJson
-from data.epddata.source.oekobaudatapi import OekobaudatAPI
+from data.epddata.source.oekobaudatapi import OekobaudatApi
 from data.epddata.epddatamanager import EpdDataManager
 from epd.epddataset.en15804A1dataset import En15804A1Dataset
 from epd.epddataset.en15804A2dataset import En15804A2Dataset
@@ -32,10 +32,10 @@ class TestLoadDatasetMethods(unittest.TestCase):
         self.epd_datamanager_a2.register_source("oekobaudat_edited", self.oekobaudat_edited)
         self.oekobaudat_edited_dropped_duplicates = self.oekobaudat_edited.data.drop_duplicates(subset="UUID")
 
-        self.oekobaudat_api_a1 = OekobaudatAPI("Ökobaudat_API_A1")
+        self.oekobaudat_api_a1 = OekobaudatApi("Ökobaudat_API_A1")
         self.epd_datamanager_a1.register_source("oekobaudat_api_a1", self.oekobaudat_api_a1)
 
-        self.oekobaudat_api_a2 = OekobaudatAPI("Ökobaudat_API_A2")
+        self.oekobaudat_api_a2 = OekobaudatApi("Ökobaudat_API_A2")
         self.epd_datamanager_a2.register_source("oekobaudat_api_a2", self.oekobaudat_api_a2)
 
         self.teco_json_filepath = Path.cwd() / ".." / "data" / "input" / "inputdata" / "LcaDataTeco.json"
