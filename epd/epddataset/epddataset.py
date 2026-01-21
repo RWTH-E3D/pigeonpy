@@ -66,7 +66,7 @@ class EpdDataset(object):
             print(f"Dataset: '{self.name}':")
         else:
             print("Processed dataset:")
-        return f'{self.print__data(data_to_print, row_labels=row_labels, col_labels=col_labels)}'
+        return f'{self.print_data(data_to_print, row_labels=row_labels, col_labels=col_labels)}'
 
     def __mul__(self, other):
         """Method to multiply the dataset with another dataset or a scalar.
@@ -213,7 +213,7 @@ class EpdDataset(object):
 
         return result_epd
 
-    def print__data(self, arr, row_labels=None, col_labels=None):
+    def print_data(self, arr, row_labels=None, col_labels=None):
         """Method that prints the _data array together with the life cycle stages from the class variable
          as columns and the environmental indicators as rows in a readable way
 
@@ -235,11 +235,11 @@ class EpdDataset(object):
         max_chars = max([len(str(item)) for item in arr.flatten()])  # char number required to display any item in list
         rw = max([len(str(item)) for item in row_labels])  # width for the indicator column
         readable_data_string = str(
-            '%s %s' % (' ' * (rw + 1), ' '.join(self.format__1(max_chars, i) for i in col_labels)))
+            '%s %s' % (' ' * (rw + 1), ' '.join(self.format_1(max_chars, i) for i in col_labels)))
         for row_label, row in zip(row_labels, arr):
             readable_data_string += "\n"
             readable_data_string += str(
-                '%s [%s]' % (self.format__1(rw, row_label), ' '.join(self.format__1(max_chars, i) for i in row)))
+                '%s [%s]' % (self.format_1(rw, row_label), ' '.join(self.format_1(max_chars, i) for i in row)))
         return readable_data_string
 
     def export(self, path=None, file_format="teco_json", drop_rows=False, add_uuid=False):
@@ -349,7 +349,7 @@ class EpdDataset(object):
         #todo: Find out whether it makes more sense to overwrite self.data or return a new data record and adjust it if necessary.
 
     @staticmethod
-    def format__1(digits, num):
+    def format_1(digits, num):
         """Formats each field of the printed data array, so it has the correct width. Digits parameter gives maximum for
         field width and num is the value to be formatted."""
         if digits < len(str(num)):
