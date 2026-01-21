@@ -109,7 +109,7 @@ class OekobaudatCsv(FileEpdSource):
     def _populate_metadata(epd_dataset, lca_dataset_bind, epd_id):
         """Populates metadata fields in the EPD dataset."""
         epd_dataset.epd_id = epd_id
-        epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
+        epd_dataset.name = lca_dataset_bind['Name (de)'].iloc[0]
         epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
         epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
 
