@@ -42,7 +42,7 @@ class En15804A1Dataset(EpdDataset):
         super().__init__()
         self.data = np.full((len(self.environmental_indicators),len(self.life_cycle_stages)), 0.0)
 
-    def load_lca_dataset(self, epd_id, epd_data_manager, source_key = None):
+    def load_lca_dataset(self, epd_id, epd_data_manager, scenario = None, source_key = None):
         """Method that calls the functions to load a dataset from the file binding into the instance dependent
         on the passed file format inside the DataClass instance
 
@@ -52,7 +52,9 @@ class En15804A1Dataset(EpdDataset):
             String with LCA id for the dataset to be loaded
         epd_data_manager : EpdDataManager
             Instance of EpdDataManager containing the different epd sources
+        scenario : str
+            Name of the scenario to be used in the dataset if specified
         source_key : str
             If given, the EpdDataManager loads the epd from the source, specified by the source_key
         """
-        epd_data_manager.load_epd(epd_id, epd_dataset=self, source_key=source_key)
+        epd_data_manager.load_epd(epd_id, scenario=scenario, epd_dataset=self, source_key=source_key)

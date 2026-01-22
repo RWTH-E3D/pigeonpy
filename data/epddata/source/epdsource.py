@@ -13,7 +13,7 @@ class EpdSource(object):
         self.standards = None
         self.dataset_template = None
 
-    def load_epd(self, epd_dataset, epd_id):
+    def load_epd(self, epd_dataset, epd_id, scenario):
         """Method to load the EPD dataset given by an epd_id from the respective source."""
         pass
 

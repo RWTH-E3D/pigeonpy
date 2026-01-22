@@ -21,8 +21,8 @@ class CalculationInput(object):
         Header for the partition_df
     """
     def __init__(self):
-        self._calculation_header = ["calculation_id", "#amount", "#uuid", "#epd_name", "#comment", "#replacement_cycle"]
-        self._mandatory_columns = ["#amount", "#uuid", "#epd_name"]
+        self._calculation_header = ["calculation_id", "#amount", "#uuid", "#epd_name", "#scenario", "#replacement_cycle", "#comment"]
+        self._mandatory_columns = ["#amount", "#uuid", "#epd_name", "#scenario"]
 
         self._subset_header = ["calculation_id", "subset_name", "partition_id"]
         self._partition_header = ["partition_id", "partition_name"]
