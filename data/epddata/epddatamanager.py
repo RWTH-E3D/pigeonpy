@@ -89,6 +89,7 @@ class EpdDataManager(object):
         """Saves the content from the epd_dataset to the _fetched_datasets dictionary with the UUID as key."""
         self._fetched_datasets[(epd_id, scenario)] = {
             "name": epd_dataset.name,
+            "scenario": epd_dataset.scenario,
             "data": epd_dataset.data.copy(),
             "initial_source": epd_dataset.history.initial_source
         }
@@ -97,6 +98,7 @@ class EpdDataManager(object):
         """Assigns name and data of an already loaded dataset from the dictionary that caches already loaded datasets
         to another instance."""
         epd_dataset.name = self._fetched_datasets[(epd_id, scenario)].get("name")
+        epd_dataset.scenario = self._fetched_datasets[(epd_id, scenario)].get("scenario")
         epd_dataset.data = self._fetched_datasets[(epd_id, scenario)].get("data").copy()
         epd_dataset.history.add_data_source(
             epd_id,

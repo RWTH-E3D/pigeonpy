@@ -91,7 +91,7 @@ class OekobaudatCsv(FileEpdSource):
         if lca_dataset_bind["Modul"].duplicated().any(): # True -> dataset contains scenarios
             lca_dataset_bind = self._handle_scenarios(lca_dataset_bind, scenario, epd_id)
 
-        data_array = self._populate_data_array(epd_dataset, lca_dataset_bind, scenario)
+        data_array = self._populate_data_array(epd_dataset, lca_dataset_bind)
         data_array = self._handle_a1_a3_column(epd_dataset, data_array)
         epd_dataset.data = data_array
 
