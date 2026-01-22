@@ -91,7 +91,7 @@ class Study(object):
         leaving the original template class unchanged."""
         # Create a new subclass to avoid mutating the original template class
         custom_class = type(
-            f"{self.dataset_template.__name__}_custom",
+            f"{self.dataset_template.__name__}_{self.study_name}",
             (self.dataset_template,),
             {
                 "environmental_indicators": copy.deepcopy(self.dataset_template.environmental_indicators),
