@@ -1,8 +1,11 @@
+import pandas as pd
+
 from data.epddata.source.apiepdsource import ApiEpdSource
 import requests
 import numpy as np
 from io import StringIO
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 
 
 class OekobaudatAPI(ApiEpdSource):
@@ -124,7 +127,7 @@ class OekobaudatAPI(ApiEpdSource):
 
         self._root = "https://oekobaudat.de/OEKOBAU.DAT/resource"
 
-    def load_epd(self, epd_dataset, epd_id):
+    def load_epd(self, epd_dataset, epd_id, scenario):
         """Carries out method calls to request epd data based on the given epd_id (UUID), process/ parse the returned
         xml file, extract indicator data out of the xml file and populate the given epd_dataset instance with the
         extracted indicator data.
@@ -135,7 +138,8 @@ class OekobaudatAPI(ApiEpdSource):
             Instance of a child class of EpdDataset
         epd_id : str
             UUID for the epd dataset to be loaded
-
+        scenario : str
+            Name of the scenario to be used in the dataset if specified
         """
 
         xml_data = self._single_dataset_request(epd_id)
@@ -145,25 +149,29 @@ class OekobaudatAPI(ApiEpdSource):
         if not self._check_compliance(process_dataset, ns):
             raise Exception(f"Trying to load a dataset which is not compliant to the defined standard. '{epd_id}'")
 
-        epd_data = {
+        raw_epd_data = {
             **self._extract_indicator_data(
                 process_dataset=process_dataset,
                 ns=ns,
                 xml_base_path=".//default:exchanges/default:exchange",
-                uuid_allocations=self.exchange_uuid_allocations
+                uuid_allocations=self.exchange_uuid_allocations,
+                scenario=scenario
             ),
             **self._extract_indicator_data(
                 process_dataset=process_dataset,
                 ns=ns,
                 xml_base_path=".//default:LCIAResults/default:LCIAResult",
-                uuid_allocations=self.lcia_uuid_allocations[epd_dataset.standard]
+                uuid_allocations=self.lcia_uuid_allocations[epd_dataset.standard],
+                scenario=scenario
             )
         }
 
-        self._set_metadata(epd_dataset, epd_id, process_dataset=process_dataset, ns=ns)
-        self._populate_data_array(epd_dataset, epd_data)
+        scenario_resolved_epd_data = self._handle_scenarios(raw_epd_data, scenario, epd_id)
 
-    def _extract_indicator_data(self, process_dataset, ns, xml_base_path, uuid_allocations):
+        self._set_metadata(epd_dataset, epd_id, scenario, process_dataset=process_dataset, ns=ns)
+        self._populate_data_array(epd_dataset, scenario_resolved_epd_data)
+
+    def _extract_indicator_data(self, process_dataset, ns, xml_base_path, uuid_allocations, scenario):
         """Extracting environmental indicator data out of the fetched dataset xml file by using pythons xml library,
         either for the "Exchanges" (pere, perm, etc.) or for the "LCIAResults" (gwp-total, odp, etc.) part of the
         XML file by distinguishing the two cases based on the given xml_base_path and uuid_allocation.
@@ -188,7 +196,8 @@ class OekobaudatAPI(ApiEpdSource):
             associated amount as key/ value pairs
 
         """
-        indicator_data = {}
+        indicator_data = {} # Löschen wenn fertig
+        raw_indicator_data = defaultdict(lambda: defaultdict(dict))
         elements = process_dataset.findall(xml_base_path, ns)
 
         for element in elements:
@@ -219,13 +228,65 @@ class OekobaudatAPI(ApiEpdSource):
             for amount in element.findall(".//epd:amount", ns):
                 # value of ns['epd'] = http://www.iai.kit.edu/EPD/2013
                 module = amount.get(f"{{{ns['epd']}}}module").replace("-", "_").lower()
+                scenario = amount.get(f"{{{ns['epd']}}}scenario") # None if missing
                 if amount.text is not None:
                     element_data[module] = element_data.setdefault(module, float(amount.text or 0.0))
                     # setdefault() -> Always use first life cycle scenario if multiple exist
 
+                    value = float(amount.text or 0.0)
+                    raw_indicator_data[element_name][module][scenario] = value # E.g. element_name=pere, module=a1_a3, scenario=None
+
             indicator_data.update(element_data)
 
-        return indicator_data
+        return raw_indicator_data # indicator_data
+
+    @staticmethod
+    def _handle_scenarios(raw_epd_data, scenario, epd_id):
+        """
+
+        Parameters
+        ----------
+        raw_epd_data : DefaultDict
+            asd
+        scenario : str
+            Name of the scenario to use or None
+        epd_id : str
+            UUID used to create the lca_dataset_bind and given to this method for clarity in case an error is raised
+
+        Returns
+        -------
+        resolved_epd_data : Dict
+            asd
+        """
+        resolved_epd_data = {}
+
+        for indicator, modules in raw_epd_data.items():
+            resolved_epd_data[indicator] = {}
+
+            for module, scenarios in modules.items():
+
+                # No scenario, only 1 value
+                if len(scenarios) == 1:
+                    resolved_epd_data[indicator][module] = next(iter(scenarios.values()))
+                    continue
+
+                # Scenarios present, but nothing specified by user
+                if pd.isna(scenario) or scenario is None:
+                    raise Exception(
+                        f"Dataset with id '{epd_id}' contains scenarios. Please specify one.\n"
+                        f"Available scenarios: {list(scenarios.keys())}"
+                    )
+
+                if scenario not in scenarios:
+                    raise KeyError(
+                        f"Error during loading of dataset with id '{epd_id}'. "
+                        f"Given scenario '{scenario}' does not match with available scenarios. "
+                        f"Available scenarios: {list(scenarios.keys())}"
+                    )
+
+                resolved_epd_data[indicator][module] = scenarios[scenario]
+
+        return resolved_epd_data
 
     def load(self, dataset_template):
         """Checks the lcia uuid allocations by requesting the lcia methods (basically indicators) used in the latest
@@ -294,7 +355,7 @@ class OekobaudatAPI(ApiEpdSource):
         return response
 
     @staticmethod
-    def _set_metadata(epd_dataset, epd_id, process_dataset=None, ns=None, name=None):
+    def _set_metadata(epd_dataset, epd_id, scenario, process_dataset=None, ns=None, name=None):
         """Sets the metadata attributes in the EpdDataset object either from the XML process_dataset and the associated
         namespaces or from the cached data directly given by the name argument"""
         if (process_dataset is not None) and (ns is not None):
@@ -302,6 +363,7 @@ class OekobaudatAPI(ApiEpdSource):
         elif name:
             epd_dataset.name = name
         epd_dataset.epd_data_id = epd_id
+        epd_dataset.scenario = scenario
         # Todo: Implement reference flow value and unit by fetching flow with 'referenceToFlowDataSet' -> 'refObjectId'
 
     @staticmethod

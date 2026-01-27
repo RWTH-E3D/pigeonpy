@@ -145,8 +145,8 @@ class OekobaudatCsv(FileEpdSource):
 
             if scenario not in available_scenarios:
                 raise KeyError(
-                    "Error during loading of dataset. "
-                    f"Given scenario '{scenario}' for dataset with id '{epd_id}' does not match with available scenarios. "
+                    f"Error during loading of dataset with id '{epd_id}'. "
+                    f"Given scenario '{scenario}' does not match with available scenarios. "
                     f"Available scenarios: {available_scenarios}"
                 )
 
