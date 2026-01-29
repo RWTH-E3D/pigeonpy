@@ -133,30 +133,33 @@ class OekobaudatCsv(FileEpdSource):
         """
         duplicate_mask = lca_dataset_bind["Modul"].duplicated(keep=False)
         available_scenarios = (
-            lca_dataset_bind.loc[duplicate_mask, "Szenario"]
-            .dropna()
-            .unique()
+            lca_dataset_bind.loc[duplicate_mask, ["Modul", "Szenario"]]
+            .dropna(subset=["Szenario"])
+            .drop_duplicates()
         )
 
         if pd.notna(scenario) and scenario is not None:
 
+            # test_mode for testing if datasets can be loaded with test_load_dataset_methods.py
             if scenario == "test_mode":
                 return lca_dataset_bind
 
-            if scenario not in available_scenarios:
-                raise KeyError(
-                    f"Error during loading of dataset with id '{epd_id}'. "
-                    f"Given scenario '{scenario}' does not match with available scenarios. "
-                    f"Available scenarios: {available_scenarios}"
+            # Scenarios present and user specified a scenario, but it is not in the available scenarios
+            if scenario not in available_scenarios["Szenario"].values:
+                raise Exception(
+                    f"KeyError during loading of dataset with id '{epd_id}'.\n"
+                    f"Given scenario '{scenario}' does not match with available scenarios.\n "
+                    f"Available scenarios:\n{available_scenarios}"
                 )
 
             lca_dataset_bind = lca_dataset_bind[
                 ~duplicate_mask | (lca_dataset_bind["Szenario"] == scenario)
                 ]
         else:
+            # Scenarios present, but nothing specified by user
             raise Exception(
-                f"Dataset with id '{epd_id}' contains scenarios. Please specify one.\n"
-                f"Available scenarios: {available_scenarios}"
+                f"Error during loading of dataset. Dataset with id '{epd_id}' contains scenarios. Please specify one.\n"
+                f"Available scenarios:\n{available_scenarios}"
             )
 
         return lca_dataset_bind
@@ -165,7 +168,7 @@ class OekobaudatCsv(FileEpdSource):
     def _populate_metadata(epd_dataset, lca_dataset_bind, epd_id, scenario):
         """Populates metadata fields in the EPD dataset."""
         epd_dataset.epd_data_id = epd_id
-        epd_dataset._name = lca_dataset_bind['Name (de)'].iloc[0]
+        epd_dataset.name = lca_dataset_bind['Name (de)'].iloc[0]
         epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
         epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
         epd_dataset.scenario = scenario

@@ -15,7 +15,7 @@ from matplotlib.ticker import MaxNLocator
 tic = time.time()
 
 #input file wird geladen
-input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper+replacement_cycle+headers.csv"
+input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper_scenarios.csv"
 
 # Studie wird erstellt
 standard_dataset = En15804A2Dataset
@@ -41,7 +41,7 @@ example_study.run_calculation("building_type")
 
 #Normalisieurngs EPD wird geladen
 normalization_epd = En15804A2Dataset()
-normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", example_study.epd_datamanager)
+normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", example_study.epd_datamanager, scenario="S0")
 
 # Normalization
 normalization_factors = {

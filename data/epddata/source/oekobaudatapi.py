@@ -191,13 +191,16 @@ class OekobaudatAPI(ApiEpdSource):
 
         Returns
         ----------
-        indicator_data : dict
-            Contains the environmental indicators as keys for dictionaries which contain the life cycle stages and the
-            associated amount as key/ value pairs
-
+        raw_indicator_data : DefaultDict
+            Contains the indicator values either for the exchanges part or the LCIAResult part of the XML.
+            Indicator values are saved with the following nesting:
+            raw_indicator_data[<indicator>][<module/life_cycle_stage>][<scenario or None>]
+            Additionally, extracted scenario information is included under raw_indicator_data["scenarios"]
         """
-        indicator_data = {} # Löschen wenn fertig
         raw_indicator_data = defaultdict(lambda: defaultdict(dict))
+        raw_indicator_data["scenarios"] = defaultdict(set)
+        scenarios = set([])
+
         elements = process_dataset.findall(xml_base_path, ns)
 
         for element in elements:
@@ -223,22 +226,21 @@ class OekobaudatAPI(ApiEpdSource):
                     print(f"Unknown indicator found for dataset '{dataset_uuid}: '"
                           f"Unable to allocate indicator uuid '{element_uuid}' to indicator")
 
-            element_data = indicator_data.setdefault(element_name, {})
-
             for amount in element.findall(".//epd:amount", ns):
                 # value of ns['epd'] = http://www.iai.kit.edu/EPD/2013
                 module = amount.get(f"{{{ns['epd']}}}module").replace("-", "_").lower()
                 scenario = amount.get(f"{{{ns['epd']}}}scenario") # None if missing
-                if amount.text is not None:
-                    element_data[module] = element_data.setdefault(module, float(amount.text or 0.0))
-                    # setdefault() -> Always use first life cycle scenario if multiple exist
 
+                if amount.text is not None:
                     value = float(amount.text or 0.0)
                     raw_indicator_data[element_name][module][scenario] = value # E.g. element_name=pere, module=a1_a3, scenario=None
 
-            indicator_data.update(element_data)
+                    if scenario:
+                        scenarios.add(scenario)
+                        raw_indicator_data["scenarios"]["scenarios_unique"] = scenarios
+                        raw_indicator_data["scenarios"][module].add(scenario)
 
-        return raw_indicator_data # indicator_data
+        return raw_indicator_data
 
     @staticmethod
     def _handle_scenarios(raw_epd_data, scenario, epd_id):
@@ -247,7 +249,7 @@ class OekobaudatAPI(ApiEpdSource):
         Parameters
         ----------
         raw_epd_data : DefaultDict
-            asd
+            If a dataset contains scenarios, this dictionary holds multiple values for the scenario modules
         scenario : str
             Name of the scenario to use or None
         epd_id : str
@@ -256,35 +258,60 @@ class OekobaudatAPI(ApiEpdSource):
         Returns
         -------
         resolved_epd_data : Dict
-            asd
+            Contains no duplicate value entries for modules, only the values of the selected scenarios, if scenarios exist
         """
         resolved_epd_data = {}
+        all_scenarios_module_resolved = None
+        all_scenarios_unique = None
+
+        if len(raw_epd_data["scenarios"]) > 0:
+            all_scenarios_module_resolved = raw_epd_data.pop("scenarios")
+            all_scenarios_unique = all_scenarios_module_resolved.pop("scenarios_unique")
 
         for indicator, modules in raw_epd_data.items():
             resolved_epd_data[indicator] = {}
 
-            for module, scenarios in modules.items():
+            for module, indicator_values in modules.items():
 
-                # No scenario, only 1 value
-                if len(scenarios) == 1:
-                    resolved_epd_data[indicator][module] = next(iter(scenarios.values()))
+                # test_mode for testing if datasets can be loaded with test_load_dataset_methods.py, not testing scenarios
+                if scenario == "test_mode":
+                    resolved_epd_data[indicator][module] = next(iter(indicator_values.values()))
+                    continue
+
+                # No scenarios, only 1 value for the module
+                if len(indicator_values) == 1:
+                    resolved_epd_data[indicator][module] = next(iter(indicator_values.values()))
                     continue
 
                 # Scenarios present, but nothing specified by user
                 if pd.isna(scenario) or scenario is None:
+                    pretty_scenarios = {
+                        module: sorted(scenarios)
+                        for module, scenarios in all_scenarios_module_resolved.items()
+                    }
                     raise Exception(
-                        f"Dataset with id '{epd_id}' contains scenarios. Please specify one.\n"
-                        f"Available scenarios: {list(scenarios.keys())}"
+                        f"Error during loading of dataset. Dataset with id '{epd_id}' contains scenarios. Please specify one.\n"
+                        f"Available scenarios:\n "
+                        f"{pretty_scenarios}"
                     )
 
-                if scenario not in scenarios:
-                    raise KeyError(
-                        f"Error during loading of dataset with id '{epd_id}'. "
-                        f"Given scenario '{scenario}' does not match with available scenarios. "
-                        f"Available scenarios: {list(scenarios.keys())}"
+                # Scenarios present and user specified a scenario, but it is not in the available scenarios
+                if scenario not in all_scenarios_unique:
+                    pretty_scenarios = {
+                        module: sorted(scenarios)
+                        for module, scenarios in all_scenarios_module_resolved.items()
+                    }
+                    raise Exception(
+                        f"KeyError during loading of dataset with id '{epd_id}'. "
+                        f"Given scenario '{scenario}' does not match with available scenarios for module '{module}'. "
+                        f"Available scenarios: {pretty_scenarios}"
                     )
 
-                resolved_epd_data[indicator][module] = scenarios[scenario]
+                # Specified scenario by user only present in another module -> skips current module and continues
+                if scenario in all_scenarios_unique and scenario not in indicator_values:
+                    continue
+
+                resolved_epd_data[indicator][module] = indicator_values[scenario]
 
         return resolved_epd_data
 
