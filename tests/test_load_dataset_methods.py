@@ -19,27 +19,27 @@ class TestLoadDatasetMethods(unittest.TestCase):
         self.latest_oekobaudat_dl = get_latest_oekobaudat_csv()
 
         self.oekobaudat_filepath = Path.cwd() / ".." / "data" / "input" / "inputdata" / "OBD_2023_I_2024-01-09T12_49_34.csv"
-        self.oekobaudat_a1 = OekobaudatCsv("Ökobaudat_A1", self.oekobaudat_filepath)
+        self.oekobaudat_a1 = OekobaudatCsv(self.oekobaudat_filepath)
         self.epd_datamanager_a1.register_source("oekobaudat_a1", self.oekobaudat_a1)
         self.oekobaudat_a1_dropped_duplicates = self.oekobaudat_a1.data.drop_duplicates(subset="UUID")
 
-        self.oekobaudat_a2 = OekobaudatCsv("Ökobaudat_A2", self.latest_oekobaudat_dl)
+        self.oekobaudat_a2 = OekobaudatCsv(self.latest_oekobaudat_dl)
         self.epd_datamanager_a2.register_source("oekobaudat_a2", self.oekobaudat_a2)
         self.oekobaudat_a2_dropped_duplicates = self.oekobaudat_a2.data.drop_duplicates(subset="UUID")
 
         self.oekobaudat_edited_filepath = Path.cwd() / ".." / "data" / "input" / "inputdata" / "OBD_2023_I_2024-01-09T12_49_34_Strommix_interpoliert.csv"
-        self.oekobaudat_edited = OekobaudatCsv("Ökobaudat_edited", self.oekobaudat_edited_filepath)
+        self.oekobaudat_edited = OekobaudatCsv(self.oekobaudat_edited_filepath)
         self.epd_datamanager_a2.register_source("oekobaudat_edited", self.oekobaudat_edited)
         self.oekobaudat_edited_dropped_duplicates = self.oekobaudat_edited.data.drop_duplicates(subset="UUID")
 
-        self.oekobaudat_api_a1 = OekobaudatAPI("Ökobaudat_API_A1")
+        self.oekobaudat_api_a1 = OekobaudatAPI()
         self.epd_datamanager_a1.register_source("oekobaudat_api_a1", self.oekobaudat_api_a1)
 
-        self.oekobaudat_api_a2 = OekobaudatAPI("Ökobaudat_API_A2")
+        self.oekobaudat_api_a2 = OekobaudatAPI()
         self.epd_datamanager_a2.register_source("oekobaudat_api_a2", self.oekobaudat_api_a2)
 
         self.teco_json_filepath = Path.cwd() / ".." / "data" / "input" / "inputdata" / "LcaDataTeco.json"
-        self.teco_json = TecoJson("Teco_json", filepath=self.teco_json_filepath)
+        self.teco_json = TecoJson(filepath=self.teco_json_filepath)
         self.epd_datamanager_a1.register_source("teco_json", self.teco_json)
         self.teco_json.data.pop("version")
 
