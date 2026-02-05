@@ -42,7 +42,7 @@ class CalculationInput(object):
         """
         import_df = self._load_and_preprocess_csv(filepath)
 
-        self._populate_dataframes(import_df)
+        self._initialize_calculation_dataframes(import_df)
 
     def _load_and_preprocess_csv(self, filepath):
         """Method to load the input csv into a pandas dataframe, clean UUID column from whitespaces, create an index
@@ -50,7 +50,7 @@ class CalculationInput(object):
 
         Parameters
         ----------
-        filepath: str
+        filepath : str
             Path to the input csv file
         """
         df = (pd.read_csv(filepath, sep=',', encoding='ANSI'))
@@ -66,12 +66,12 @@ class CalculationInput(object):
         df.insert(len(df.columns), "unique_epd", df["#epd_name"])
         return df
 
-    def _populate_dataframes(self, import_df):
-        """Populate the dataframes for calculation, subset and partition based on the defined headers.
+    def _initialize_calculation_dataframes(self, import_df):
+        """Initialize internal calculation, partition, and subset dataframes from a preprocessed import dataframe.
 
         Parameters
         ----------
-        import_df: pd.DataFrame
+        import_df : pd.DataFrame
             The loaded and preprocessed csv as dataframe
         """
         cols_to_copy = [c for c in self._calculation_header if c in import_df]
@@ -93,18 +93,17 @@ class CalculationInput(object):
         self.partition_df = pd.DataFrame(partitions, columns=self._partition_header)
         self.subset_df = pd.concat([pd.DataFrame(entry) for entry in categories])
 
-    def select_by_partition(self, *partitions):
-        """Method to create a dataframe for the calculation which additionally contains the subset or subset
-        combination according to which the datasets will be calculated.
+    def get_calculation_df_for_partitions(self, *partitions):
+        """Return a calculation-ready dataframe filtered by one or more partitions.
 
         Parameters
         ----------
-        *partitions: str
+        *partitions : str
             The subset names as strings according to which the calculation will be made
 
         Returns
         -------
-        calc_df: pd.DataFrame
+        calc_df : pd.DataFrame
             Contains information for the calculation; UUIDs, amounts, subset/ categories
         """
         if len(partitions) == 1:
@@ -118,8 +117,13 @@ class CalculationInput(object):
 
         Parameters
         ----------
-        partition: str
+        partition : str
             Name of the partition
+
+        Returns
+        -------
+        calc_df : pd.DataFrame
+            Initial calculation dataframe filtered by partition. Contains only rows relevant for the given partition.
         """
         chosen_partition = self.partition_df.query(
             "partition_name == @partition"
@@ -136,8 +140,15 @@ class CalculationInput(object):
         loading the input) with the subset values of the partition combination according to which the datasets
         will be calculated.
 
-        partitions: tuple
+        Parameters
+        ----------
+        partitions : tuple
             Contains the strings of the partitions for the partition combination
+
+        Returns
+        -------
+        calc_df : pd.DataFrame
+            Initial calculation dataframe filtered by partitions. Contains only rows relevant for the partitions.
         """
         subset_values_df = self.subset_df.merge(
             self.partition_df, on='partition_id'

@@ -72,7 +72,7 @@ class Lcia(object):
         with the reference_result argument. The results of the normalization are saved to the normalized_results dict in
         the instance attribute. For every existing partition in the result attribute, a normalization is performed.
 
-        The method creates a class template for normalized datasets using the dimensionless_template method of the
+        The method creates a class template for normalized datasets using the create_dimensionless_template method of the
         EpdDataset class to provide the correct basis for normalization.
 
         Parameters
@@ -94,7 +94,7 @@ class Lcia(object):
         if isinstance(reference_result, dict):
             reference_result = self._create_array_from_dict(reference_result)
 
-        normalized_dataset_class = self.dataset_template.dimensionless_template(
+        normalized_dataset_class = self.dataset_template.create_dimensionless_template(
             f"NormalizedDataset_{method_name}", resulting_unit
         )
 
@@ -130,7 +130,7 @@ class Lcia(object):
         as the normalization_method argument here. If no method_name is specified, the weighting is applied to the
         result attribute.
 
-        The method creates a class template for weighted datasets using the dimensionless_template method of the
+        The method creates a class template for weighted datasets using the create_dimensionless_template method of the
         EpdDataset class to provide the correct basis for weighting.
 
         Parameters
@@ -155,7 +155,7 @@ class Lcia(object):
         if isinstance(weighting_factors, dict):
             weighting_factors = self._create_array_from_dict(weighting_factors)
 
-        weighted_dataset_class = self.dataset_template.dimensionless_template(
+        weighted_dataset_class = self.dataset_template.create_dimensionless_template(
             f"WeightedDataset_{method_name}", resulting_unit
         )
 
@@ -194,17 +194,32 @@ class Lcia(object):
         """
         results = {}
         for partition in partitions:
-            results[partition] = self._run_individual_calculation(
+            results[partition] = self._calculate_partition(
                 partition, epd_datamanager, observation_period
             )
-        results["unique_epd"] = self._run_individual_calculation(
+        results["unique_epd"] = self._calculate_partition(
             "unique_epd", epd_datamanager, observation_period
         )
         return results
 
-    def _run_individual_calculation(self, partition, epd_datamanager, observation_period):
+    def _calculate_partition(self, partition, epd_datamanager, observation_period):
         """Calls the calculate method of the Calculator class for a single partition, differentiating between the cases
-        of single string partition or tuple partition and returns the calculated pd.Series object."""
+        of single string partition or tuple partition and returns the calculated pd.Series object.
+
+        Parameters
+        ----------
+        partition : str or tuple
+            The partition to be calculated
+        epd_datamanager : EpdDatamanager
+            Passed through to the calculate method for loading the datasets during calculation
+        observation_period : int
+            Used to calculate the replacements in the calculate method
+
+        Returns
+        -------
+        results : dict
+            Contains the calculation results for the given partitions.
+        """
         if isinstance(partition, tuple):
             return self._calculator.calculate(
                 *partition,
@@ -224,8 +239,14 @@ class Lcia(object):
         self.result["indicator_values"]["total_result"].name = "total_result"
 
     def _calculate_weighting(self, result, method_name, weighting_factors, weighted_dataset_class):
-        """Method to eliminate duplication. Calculates the weighting for the given result which is either the result
-         attribute or a previously calculated normalization result."""
+        """Apply weighting factors to calculation or normalization results.
+
+        Handles both pandas Series and dataset instances and stores the
+        weighted results under the given method name in ``self.result``.
+
+        This method exists to avoid duplication between weighting of
+        indicator results and normalized results.
+        """
         weight_dataset = lambda dataset: weighted_dataset_class(
             data = (dataset * weighting_factors).data,
             name = dataset.name + "_weighted",

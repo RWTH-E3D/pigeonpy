@@ -67,7 +67,7 @@ class EpdDataset(object):
             print(f"Dataset: '{self.name}':")
         else:
             print("Processed dataset:")
-        return f'{self.print__data(data_to_print, row_labels=row_labels, col_labels=col_labels)}'
+        return f'{self.create_printable_string_from_data_array(data_to_print, row_labels=row_labels, col_labels=col_labels)}'
 
     def __mul__(self, other):
         """Method to multiply the dataset with another dataset or a scalar.
@@ -214,7 +214,7 @@ class EpdDataset(object):
 
         return result_epd
 
-    def print__data(self, arr, row_labels=None, col_labels=None):
+    def create_printable_string_from_data_array(self, arr, row_labels=None, col_labels=None):
         """Method that prints the _data array together with the life cycle stages from the class variable
          as columns and the environmental indicators as rows in a readable way
 
@@ -233,15 +233,25 @@ class EpdDataset(object):
             data Matrix in string form to be printed by the __str__ dunder method of the class
 
         """
-        max_chars = max([len(str(item)) for item in arr.flatten()])  # char number required to display any item in list
-        rw = max([len(str(item)) for item in row_labels])  # width for the indicator column
-        readable_data_string = str(
-            '%s %s' % (' ' * (rw + 1), ' '.join(self.format__1(max_chars, i) for i in col_labels)))
+        fmt = self._format_data_array_element_for_printing
+
+        max_chars = max(len(str(item)) for item in arr.flatten()) # char number required to display any item in list
+        rw = max(len(str(item)) for item in row_labels) # width for the indicator column
+
+        lines = []
+
+        header = (
+                " " * (rw + 1)
+                + " ".join(fmt(max_chars, label) for label in col_labels)
+        )
+        lines.append(header)
+
         for row_label, row in zip(row_labels, arr):
-            readable_data_string += "\n"
-            readable_data_string += str(
-                '%s [%s]' % (self.format__1(rw, row_label), ' '.join(self.format__1(max_chars, i) for i in row)))
-        return readable_data_string
+            row_label_str = fmt(rw, row_label)
+            row_values_str = " ".join(fmt(max_chars, val) for val in row)
+            lines.append(f"{row_label_str} [{row_values_str}]")
+
+        return "\n".join(lines)
 
     def export(self, path=None, file_format="teco_json", drop_rows=False, add_uuid=False):
         """Exports the datasets data to either 'teco_json' format or 'csv' format. The drop_rows and add_uuid parameters
@@ -343,15 +353,19 @@ class EpdDataset(object):
         raise KeyError(f"There is no indicator {abr_indicator}")
 
     @staticmethod
-    def format__1(digits, num):
+    def _format_data_array_element_for_printing(width, value):
         """Formats each field of the printed data array, so it has the correct width. Digits parameter gives maximum for
         field width and num is the value to be formatted."""
-        if digits < len(str(num)):
+        value_str = str(value)
+        value_len = len(value_str)
+
+        if value_len > width:
             print(f"Values < column or row labels. Data matrix of dataset may be empty.")
-        return ' ' * (digits - len(str(num))) + str(num)
+
+        return ' ' * (width - value_len) + value_str
 
     @classmethod
-    def dimensionless_template(cls, name, resulting_unit):
+    def create_dimensionless_template(cls, name, resulting_unit):
         """Method to create a template for a dataset class with dimensionless environmental indicators inheriting from
         this class. The created template is used for normalization or weighting methods that result in dimensionless
         data (or data with special unit given by resulting unit) due to their calculation.

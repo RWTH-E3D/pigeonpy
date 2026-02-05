@@ -30,7 +30,7 @@ class Calculator(object):
             of an EpdDataset object
         """
 
-        calc_df = self.calc_in.select_by_partition(*partitions)
+        calc_df = self.calc_in.get_calculation_df_for_partitions(*partitions)
 
         dataset_objects = []
         for index, row in calc_df.iterrows():
