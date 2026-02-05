@@ -37,15 +37,17 @@ class OekobaudatCsv(FileEpdSource):
     """
 
     a1_aliases = ["'DIN EN 15804'", "'EN 15804'", "'DIN EN 15804' / 'ISO 14025'",
-                       "'EN 15804' / 'ISO 14025' / 'OEKOBAUDAT Entry Level Compliance'"]
+                       "'EN 15804' / 'ISO 14025' / 'OEKOBAUDAT Entry Level Compliance'",
+                  "'EN 15804+A1' / 'ISO 14025'"]
     a2_aliases = ["'DIN EN 15804+A2'", "'EN 15804+A2'", "'DIN EN 15804+A2' / 'ISO 14025'",
-                       "'EN 15804+A2' / 'ISO 14025'", "'EN 15804+A2' / 'EN 16485'", "'EN 15804+A2 (EF 3.1)'"]
+                       "'EN 15804+A2' / 'ISO 14025'", "'EN 15804+A2' / 'EN 16485'", "'EN 15804+A2 (EF 3.1)'",
+                  "'EN 15804+A2 (EF 3.0)' / 'ISO 14025'"]
 
     dtype_dict = {
         "UUID": str,
         "Name (de)": str,
         "Name (en)": str,
-        "Konformität": str,
+        "Konformitaet": str,
         "Referenzjahr": "Int64",
         "Bezugseinheit": str,
         "Referenzfluss-Name": str,
@@ -115,7 +117,7 @@ class OekobaudatCsv(FileEpdSource):
 
     @staticmethod
     def _handle_scenarios(lca_dataset_bind, scenario, epd_id):
-        """
+        """Resolves scenario dependent EPD data.
 
         Parameters
         ----------
@@ -140,8 +142,8 @@ class OekobaudatCsv(FileEpdSource):
 
         if pd.notna(scenario) and scenario is not None:
 
-            # test_mode for testing if datasets can be loaded with test_load_dataset_methods.py
-            if scenario == "test_mode":
+            # "use_first" for testing if datasets can be loaded with test_load_dataset_methods.py
+            if scenario == "use_first":
                 return lca_dataset_bind
 
             # Scenarios present and user specified a scenario, but it is not in the available scenarios
@@ -200,7 +202,7 @@ class OekobaudatCsv(FileEpdSource):
         return data_array
 
     def _load_en15804a1(self):
-        use_columns_a1 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
+        use_columns_a1 = ["UUID", "Name (de)", "Name (en)", "Konformitaet", "Referenzjahr", "Bezugsgroesse",
                           "Bezugseinheit", "Referenzfluss-Name", "Modul", "Szenario",
                           "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
                           "HWD", "NHWD", "RWD", "CRU", "MFR", "MER", "EEE", "EET",
@@ -209,20 +211,22 @@ class OekobaudatCsv(FileEpdSource):
                                        usecols=use_columns_a1, converters={'Bezugsgroesse': self.convert_string_to_1},
                                        dtype=self.dtype_dict)
         
-        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformität.isin(self.a2_aliases)].index)
-        if len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformität'].str.contains('A2')]) != 0:
+        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformitaet.isin(self.a2_aliases)].index)
+        lca_data_bind_pd = lca_data_bind_pd.dropna(subset = ["Konformitaet"])
+
+        if len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformitaet'].str.contains('A2')]) != 0:
             print(f"Warning: LCA dataset binding still contains "
-                  f"{len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformität'].str.contains('A2')])} datasets"
+                  f"{len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformitaet'].str.contains('A2')])} datasets"
                   f"conform to standard A2")
 
         return lca_data_bind_pd
 
     def _load_en15804a2(self):
-        use_columns_a2 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
+        use_columns_a2 = ["UUID", "Name (de)", "Name (en)", "Konformitaet", "Referenzjahr", "Bezugsgroesse",
                           "Bezugseinheit", "Referenzfluss-Name", "Modul", "Szenario",
                           "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
-                          # "Additional environmental impact indicators" with high uncertainties (see Ökobaudat Manual)
-                          # -> excluded here (If the use is desired, add to json and column names below!!!)
+                          # "Additional environmental impact indicators" with high uncertainties (see Ökobaudat manual)
+                          # -> excluded here (If the use is desired, add to json and column names below)
                           # "HTPc (A2)", "HTPnc (A2)", "PM (A2)", "IRP (A2)", "ETPfw (A2)", "SOP (A2)",
                           "HWD", "NHWD", "RWD", "CRU", "MFR", "MER", "EEE", "EET",
                           "AP (A2)", "GWPtotal (A2)", "GWPbiogenic (A2)", "GWPfossil (A2)", "GWPluluc (A2)",
@@ -232,7 +236,9 @@ class OekobaudatCsv(FileEpdSource):
         lca_data_bind_pd = pd.read_csv(self.filepath, sep=';', encoding="ISO-8859-1",
                                        usecols=use_columns_a2, converters={'Bezugsgroesse': self.convert_string_to_1},
                                        dtype=self.dtype_dict)
-        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformität.isin(self.a1_aliases)].index)
+
+        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformitaet.isin(self.a1_aliases)].index)
+        lca_data_bind_pd = lca_data_bind_pd.dropna(subset=["Referenzjahr"])
 
         # Renaming columns to fit the syntax of indicators_en_15804_a2.json
         rename_columns_a2 = {"AP (A2)": "AP", "GWPtotal (A2)": "GWP-TOTAL", "GWPbiogenic (A2)": "GWP-BIOGEN",

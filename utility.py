@@ -40,10 +40,15 @@ def linear_interpolate(dataset1, dataset2, steps, return_datasets=True):
     return interpolation_results
 
 
-def get_latest_oekobaudat_csv():
-    """Function that requests the csv download for the latest export of the Oekobaudat database. It fetches the
-    available datastocks (different database versions) of the Oekobaudat, chooses the latest one and proceeds to request
-    its CSV file.
+def get_latest_oekobaudat_csv(datastock_uuid=None):
+    """Function that requests the csv download for a specific datastock of the Oekobaudat database. It fetches the
+    available datastocks (different database versions) of the Oekobaudat, chooses either the latest standard/'OBD'
+    versionone or the one specified with datastock_uuid, and proceeds to request its CSV file.
+
+    Parameters
+    ----------
+    datastock_uuid : str or None
+        If specified available, it is used to select the datastock to be downloaded.
 
     Returns
     -------
@@ -54,37 +59,55 @@ def get_latest_oekobaudat_csv():
     root = "https://oekobaudat.de/OEKOBAU.DAT/resource"
     datastocks_endpoint = root + "/datastocks?format=JSON"
 
-    latest_datastock = _fetch_latest_datastock(datastocks_endpoint)
+    latest_datastock = _fetch_datastock_metadata(datastocks_endpoint, datastock_uuid=datastock_uuid)
     if not latest_datastock:
-        raise ValueError("No available datastocks found")
+        raise ValueError("Error during download of datastock csv. No available datastocks found")
 
     datastock_csv_export = _fetch_datastock_csv(root, latest_datastock["uuid"])
-    datastock_csv_filepath = _save_csv_file(datastock_csv_export, latest_datastock["name"][0]["value"])
+    datastock_csv_filepath = _save_csv_file(datastock_csv_export, latest_datastock["shortName"])
 
     print(f"Download successful: '{datastock_csv_filepath.name}' saved in project directory.")
 
     return datastock_csv_filepath
 
-def _fetch_latest_datastock(endpoint):
-    """Requests the latest datastock from the associated API endpoint.
+def _fetch_datastock_metadata(endpoint, datastock_uuid):
+    """Requests the latest OBD datastock (if datastock_uuid=None) or the datastock specified by datastock_uuid from the
+    associated API endpoint.
 
     Parameters
     ----------
     endpoint : str
         URL to the API endpoint
+    datastock_uuid : str or None
+        Used to select the datastock in the list of available datastocks if given.
 
     Returns
     -------
-    available_datastocks[-1] : str
-        The last entry from the available datastocks list which is the UUID for the latest available datastock
+    datastock : Dict or None
+        The dictionary element from the list of available datastocks, which is either the latest datastock with "OBD" in
+        its name, the datastock specified by datastock_uuid, or None if the two options before where not successful.
     """
     try:
         response = requests.get(endpoint)
         response.raise_for_status()
-        available_datastocks = response.json().get("dataStock", [])
-        return available_datastocks[-1] if available_datastocks else None
     except (requests.ConnectionError, requests.HTTPError) as error:
         raise Exception(f"Error fetching datastocks from {endpoint}: {error}")
+
+    available_datastocks = response.json().get("dataStock", [])
+
+    if datastock_uuid:
+        for datastock in available_datastocks:
+            if datastock.get("uuid") == datastock_uuid:
+                return datastock
+
+        raise KeyError(f"Error during fetch of oekobaudat csv.\nGiven datastock_uuid '{datastock_uuid}' not in"
+                       f"available datastocks.")
+    else:
+        for datastock in reversed(available_datastocks):
+            if "OBD" in datastock.get("shortName"):
+                return datastock
+
+    return None
 
 def _fetch_datastock_csv(root, uuid):
     """Requests the datastock identified by the given UUID and returns it as text content.
@@ -111,6 +134,10 @@ def _fetch_datastock_csv(root, uuid):
 
 def _save_csv_file(csv_content, filename):
     """Saves the CSV content to a file in the project directory."""
+
+    remove_punctuation_map = dict((ord(char), None) for char in '\\/*?:"<>|')
+    filename = filename.translate(remove_punctuation_map)
+
     filepath = Path.cwd() / f"{filename}.csv"
     with open(filepath, 'w') as f:
         f.write(csv_content)

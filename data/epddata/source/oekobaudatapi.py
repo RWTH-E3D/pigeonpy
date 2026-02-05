@@ -146,8 +146,7 @@ class OekobaudatAPI(ApiEpdSource):
 
         process_tree, process_dataset, ns = self._parse_xml(xml_data)
 
-        if not self._check_compliance(process_dataset, ns):
-            raise Exception(f"Trying to load a dataset which is not compliant to the defined standard. '{epd_id}'")
+        self._check_compliance(process_dataset, ns, epd_id)
 
         raw_epd_data = {
             **self._extract_indicator_data(
@@ -244,7 +243,7 @@ class OekobaudatAPI(ApiEpdSource):
 
     @staticmethod
     def _handle_scenarios(raw_epd_data, scenario, epd_id):
-        """
+        """Resolves scenario dependent EPD data.
 
         Parameters
         ----------
@@ -273,8 +272,8 @@ class OekobaudatAPI(ApiEpdSource):
 
             for module, indicator_values in modules.items():
 
-                # test_mode for testing if datasets can be loaded with test_load_dataset_methods.py, not testing scenarios
-                if scenario == "test_mode":
+                # "use_first" for testing if datasets can be loaded with test_load_dataset_methods.py, uses first scenario
+                if scenario == "use_first":
                     resolved_epd_data[indicator][module] = next(iter(indicator_values.values()))
                     continue
 
@@ -361,15 +360,20 @@ class OekobaudatAPI(ApiEpdSource):
             raise Exception(f"Request of dataset with uuid '{uuid}' not successful. {response.text}")
         return response.text
 
-    def _check_compliance(self, dataset, ns) -> bool:
+    def _check_compliance(self, dataset, ns, epd_id):
         """Checks the compliance UUIDs in the XML file of the epd for compliance with the defined standard in the class
         instance and the associated compliance UUIDs (see class variables)"""
         compliance_declarations = dataset.findall(".//{*}referenceToComplianceSystem", namespaces=ns)
+        dataset_compliance_systems = []
         for entry in compliance_declarations:
             compliance = entry.get("refObjectId")
             if compliance in self.compliance_uuids[self.dataset_template.standard]:
-                return True
-        return False
+                return
+            else:
+                dataset_compliance_systems.append(compliance)
+
+        raise Exception(f"Error trying to load dataset with id '{epd_id}'.\n Dataset compliance system(s) "
+                        f"'{dataset_compliance_systems}' not compliant to the defined standard.")
 
     @staticmethod
     def _make_request(request_url):
