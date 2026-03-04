@@ -21,8 +21,8 @@ class CalculationInput(object):
         Header for the partition_df
     """
     def __init__(self):
-        self._calculation_header = ["calculation_id", "_amount", "_uuid", "_epd_name", "_comment", "_replacement_cycle"]
-        self._mandatory_columns = ["_amount", "_uuid", "_epd_name"]
+        self._calculation_header = ["calculation_id", "amount", "uuid", "epd_name", "comment", "replacement_cycle"]
+        self._mandatory_columns = ["amount", "uuid", "epd_name"]
 
         self._subset_header = ["calculation_id", "subset_name", "partition_id"]
         self._partition_header = ["partition_id", "partition_name"]
@@ -61,9 +61,9 @@ class CalculationInput(object):
             raise KeyError(f"Column names from input csv do not match the specifications for obligatory column names."
                            f"Columns must include: '{self._mandatory_columns}'. {error}")
 
-        df['_uuid'] = df['_uuid'].str.strip()
+        df["uuid"] = df["uuid"].str.strip()
         df.insert(0, self._calculation_header[0], df.index)
-        df.insert(len(df.columns), "unique_epd", df["_epd_name"])
+        df.insert(len(df.columns), "unique_epd", df["epd_name"])
         return df
 
 
