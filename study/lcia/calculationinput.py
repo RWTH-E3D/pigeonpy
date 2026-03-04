@@ -21,8 +21,8 @@ class CalculationInput(object):
         Header for the partition_df
     """
     def __init__(self):
-        self._calculation_header = ["calculation_id", "#amount", "#uuid", "#epd_name", "#comment", "#replacement_cycle"]
-        self._mandatory_columns = ["#amount", "#uuid", "#epd_name"]
+        self._calculation_header = ["calculation_id", "_amount", "_uuid", "_epd_name", "_comment", "_replacement_cycle"]
+        self._mandatory_columns = ["_amount", "_uuid", "_epd_name"]
 
         self._subset_header = ["calculation_id", "subset_name", "partition_id"]
         self._partition_header = ["partition_id", "partition_name"]
@@ -31,7 +31,7 @@ class CalculationInput(object):
         self.subset_df = None
         self.partition_df = None
 
-    def load(self, filepath):
+    def load(self, filepath, sep = ","):
         """Method to set the class attributes (dataframes with calculation info, partitions, categories)
         based on the input csv
 
@@ -40,11 +40,11 @@ class CalculationInput(object):
         filepath : str
             Path to the input csv file
         """
-        import_df = self._load_and_preprocess_csv(filepath)
+        import_df = self._load_and_preprocess_csv(filepath, sep = sep)
 
         self._populate_dataframes(import_df)
 
-    def _load_and_preprocess_csv(self, filepath):
+    def _load_and_preprocess_csv(self, filepath, sep = ","):
         """Method to load the input csv into a pandas dataframe, clean UUID column from whitespaces, create an index
         column and a column for the calculation of all individual datasets as a separate partition
 
@@ -53,10 +53,7 @@ class CalculationInput(object):
         filepath: str
             Path to the input csv file
         """
-        df = pd.read_csv(filepath, sep=',', encoding='ANSI')
-
-        df = df.dropna(how='all')
-        df = df.reset_index(drop=True)
+        df = (pd.read_csv(filepath, sep=sep, encoding='ANSI'))
 
         try:
             df[self._mandatory_columns]
@@ -64,10 +61,11 @@ class CalculationInput(object):
             raise KeyError(f"Column names from input csv do not match the specifications for obligatory column names."
                            f"Columns must include: '{self._mandatory_columns}'. {error}")
 
-        df['#uuid'] = df['#uuid'].str.strip()
+        df['_uuid'] = df['_uuid'].str.strip()
         df.insert(0, self._calculation_header[0], df.index)
-        df.insert(len(df.columns), "unique_epd", df["#epd_name"])
+        df.insert(len(df.columns), "unique_epd", df["_epd_name"])
         return df
+
 
     def _populate_dataframes(self, import_df):
         """Populate the dataframes for calculation, subset and partition based on the defined headers.
@@ -77,6 +75,9 @@ class CalculationInput(object):
         import_df: pd.DataFrame
             The loaded and preprocessed csv as dataframe
         """
+        #todo: check for datatypes of subsets. In the moment a subset of the name "00" will be transformed into an integer
+        # all subsets should be strings to ensure consistency
+
         cols_to_copy = [c for c in self._calculation_header if c in import_df]
         calculations = import_df[cols_to_copy].copy()
 

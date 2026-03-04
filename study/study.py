@@ -81,9 +81,9 @@ class Study(object):
             observation_period=self.observation_period
         )
 
-    def load_calculation_input(self, filepath):
+    def load_calculation_input(self, filepath, sep=","):
         """Loads the input CSV file based on the filepath"""
-        self.lcia.load_input(filepath)
+        self.lcia.load_input(filepath, sep=sep)
 
     def _customize_dataset_template(self, indicators, stages):
         """If environmental_indicators or life_cycle_stages are given during initialization of the study this method

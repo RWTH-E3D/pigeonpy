@@ -34,12 +34,12 @@ class Calculator(object):
 
         dataset_objects = []
         for index, row in calc_df.iterrows():
-            dataset_object = epd_datamanager.load_epd(row['#uuid'])
-            dataset_object *= row['#amount']
+            dataset_object = epd_datamanager.load_epd(row['_uuid'])
+            dataset_object *= row['_amount']
             dataset_object = self.calculate_replacements(
                 dataset_object,
                 observation_period,
-                row['#replacement_cycle']
+                row['_replacement_cycle']
             )
 
             calculated_result_row = {
