@@ -439,11 +439,11 @@ class History:
     initial_name : str
         The name of the EPD whose data was loaded into the EpdDataset object.
     initial_epd_id : str
-        ID, e.g. UUID, of EPD whose data was loaded into the EpdDataset object.
+        epd_id, e.g. UUID, of EPD whose data was loaded into the EpdDataset object.
     contained_epd_ids : set
-        ID's of all EPDs that were aggregated in the dataset
+        epd_id of all EPDs that were aggregated in the dataset
     epd_infos : dict
-        The name and source of all contained EPDs, identified with IDs as dictionary keys
+        The name and source of all contained EPDs, identified with epd_id as dictionary keys
     entries : list
         Contains string objects for every operation/ calculation step.
     """
@@ -515,7 +515,7 @@ class History:
         Parameters
         ----------
         epd_id : str
-            The UUID of the EPD
+            The epd_id of the EPD
         epd_name : str
             The name of the EPD
         source_key :

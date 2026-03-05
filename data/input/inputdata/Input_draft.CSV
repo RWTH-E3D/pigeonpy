@@ -1,4 +1,4 @@
-Scaling Factor,UUID,EPD Name,comment/ Unit for reference flow,Category1,Year Installation for components or occurence for consumption,Year Disposal
+Scaling Factor,epd_id,EPD Name,comment/ Unit for reference flow,Category1,Year Installation for components or occurence for consumption,Year Disposal
 1.00,2099e104-ce43-4c05-a923-a7a8b044dd6f,Gas condensing boiler120-400 kW (upright unit),piece,Technical building equipment,1996,2045
 40459.97,"79c32d0a-7b45-4d80-955a-ff3a73461f5b",Use - 1 kWh of final energy from gas calorific value (according to GEG),1 kWh = 3.6 * 1.0 MJ,Gas energy consumption for heating,1996,
 40459.97,"79c32d0a-7b45-4d80-955a-ff3a73461f5b",Use - 1 kWh of final energy from gas calorific value (according to GEG),1 kWh = 3.6 * 1.0 MJ,Gas energy consumption for heating,1997,

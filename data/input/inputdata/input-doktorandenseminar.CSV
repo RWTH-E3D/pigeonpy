@@ -1,4 +1,4 @@
-Scaling Factor,UUID,EPD Name,comment/ Unit for reference flow,Variante,Organisch,Regional
+Scaling Factor,epd_id,EPD Name,comment/ Unit for reference flow,Variante,Organisch,Regional
 2,1edb805d-08dc-461e-8195-05a9865470d0,Flachsvlies ,1.0 * 1.0 m3 (Volumen),Flachsvlies,Ja,Ja
 0.864,7aba3603-0689-4da5-8d24-fd92ae398d07,Konstruktionsvollholz ,1.0 * 1.0 m3 (Volumen),Flachsvlies,Ja,Ja
 2,6505a4d0-df9a-4f7f-8a10-fa4ef36629ad,Hanvflies,1.0 * 1.0 m3 (Volumen),Hanvflies,Ja,Ja

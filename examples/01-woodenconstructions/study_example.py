@@ -21,7 +21,7 @@ oekobaudat_api = OekobaudatApi()
 # example_study.epd_datamanager.register_source("oekobaudat", oekobaudat)
 example_study.epd_datamanager.register_source("oekobaudat API", oekobaudat_api)
 
-#Berechnung wird geladen und gestartet #amount;#uuid;#epd_name;#comment;#replacement_cycle;Dataholz ID;Dataholz Variant;Owner;
+#Berechnung wird geladen und gestartet #amount;#epd_id;#epd_name;#comment;#replacement_cycle;Dataholz ID;Dataholz Variant;Owner;
 example_study.load_calculation_input(input_csv_path, sep=";")
 
 selected_partitions = ("Dataholz ID", "Dataholz Variant")

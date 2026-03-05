@@ -11,7 +11,7 @@ class Calculator(object):
     def calculate(self, *partitions, epd_datamanager, observation_period):
         """Method for subset based calculation of datasets
 
-        Loads the datasets based on the UUIDs, multiplies them with the value defined in the input csv and sums up
+        Loads the datasets based on their epd_id, multiplies them with the value defined in the input csv and sums up
         every dataset with the same subset name.
 
         Parameters
@@ -35,7 +35,7 @@ class Calculator(object):
         dataset_objects = []
         for row in calc_df.itertuples(index = False):
             pass
-            dataset_object = epd_datamanager.load_epd(row.uuid, row.scenario)
+            dataset_object = epd_datamanager.load_epd(row.epd_id, row.scenario)
             dataset_object *= row.amount
             dataset_object = self.calculate_replacements(
                 dataset_object,

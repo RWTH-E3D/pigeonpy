@@ -1,4 +1,4 @@
-Scaling Factor,UUID,EPD name,reference_flow,building_part,year,building,building_type
+Scaling Factor,epd_id,EPD name,reference_flow,building_part,year,building,building_type
 1,ce333ecb-6cad-441c-9dae-70966acf9333,Gas condensing boiler 20-120kW,piece,Technical building equipment,2020,B104_IV,type 4
 71402.28003957248,84aa7483-9824-49a9-a3e3-f9fb092ea7b7 ,Use - 1 kWh of final energy from gas calorific value (according to GEG),1 kWh = 3.6 * 1.0 MJ,Gas energy consumption for heating,2020,B104_IV,type 4
 71402.28003957248,84aa7483-9824-49a9-a3e3-f9fb092ea7b7 ,Use - 1 kWh of final energy from gas calorific value (according to GEG),1 kWh = 3.6 * 1.0 MJ,Gas energy consumption for heating,2021,B104_IV,type 4

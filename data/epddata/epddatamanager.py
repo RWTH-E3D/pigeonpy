@@ -13,7 +13,7 @@ class EpdDataManager(object):
         A subclass of EpdDataset itself (not an instance) that serves as a template for creating instances of the given
         class to load the indicator data of an EPD dataset into the data array of the class instance.
     _fetched_datasets : dict
-        Caches the data array and name of an already loaded dataset with its uuid as key.
+        Caches the data array and name of an already loaded dataset with its epd_id as key.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ class EpdDataManager(object):
         Parameters
         ----------
         epd_id : str
-            UUID of the EPD dataset to be loaded
+            epd_id of the EPD dataset to be loaded
         scenario : str
             Scenario name to identify the scenario that should be loaded into the dataset object; can be None or nan
         epd_dataset : EpdDataset
@@ -50,12 +50,12 @@ class EpdDataManager(object):
         source_key : str
             If specified (and found in sources) uses the source indicated by the source_key to load the EPD data from.
             If no source_key is given, it searches the sources for a source that contains a dataset with the given
-            epd_id/ uuid.
+            epd_id.
 
         Returns
         ----------
         epd_dataset : EpdDataset
-            The returned dataset is filled with data and information of the EPD indicated by the UUID.
+            The returned dataset is filled with data and information of the EPD indicated by the epd_id.
         """
         epd_dataset = epd_dataset or self._create_dataset_object()
 
@@ -86,7 +86,7 @@ class EpdDataManager(object):
         return self.dataset_template()
 
     def _cache_dataset_content(self, epd_id, epd_dataset, scenario):
-        """Saves the content from the epd_dataset to the _fetched_datasets dictionary with the UUID as key."""
+        """Saves the content from the epd_dataset to the _fetched_datasets dictionary with the epd_id as key."""
         self._fetched_datasets[(epd_id, scenario)] = {
             "name": epd_dataset.name,
             "scenario": epd_dataset.scenario,

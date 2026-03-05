@@ -1,4 +1,4 @@
-#amount;#uuid;#epd_name;#comment;#replacement_cycle;#scenario;Dataholz ID;Dataholz Variant;datatype;Owner;Unnamed: 10
+#amount;#epd_id;#epd_name;#comment;#replacement_cycle;#scenario;Dataholz ID;Dataholz Variant;datatype;Owner;Unnamed: 10
 0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awropo09a;00;generic;Sphera;
 0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awropo09a;00;specific;Holzwerk Gebr. Schneider GmbH;
 0.01536;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awropo09a;00;representative;Thuenen;

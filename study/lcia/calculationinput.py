@@ -24,8 +24,8 @@ class CalculationInput(object):
         Header for the partition_df
     """
     def __init__(self):
-        self._calculation_header = ["calculation_id", "amount", "uuid", "epd_name", "scenario", "replacement_cycle", "comment"]
-        self._mandatory_columns = ["#amount", "#uuid", "#epd_name", "#scenario"]
+        self._calculation_header = ["calculation_id", "amount", "epd_id", "epd_name", "scenario", "replacement_cycle", "comment"]
+        self._mandatory_columns = ["#amount", "#epd_id", "#epd_name", "#scenario"]
 
         self._subset_header = ["calculation_id", "subset_name", "partition_id"]
         self._partition_header = ["partition_id", "partition_name"]
@@ -50,7 +50,7 @@ class CalculationInput(object):
         self._initialize_calculation_dataframes(import_df)
 
     def _load_and_preprocess_csv(self, filepath, sep = ","):
-        """Method to load the input csv into a pandas dataframe, clean UUID column from whitespaces, create an index
+        """Method to load the input csv into a pandas dataframe, clean epd_id column from whitespaces, create an index
         column and a column for the calculation of all individual datasets as a separate partition
 
         Parameters
@@ -68,7 +68,7 @@ class CalculationInput(object):
 
         df.columns = [column.replace("#", "") for column in df.columns]
 
-        df["uuid"] = df["uuid"].str.strip()
+        df["epd_id"] = df["epd_id"].str.strip()
         df.insert(0, self._calculation_header[0], df.index)
         df.insert(len(df.columns), "unique_epd", df["epd_name"])
         return df
@@ -114,7 +114,7 @@ class CalculationInput(object):
         Returns
         -------
         calc_df : pd.DataFrame
-            Contains information for the calculation; UUIDs, amounts, subset/ categories
+            Contains information for the calculation; epd_id, amounts, subset/ categories
         """
         if len(partitions) == 1:
             return self._filter_by_single_partition(partitions[0])

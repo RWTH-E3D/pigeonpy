@@ -21,7 +21,7 @@ class En15804A1Dataset(EpdDataset):
     Attributes
     ----------
     epd_id : str
-        lca id/ uuid for the contained dataset
+        epd_id for the contained dataset
     name : str
         Name of the dataset
     ref_flow_value : float
