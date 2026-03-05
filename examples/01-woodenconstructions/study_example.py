@@ -5,7 +5,7 @@ from data.epddata.source.oekobaudatapi import OekobaudatApi
 from epd.epddataset.en15804A2dataset import En15804A2Dataset
 
 #input file wird geladen
-input_csv_path = Path.cwd() /  "calculationinput.csv"
+input_csv_path = Path.cwd() /  "calculationinput_scenarios.csv"
 
 standard_dataset = En15804A2Dataset
 example_study = Study(
@@ -28,8 +28,9 @@ selected_partitions = ("Dataholz ID", "Dataholz Variant")
 
 example_study.run_calculation(selected_partitions)
 
-#results = example_study.lcia.result
+results = example_study.lcia.result
 
-#print(results["indicator_values"][selected_partitions][("awropo09a", 0)])
+results["indicator_values"][selected_partitions][("awropo09a", 0)].show_history()
+print(results["indicator_values"][selected_partitions][("awropo09a", 0)])
 
 #[selected_partitions][("awropo09a", "00")]

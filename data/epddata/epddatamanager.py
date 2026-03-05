@@ -29,13 +29,13 @@ class EpdDataManager(object):
         self._fetched_datasets = {}
 
     def register_source(self, source_key, source):
-        """Registers a source instance into the databases dictionary with a given key"""
+        """Registers a source instance into the sources dictionary with a given key"""
         self.sources[source_key] = source
         self.sources[source_key].load(self.dataset_template)
 
     def load_epd(self, epd_id, scenario=None, epd_dataset=None, source_key=None):
         """Either loads a dataset from the cached datasets or calls the method of one of the EPD sources in the
-        databases dictionary to load the environmental indicator data into an EpdDataset instance. If an EPD is loaded
+        sources dictionary to load the environmental indicator data into an EpdDataset instance. If an EPD is loaded
         for the first time, it is saved in the dataset cache dictionary (_fetched_datasets).
 
         Parameters
@@ -48,8 +48,8 @@ class EpdDataManager(object):
             Instance of EpdDataset. If None, then an instance is created using the associated method and
             dataset_template attribute.
         source_key : str
-            If specified (and found in databases) uses the source indicated by the source_key to load the EPD data from.
-            If no source_key is given, it searches the databases for a source that contains a dataset with the given
+            If specified (and found in sources) uses the source indicated by the source_key to load the EPD data from.
+            If no source_key is given, it searches the sources for a source that contains a dataset with the given
             epd_id/ uuid.
 
         Returns
@@ -74,7 +74,7 @@ class EpdDataManager(object):
         if source_key not in self.sources:
             raise ValueError(f"No data source found with source key '{source_key}'")
 
-        self.databases[source_key].load_epd(epd_dataset, epd_id, scenario)
+        self.sources[source_key].load_epd(epd_dataset, epd_id, scenario)
         epd_dataset.history.add_data_source(epd_id, epd_dataset.name, source_key)
 
         self._cache_dataset_content(epd_id, epd_dataset, scenario)

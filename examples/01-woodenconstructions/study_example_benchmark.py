@@ -6,7 +6,7 @@ from epd.epddataset.en15804A2dataset import En15804A2Dataset
 import timeit
 
 def basic_usage():
-    input_csv_path = Path.cwd() /  "calculationinput.csv"
+    input_csv_path = Path.cwd() /  "calculationinput_scenarios.csv"
 
     standard_dataset = En15804A2Dataset
     example_study = Study(

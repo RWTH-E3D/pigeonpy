@@ -15,13 +15,16 @@ class CalculationInput(object):
         Contains the defined partitions from the input csv
     _calculation_header : list
         Header for the calculation_df
+    _mandatory_columns : list
+        Columns that are mandatory in the input csv. Marked with the hash sign '#', they represent pre-defined columns
+        that are not part of partitions.
     _subset_header : list
         Header for the subset_df
     _partition_header : list
         Header for the partition_df
     """
     def __init__(self):
-        self._calculation_header = ["calculation_id", "#amount", "#uuid", "#epd_name", "#scenario", "#replacement_cycle", "#comment"]
+        self._calculation_header = ["calculation_id", "amount", "uuid", "epd_name", "scenario", "replacement_cycle", "comment"]
         self._mandatory_columns = ["#amount", "#uuid", "#epd_name", "#scenario"]
 
         self._subset_header = ["calculation_id", "subset_name", "partition_id"]
@@ -39,6 +42,8 @@ class CalculationInput(object):
         ----------
         filepath : str
             Path to the input csv file
+        sep : str
+            Separator used in the input csv file
         """
         import_df = self._load_and_preprocess_csv(filepath, sep = sep)
 
@@ -60,6 +65,8 @@ class CalculationInput(object):
         except KeyError as error:
             raise KeyError(f"Column names from input csv do not match the specifications for obligatory column names."
                            f"Columns must include: '{self._mandatory_columns}'. {error}")
+
+        df.columns = [column.replace("#", "") for column in df.columns]
 
         df["uuid"] = df["uuid"].str.strip()
         df.insert(0, self._calculation_header[0], df.index)

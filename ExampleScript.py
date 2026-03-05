@@ -1,7 +1,7 @@
 import time
 from study.study import Study
 from pathlib import Path
-from data.epddata.source.oekobaudatapi import OekobaudatAPI
+from data.epddata.source.oekobaudatapi import OekobaudatApi
 from epd.epddataset.en15804A2dataset import En15804A2Dataset
 
 import numpy as np # Löschen, wenn Gewichtungsfaktoren über Funktion erstellt werden
@@ -27,7 +27,7 @@ example_study = Study(
 )
 
 
-oekobaudat_api = OekobaudatAPI()
+oekobaudat_api = OekobaudatApi()
 
 # example_study.epd_datamanager.register_source("oekobaudat", oekobaudat)
 example_study.epd_datamanager.register_source("oekobaudat API", oekobaudat_api)

@@ -35,7 +35,7 @@ class Calculator(object):
         dataset_objects = []
         for row in calc_df.itertuples(index = False):
             pass
-            dataset_object = epd_datamanager.load_epd(row.uuid)
+            dataset_object = epd_datamanager.load_epd(row.uuid, row.scenario)
             dataset_object *= row.amount
             dataset_object = self.calculate_replacements(
                 dataset_object,
