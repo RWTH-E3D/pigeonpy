@@ -33,18 +33,19 @@ class Calculator(object):
         calc_df = self.calc_in.get_calculation_df_for_partitions(*partitions)
 
         dataset_objects = []
-        for index, row in calc_df.iterrows():
-            dataset_object = epd_datamanager.load_epd(row['#uuid'], row['#scenario'])
-            dataset_object *= row['#amount']
+        for row in calc_df.itertuples(index = False):
+            pass
+            dataset_object = epd_datamanager.load_epd(row.uuid)
+            dataset_object *= row.amount
             dataset_object = self.calculate_replacements(
                 dataset_object,
                 observation_period,
-                row['#replacement_cycle']
+                row.replacement_cycle
             )
 
             calculated_result_row = {
                 'epd_dataset': dataset_object,
-                'subset_name': row['subset_name']
+                'subset_name': row.subset_name
             }
             dataset_objects.append(calculated_result_row)
 

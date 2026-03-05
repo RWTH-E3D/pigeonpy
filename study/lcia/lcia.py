@@ -61,11 +61,11 @@ class Lcia(object):
         )
         self._calculate_total_result()
 
-    def load_input(self, filepath):
+    def load_input(self, filepath, sep=","):
         """Instantiates CalculationInput class and calls the load function for preprocessing the input CSV file given
         with the filepath."""
         self.input = CalculationInput()
-        self.input.load(filepath)
+        self.input.load(filepath, sep = sep)
 
     def normalize(self, method_name, reference_result, resulting_unit='-'):
         """Performs a normalization calculation of the indicator impacts in relation to the reference information given

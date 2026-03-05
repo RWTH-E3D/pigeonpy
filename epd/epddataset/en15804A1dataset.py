@@ -20,7 +20,7 @@ class En15804A1Dataset(EpdDataset):
 
     Attributes
     ----------
-    epd_data_id : str
+    epd_id : str
         lca id/ uuid for the contained dataset
     name : str
         Name of the dataset

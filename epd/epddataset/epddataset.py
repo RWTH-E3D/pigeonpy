@@ -25,7 +25,7 @@ class EpdDataset(object):
 
     Attributes
     ----------
-    epd_data_id : str
+    epd_id : str
         lca id for the contained dataset
     name : str
         Name of the contained dataset
@@ -51,7 +51,7 @@ class EpdDataset(object):
     epd_attribute_loader = EpdAttributeLoader()
 
     def __init__(self, data=None, name=None, history=None):
-        self.epd_data_id = None
+        self.epd_id = None
         self.name = name
         self.ref_flow_value = None
         self.ref_flow_unit = None
@@ -365,6 +365,13 @@ class EpdDataset(object):
             if indicator.abbreviation == abr_indicator:
                 return index
         raise KeyError(f"There is no indicator {abr_indicator}")
+
+    def sum_to_stage(self, stage):
+        indicator_sums = self.data.sum(axis = 1)
+        self.data = np.zeros_like(self.data)
+        stage_id = self._get_index_life_cycle_stage(stage)
+        self.data[:, stage_id] = indicator_sums
+        #todo: Find out whether it makes more sense to overwrite self.data or return a new data record and adjust it if necessary.
 
     @staticmethod
     def _format_data_array_element_for_printing(width, value):

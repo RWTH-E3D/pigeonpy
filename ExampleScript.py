@@ -34,6 +34,7 @@ example_study.epd_datamanager.register_source("oekobaudat API", oekobaudat_api)
 
 
 
+
 #Berechnung wird geladen und gestartet
 example_study.load_calculation_input(input_csv_path)
 example_study.run_calculation("building_type")

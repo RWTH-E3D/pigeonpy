@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 
-class OekobaudatAPI(ApiEpdSource):
+class OekobaudatApi(ApiEpdSource):
     """Class that contains methods for fetching datasets in XML format from the oekobaudat API and loading them into
     EpdDataset objects
 
