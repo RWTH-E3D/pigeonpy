@@ -30,7 +30,7 @@ class Calculator(object):
             of an EpdDataset object
         """
 
-        calc_df = self.calc_in.select_by_partition(*partitions)
+        calc_df = self.calc_in.get_calculation_df_for_partitions(*partitions)
 
         dataset_objects = []
         for row in calc_df.itertuples(index = False):
@@ -68,23 +68,21 @@ class Calculator(object):
 
         Parameters
         ----------
-        dataset_object
-        observation_period
-        replacement_cycle
+        dataset_object : EpdDataset
+        observation_period : Int
+            The period specified when creating the study.
+        replacement_cycle : Int
+            replacement_cycle column value defined in input_csv
 
         Returns
         -------
-
+        dataset_object : EpdDataset
         """
         if isinstance(replacement_cycle, (int, float)) and not pd.isna(replacement_cycle):
             replacements = np.ceil(observation_period / replacement_cycle) - 1
 
             dataset_object *= (replacements + 1)
-            dataset_object.history.log_operation(
-                f"Calculate component replacements: "
-                f"{dataset_object.history.initial_name} += {replacements} * {dataset_object.history.initial_name}",
-                replace_last=True
-            )
+            dataset_object.history.log_replacements(replacements)
 
             return dataset_object
         else:

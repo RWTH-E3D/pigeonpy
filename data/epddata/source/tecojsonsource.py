@@ -43,7 +43,7 @@ class TecoJson(FileEpdSource):
         with open(self.filepath, "r+") as f:
             self.data = json.load(f)
 
-    def load_epd(self, epd_dataset, epd_id):
+    def load_epd(self, epd_dataset, epd_id, _):
         """Load the EPD data from the dict into the data array of an EpdDataset instance by iterating over the
         environmental indicator list and life cycle stages list of the epd_dataset to insert values at correct indices.
 
@@ -53,6 +53,8 @@ class TecoJson(FileEpdSource):
             The dataset object where EPD data will be loaded.
         epd_id : str
             The unique identifier for the EPD dataset.
+        _ : None
+            Placeholder for scenario argument. TecoJson does not contain scenarios
 
         Raises
         ------

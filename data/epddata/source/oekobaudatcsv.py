@@ -37,19 +37,22 @@ class OekobaudatCsv(FileEpdSource):
     """
 
     a1_aliases = ["'DIN EN 15804'", "'EN 15804'", "'DIN EN 15804' / 'ISO 14025'",
-                       "'EN 15804' / 'ISO 14025' / 'OEKOBAUDAT Entry Level Compliance'"]
+                       "'EN 15804' / 'ISO 14025' / 'OEKOBAUDAT Entry Level Compliance'",
+                  "'EN 15804+A1' / 'ISO 14025'"]
     a2_aliases = ["'DIN EN 15804+A2'", "'EN 15804+A2'", "'DIN EN 15804+A2' / 'ISO 14025'",
-                       "'EN 15804+A2' / 'ISO 14025'", "'EN 15804+A2' / 'EN 16485'", "'EN 15804+A2 (EF 3.1)'"]
+                       "'EN 15804+A2' / 'ISO 14025'", "'EN 15804+A2' / 'EN 16485'", "'EN 15804+A2 (EF 3.1)'",
+                  "'EN 15804+A2 (EF 3.0)' / 'ISO 14025'"]
 
     dtype_dict = {
         "UUID": str,
         "Name (de)": str,
         "Name (en)": str,
-        "Konformität": str,
+        "Konformitaet": str,
         "Referenzjahr": "Int64",
         "Bezugseinheit": str,
         "Referenzfluss-Name": str,
         "Modul": str,
+        "Szenario": str,
         "PERE": float, "PERM": float, "PERT": float, "PENRE": float, "PENRM": float, "PENRT": float,
         "SM": float,
         "RSF": float, "NRSF": float, "FW": float, "HWD": float, "NHWD": float, "RWD": float,
@@ -72,7 +75,7 @@ class OekobaudatCsv(FileEpdSource):
         self.dataset_template = None
         self.data = None
 
-    def load_epd(self, epd_dataset, epd_id):
+    def load_epd(self, epd_dataset, epd_id, scenario):
         """Loads the EPD data for a given epd_id from the Oekobaudat dataframe into the provided epd_dataset instance
         by calling associated methods.
 
@@ -82,13 +85,20 @@ class OekobaudatCsv(FileEpdSource):
             An instance of the dataset class to load EPD data into.
         epd_id : str
             The UUID of the EPD to load.
+        scenario : str
+            Name of the scenario to be used in the dataset if specified
         """
         lca_dataset_bind = self._filter_dataset(epd_id, epd_dataset)
-        self._populate_metadata(epd_dataset, lca_dataset_bind, epd_id)
+
+        if lca_dataset_bind["Modul"].duplicated().any(): # True -> dataset contains scenarios
+            lca_dataset_bind = self._handle_scenarios(lca_dataset_bind, scenario, epd_id)
+
         data_array = self._populate_data_array(epd_dataset, lca_dataset_bind)
         data_array = self._handle_a1_a3_column(epd_dataset, data_array)
-
         epd_dataset.data = data_array
+
+        self._populate_metadata(epd_dataset, lca_dataset_bind, epd_id, scenario)
+
 
     def _filter_dataset(self, epd_id, epd_dataset):
         """Filters the main data for the given epd_id.
@@ -106,12 +116,64 @@ class OekobaudatCsv(FileEpdSource):
         return dataset_binding
 
     @staticmethod
-    def _populate_metadata(epd_dataset, lca_dataset_bind, epd_id):
+    def _handle_scenarios(lca_dataset_bind, scenario, epd_id):
+        """Resolves scenario dependent EPD data.
+
+        Parameters
+        ----------
+        lca_dataset_bind : pd.DataFrame
+            Contains the rows of the loaded Oekobaudat csv file that match the epd_id given to the load_epd method. If
+            scenarios exist in the dataset, there are multiple rows for the same module present in this lca_dataset_bind
+        scenario : str
+            Name of the scenario to use or None
+        epd_id : str
+            UUID used to create the lca_dataset_bind and given to this method for clarity in case an error is raised
+        Returns
+        -------
+        lca_dataset_bind : pd:DataFrame
+            The same as above but without duplicate Modul entries. Only the Modul entry for the specified scenario
+        """
+        duplicate_mask = lca_dataset_bind["Modul"].duplicated(keep=False)
+        available_scenarios = (
+            lca_dataset_bind.loc[duplicate_mask, ["Modul", "Szenario"]]
+            .dropna(subset=["Szenario"])
+            .drop_duplicates()
+        )
+
+        if pd.notna(scenario) and scenario is not None:
+
+            # "use_first" for testing if datasets can be loaded with test_load_dataset_methods.py
+            if scenario == "use_first":
+                return lca_dataset_bind
+
+            # Scenarios present and user specified a scenario, but it is not in the available scenarios
+            if scenario not in available_scenarios["Szenario"].values:
+                raise Exception(
+                    f"KeyError during loading of dataset with id '{epd_id}'.\n"
+                    f"Given scenario '{scenario}' does not match with available scenarios.\n "
+                    f"Available scenarios:\n{available_scenarios}"
+                )
+
+            lca_dataset_bind = lca_dataset_bind[
+                ~duplicate_mask | (lca_dataset_bind["Szenario"] == scenario)
+                ]
+        else:
+            # Scenarios present, but nothing specified by user
+            raise Exception(
+                f"Error during loading of dataset. Dataset with id '{epd_id}' contains scenarios. Please specify one.\n"
+                f"Available scenarios:\n{available_scenarios}"
+            )
+
+        return lca_dataset_bind
+
+    @staticmethod
+    def _populate_metadata(epd_dataset, lca_dataset_bind, epd_id, scenario):
         """Populates metadata fields in the EPD dataset."""
-        epd_dataset.epd_id = epd_id
+        epd_dataset.epd_data_id = epd_id
         epd_dataset.name = lca_dataset_bind['Name (de)'].iloc[0]
         epd_dataset.ref_flow_unit = lca_dataset_bind['Bezugseinheit'].iloc[0]
         epd_dataset.ref_flow_value = lca_dataset_bind['Bezugsgroesse'].iloc[0]
+        epd_dataset.scenario = scenario
 
     @staticmethod
     def _populate_data_array(epd_dataset, lca_dataset_bind):
@@ -140,8 +202,8 @@ class OekobaudatCsv(FileEpdSource):
         return data_array
 
     def _load_en15804a1(self):
-        use_columns_a1 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
-                          "Bezugseinheit", "Referenzfluss-Name", "Modul",
+        use_columns_a1 = ["UUID", "Name (de)", "Name (en)", "Konformitaet", "Referenzjahr", "Bezugsgroesse",
+                          "Bezugseinheit", "Referenzfluss-Name", "Modul", "Szenario",
                           "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
                           "HWD", "NHWD", "RWD", "CRU", "MFR", "MER", "EEE", "EET",
                           "GWP", "ODP", "POCP", "AP", "EP", "ADPE", "ADPF"]
@@ -149,20 +211,22 @@ class OekobaudatCsv(FileEpdSource):
                                        usecols=use_columns_a1, converters={'Bezugsgroesse': self.convert_string_to_1},
                                        dtype=self.dtype_dict)
         
-        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformität.isin(self.a2_aliases)].index)
-        if len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformität'].str.contains('A2')]) != 0:
+        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformitaet.isin(self.a2_aliases)].index)
+        lca_data_bind_pd = lca_data_bind_pd.dropna(subset = ["Konformitaet"])
+
+        if len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformitaet'].str.contains('A2')]) != 0:
             print(f"Warning: LCA dataset binding still contains "
-                  f"{len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformität'].str.contains('A2')])} datasets"
+                  f"{len(lca_data_bind_pd.loc[lca_data_bind_pd['Konformitaet'].str.contains('A2')])} datasets"
                   f"conform to standard A2")
 
         return lca_data_bind_pd
 
     def _load_en15804a2(self):
-        use_columns_a2 = ["UUID", "Name (de)", "Name (en)", "Konformität", "Referenzjahr", "Bezugsgroesse",
-                          "Bezugseinheit", "Referenzfluss-Name", "Modul",
+        use_columns_a2 = ["UUID", "Name (de)", "Name (en)", "Konformitaet", "Referenzjahr", "Bezugsgroesse",
+                          "Bezugseinheit", "Referenzfluss-Name", "Modul", "Szenario",
                           "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
-                          # "Additional environmental impact indicators" with high uncertainties (see Ökobaudat Manual)
-                          # -> excluded here (If the use is desired, add to json and column names below!!!)
+                          # "Additional environmental impact indicators" with high uncertainties (see Ökobaudat manual)
+                          # -> excluded here (If the use is desired, add to json and column names below)
                           # "HTPc (A2)", "HTPnc (A2)", "PM (A2)", "IRP (A2)", "ETPfw (A2)", "SOP (A2)",
                           "HWD", "NHWD", "RWD", "CRU", "MFR", "MER", "EEE", "EET",
                           "AP (A2)", "GWPtotal (A2)", "GWPbiogenic (A2)", "GWPfossil (A2)", "GWPluluc (A2)",
@@ -172,7 +236,9 @@ class OekobaudatCsv(FileEpdSource):
         lca_data_bind_pd = pd.read_csv(self.filepath, sep=';', encoding="ISO-8859-1",
                                        usecols=use_columns_a2, converters={'Bezugsgroesse': self.convert_string_to_1},
                                        dtype=self.dtype_dict)
-        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformität.isin(self.a1_aliases)].index)
+
+        lca_data_bind_pd = lca_data_bind_pd.drop(lca_data_bind_pd[lca_data_bind_pd.Konformitaet.isin(self.a1_aliases)].index)
+        lca_data_bind_pd = lca_data_bind_pd.dropna(subset=["Referenzjahr"])
 
         # Renaming columns to fit the syntax of indicators_en_15804_a2.json
         rename_columns_a2 = {"AP (A2)": "AP", "GWPtotal (A2)": "GWP-TOTAL", "GWPbiogenic (A2)": "GWP-BIOGEN",

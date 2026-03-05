@@ -71,12 +71,12 @@ class EpdAttributeLoader:
         self._load_stages()
 
         if self.environmental_indicators_to_be_used and self.dataset_template:
-            self.dataset_template.environmental_indicators = self._customize_attributes(
+            self.dataset_template.environmental_indicators = self._filter_attributes(
                 self.environmental_indicators_to_be_used,
                 self.dataset_template.environmental_indicators
             )
         if self.life_cycle_stages_to_be_used and self.dataset_template:
-            self.dataset_template.life_cycle_stages = self._customize_attributes(
+            self.dataset_template.life_cycle_stages = self._filter_attributes(
                 self.life_cycle_stages_to_be_used,
                 self.dataset_template.life_cycle_stages
             )
@@ -103,7 +103,7 @@ class EpdAttributeLoader:
             self.life_cycle_stages = [LifeCycleStage(**stage) for stage in lcs_data]
 
     @staticmethod
-    def _customize_attributes(attributes_to_be_used, attributes_to_be_customized):
+    def _filter_attributes(attributes_to_be_used, attributes_to_be_filtered):
         """Takes the existing list of attributes (environmental indicators or life cycle stages) and creates a new list
         containing only the objects of the attributes given by the attribute abbreviations in the attributes_to_be_used
         parameter.
@@ -112,17 +112,17 @@ class EpdAttributeLoader:
         ----------
         attributes_to_be_used : list
             Contains the wished attributes as a list of abbreviations
-        attributes_to_be_customized : list
+        attributes_to_be_filtered : list
             Contains the current attributes (complete list of attributes).
 
         Returns
         -------
-        custom_attributes : list
+        filtered_attributes : list
             Contains the objects of the attributes for all attribute abbreviations given with the attributes_to_be_used
             list.
         """
-        custom_attributes = [
-            attribute for attribute in attributes_to_be_customized
+        filtered_attributes = [
+            attribute for attribute in attributes_to_be_filtered
             if attribute.abbreviation in attributes_to_be_used
         ]
-        return custom_attributes
+        return filtered_attributes

@@ -7,7 +7,6 @@ from epd.epddataset.en15804A2dataset import En15804A2Dataset
 import numpy as np # Löschen, wenn Gewichtungsfaktoren über Funktion erstellt werden
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import MaxNLocator
 
@@ -15,7 +14,7 @@ from matplotlib.ticker import MaxNLocator
 tic = time.time()
 
 #input file wird geladen
-input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper+replacement_cycle+headers.csv"
+input_csv_path = Path.cwd() / "data" / "input" / "inputdata" / "input_csv_paper_scenarios.csv"
 
 # Studie wird erstellt
 standard_dataset = En15804A2Dataset
@@ -42,7 +41,7 @@ example_study.run_calculation("building_type")
 
 #Normalisieurngs EPD wird geladen
 normalization_epd = En15804A2Dataset()
-normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", example_study.epd_datamanager)
+normalization_epd.load_lca_dataset("f8ff7cbf-f3bb-4499-95e2-8268dd84fab1", example_study.epd_datamanager, scenario="S0")
 
 # Normalization
 normalization_factors = {
@@ -62,7 +61,8 @@ weighting_factors = {
 # Benennung der Gewichtung
 example_study.lcia.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
 
-
+# Zeige Historie/Logs
+# example_study.lcia.result["indicator_values"]["total_result"].history.show_history()
 
 ###########################################################################
 ############################## Visualisation ##############################
