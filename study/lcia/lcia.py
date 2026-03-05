@@ -103,21 +103,19 @@ class Lcia(object):
         normalize_dataset = lambda dataset: normalized_dataset_class(
             data = (dataset / reference_result).data,
             name = dataset.name + "_normalized",
-            history = dataset.history
+            history = dataset.history.create_clone()
         )
         def log_normalization(dataset):
-            dataset.history.log_operation(
-                f"Normalized with normalization method '{method_name}' and reference values\n{reference_result}"
-            )
+            dataset.history.log_normalize(method_name, reference_result)
             return dataset
 
         for partition, value in self.result["indicator_values"].items():
             if isinstance(value, Series):
-                norm_result = value.apply(log_normalization)
-                norm_result = norm_result.apply(normalize_dataset)
+                norm_result = value.apply(normalize_dataset)
+                norm_result = norm_result.apply(log_normalization)
             elif isinstance(value, self.dataset_template):
-                norm_result = log_normalization(value)
-                norm_result = normalize_dataset(norm_result)
+                norm_result = normalize_dataset(value)
+                norm_result = log_normalization(norm_result)
             else:
                 norm_result = None
 
@@ -250,21 +248,19 @@ class Lcia(object):
         weight_dataset = lambda dataset: weighted_dataset_class(
             data = (dataset * weighting_factors).data,
             name = dataset.name + "_weighted",
-            history = dataset.history
+            history = dataset.history.create_clone()
         )
         def log_weighting(dataset):
-            dataset.history.log_operation(
-                f"Weighted with weighting method '{method_name}' and weighting factors\n{weighting_factors}"
-            )
+            dataset.history.log_weighting(method_name, weighting_factors)
             return dataset
 
         for partition, value in result.items():
             if isinstance(value, Series):
-                weighted_result = value.apply(log_weighting)
-                weighted_result = weighted_result.apply(weight_dataset)
+                weighted_result = value.apply(weight_dataset)
+                weighted_result = weighted_result.apply(log_weighting)
             elif isinstance(value, self.dataset_template):
-                weighted_result = log_weighting(value)
-                weighted_result = weight_dataset(weighted_result)
+                weighted_result = weight_dataset(value)
+                weighted_result = log_weighting(weighted_result)
             else:
                 weighted_result = None
 

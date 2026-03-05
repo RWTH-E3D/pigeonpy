@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from typing import Optional
+
 import numpy as np
 import copy
 from data.epdattributeloader import EpdAttributeLoader
@@ -96,13 +99,12 @@ class EpdDataset(object):
                             f"\nname: {other.name if isinstance(other, EpdDataset) else 'scalar'} "
                             f"\n{other.data if isinstance(other, EpdDataset) else other} \n{e}")
 
-        result_epd.history = self.history
+        result_epd.history = self.history.create_clone()
 
         if isinstance(other, EpdDataset):
-            result_epd.history.log_operation("Multiplied with other dataset: ")
-            result_epd.history.merge_histories(other_dataset=other)
+            result_epd.history.log_mul_other(other)
         else:
-            result_epd.history.log_operation(f"Multiplied with factor(s): {other}")
+            result_epd.history.log_mul_factor(other)
 
         return result_epd
 
@@ -134,9 +136,9 @@ class EpdDataset(object):
                             f"\n{self.data} \nof dataset {self.name}. {e}")
 
 
-        result_epd.history = self.history
-        result_epd.history.log_operation("Sum calculated with other dataset: ")
-        result_epd.history.merge_histories(other_dataset=other)
+        result_epd.history = self.history.create_clone()
+
+        result_epd.history.log_add(other)
 
         return result_epd
 
@@ -167,9 +169,9 @@ class EpdDataset(object):
             raise TypeError(f"Error when subtracting data array \n'{other.data}' \nof dataset {other.name} from data array"
                             f"\n{self.data} \nof dataset {self.name}. {e}")
 
-        result_epd.history = self.history
-        result_epd.history.log_operation("Difference calculated with other dataset: ")
-        result_epd.history.merge_histories(other_dataset=other)
+        result_epd.history = self.history.create_clone()
+
+        result_epd.history.log_sub(other)
 
         return result_epd
 
@@ -204,13 +206,12 @@ class EpdDataset(object):
                             f"\n{other.data if isinstance(other, EpdDataset) else other} \n{e}")
         np.seterr(divide='ignore')
 
-        result_epd.history = self.history
+        result_epd.history = self.history.create_clone()
 
         if isinstance(other, EpdDataset):
-            result_epd.history.log_operation("Divided by other dataset: ")
-            result_epd.history.merge_histories(other_dataset=other)
+            result_epd.history.log_truediv_other(other)
         else:
-            result_epd.history.log_operation(f"Divided by factor(s): {other}")
+            result_epd.history.log_truediv_divisor(other)
 
         return result_epd
 
@@ -252,6 +253,19 @@ class EpdDataset(object):
             lines.append(f"{row_label_str} [{row_values_str}]")
 
         return "\n".join(lines)
+
+    def show_history(self, summary=True):
+        """Shortcut for displaying the history/logs of the epd dataset by calling the associated method in History
+        class.
+
+        Parameters
+        ----------
+        summary : bool
+            Determines the level of detail. If True, the entries in History are summarized and if not, every entry is
+            printed
+        """
+        print(f"History for dataset '{self.name}': ")
+        self.history.show_history(summary=summary)
 
     def export(self, path=None, file_format="teco_json", drop_rows=False, add_uuid=False):
         """Exports the datasets data to either 'teco_json' format or 'csv' format. The drop_rows and add_uuid parameters
@@ -390,8 +404,7 @@ class EpdDataset(object):
         updated_class_dict["environmental_indicators"] = copy.deepcopy(cls.environmental_indicators)
         updated_class_dict["life_cycle_stages"] = copy.deepcopy(cls.life_cycle_stages)
 
-        # Todo: Using a unit like m^2 would lead to the unit being only m^2 while it should be
-        #  "indicator unit / m^2"
+        # Note: Specifying a unit like m^2 would lead to the unit being only m^2 when it should be"indicator unit / m^2"
         for ei in updated_class_dict["environmental_indicators"]:
             ei.abbreviation = f"{ei.abbreviation}"
             ei.name = f"{ei.name} dimensionless"
@@ -417,14 +430,77 @@ class History:
     initial_source : str
         Contains the name of the source that was used to load EPD data into the EpdDataset object.
     initial_name : str
-        The name of the Epd whose data was loaded into the EpdDataset object.
+        The name of the EPD whose data was loaded into the EpdDataset object.
+    initial_epd_id : str
+        ID, e.g. UUID, of EPD whose data was loaded into the EpdDataset object.
+    contained_epd_ids : set
+        ID's of all EPDs that were aggregated in the dataset
+    epd_infos : dict
+        The name and source of all contained EPDs, identified with IDs as dictionary keys
     entries : list
         Contains string objects for every operation/ calculation step.
     """
     def __init__(self):
         self.initial_source = None
         self.initial_name = None
+        self.initial_epd_id = None
+
+        self.contained_epd_ids = set()
+        self.epd_infos = {}
         self.entries = []
+
+    @dataclass(frozen=True)
+    class Entry:
+        """Single history entry.
+
+        kind:
+            "init"              – dataset initialized from source
+            "mul_scalar"        – multiplied by factor (scalar or array)
+            "mul_other"         – multiplied by other dataset
+            "sum"               – sum with other dataset
+            "diff"              - difference with other dataset
+            "truediv_divisor"   - division with divisor (scalar or array)
+            "truediv_other"     - division with other dataset
+            "replacements"      – replacement calculation
+            "normalize"         – normalization
+            "weighting"         – weighting
+            "other"             – generic
+        message:
+            String object that describes the operation associated with the entry 
+        factor:
+            Stores the numeric factor for scalar operations (e.g. multiply, divide)
+        epd_id:
+            The id of the EPD, the operation was performed on or None, if the operation involved more than 1 dataset
+        """
+        kind: str
+        message: str
+        operand: Optional[float] = None
+        epd_id: Optional[str] = None
+
+        def __str__(self):
+            return f"Operation: {self.kind}; Message: {self.message}"
+        
+
+    def create_clone(self):
+        """Used to clone the History object (self) to prevent using a deepcopy which slows down the process when
+        handling histories with many entries
+
+        Returns
+        -------
+        cloned_history : History
+            Basically a clone of the present History object with the same attributes as self
+        """
+        clone = History()
+
+        clone.initial_source = self.initial_source
+        clone.initial_name = self.initial_name
+        clone.initial_epd_id = self.initial_epd_id
+
+        clone.contained_epd_ids = set(self.contained_epd_ids)
+        clone.epd_infos = dict(self.epd_infos)
+        clone.entries = list(self.entries)
+
+        return clone
 
     def add_data_source(self, epd_id, epd_name, source_key):
         """Creates the first entry and sets the objects attributes.
@@ -441,27 +517,187 @@ class History:
         """
         self.initial_source = source_key
         self.initial_name = epd_name
-        self.entries.append(f"Dataset '{epd_name}' ({epd_id}) initialized from source '{source_key}'")
+        self.initial_epd_id = epd_id
+
+        self.contained_epd_ids = {epd_id}
+        self.epd_infos[epd_id] = {"name": epd_name, "source": source_key}
+
+        msg = f"Dataset '{epd_name}' ({epd_id}) initialized from source '{source_key}'"
+        self.entries.append(History.Entry(kind="init", message=msg, epd_id=epd_id))
 
     def log_operation(self, entry, replace_last=False):
-        """Adds a given entry to the entries list with the option to replace the last entry with the given entry."""
-        if replace_last:
+        """Adds a given entry to the entries list with the option to replace the last entry with the given entry.
+        If the entry is not yet an Entry object, this will be created first, before appending it either as the last
+        element of entries or replacing the current last entry, when replace_last is set to True."""
+        if not isinstance(entry, History.Entry):
+            entry = History.Entry(kind="other", message=entry, epd_id=self._single_epd_id())
+
+        if replace_last and self.entries:
             self.entries[-1] = entry
         else:
             self.entries.append(entry)
 
-    def merge_histories(self, other_dataset):
-        """Merges the logs of two individual EpdDataset objects together, i.e. when 2 datasets are calculated with each
-        other."""
-        self.entries += other_dataset.history.entries
-        # return self.entries + other_dataset.history.entries
+    def log_mul_factor(self, factor):
+        """Logs a multiplication with a factor."""
+        msg = f"Multiplied with factor(s):\n {factor}"
+        self.entries.append(History.Entry(kind="mul_scalar", message=msg, operand=factor, epd_id=self._single_epd_id()))
 
-    def show_history(self):
-        """Prints every entry in the entries list and adds empty lines between them"""
-        for entry in self.entries:
-            print(entry + "\n")
+    def log_mul_other(self, other_dataset):
+        """Logs a multiplication with another dataset."""
+        msg = f"Multiplied with other dataset: {other_dataset.history.initial_name}"
+        self.entries.append(History.Entry(kind="mul_other", message=msg, operand=other_dataset.data, epd_id=None))
+        self.merge_histories(other_dataset=other_dataset)
+
+    def log_add(self, other_dataset):
+        """Logs the calculation of a sum with another dataset."""
+        msg = f"Sum calculated with other dataset: {other_dataset.history.initial_name}"
+        self.entries.append(History.Entry(kind="sum", message=msg, epd_id=None))
+        self.merge_histories(other_dataset=other_dataset)
+
+    def log_sub(self, other_dataset):
+        """Logs the calculation of a difference with another dataset."""
+        msg = f"Difference calculated with other dataset: {other_dataset.history.initial_name}"
+        self.entries.append(History.Entry(kind="diff", message=msg, epd_id=None))
+        self.merge_histories(other_dataset=other_dataset)
+
+    def log_truediv_divisor(self, divisor):
+        """Logs a division by a factor."""
+        msg = f"Divided by scalar(s):\n {divisor}"
+        self.entries.append(History.Entry(kind="truediv_divisor", message=msg, operand=divisor, epd_id=self._single_epd_id()))
+
+    def log_truediv_other(self, other_dataset):
+        """Logs a division by another dataset."""
+        msg = f"Divided by other dataset: {other_dataset.history.initial_name}"
+        self.entries.append(History.Entry(kind="truediv_other", message=msg, operand=other_dataset.data, epd_id=None))
+        self.merge_histories(other_dataset=other_dataset)
+
+    def log_replacements(self, replacements):
+        """Logs the calculation of a replacement with kind: replacements, and replaces it with the last existing log,
+        which was automatically generated by the replacement calculation of kind: mul_scalar."""
+        msg = f"Calculated component replacements: {self.initial_name} += {replacements} * {self.initial_name}"
+        # Replace last existing entry in self.entries, since the replacement calculation already called log_add()
+        self.entries[-1] = History.Entry(kind="replacements", message=msg, operand=replacements, epd_id=self._single_epd_id())
+
+    def log_normalize(self, method_name, reference_result):
+        """Logs a normalization calculation with a reference result."""
+        msg = f"Normalized with normalization method '{method_name}' and reference values\n{reference_result}"
+        self.entries.append(History.Entry(kind="normalize", message=msg, operand=reference_result, epd_id=None))
+
+    def log_weighting(self, method_name, weighting_factors):
+        """Logs a weighting calculation with weighting factors."""
+        msg = f"Weighted with weighting method '{method_name}' and weighting factors\n{weighting_factors}"
+        self.entries.append(History.Entry(kind="weighting", message=msg, operand=weighting_factors, epd_id=None))
+
+    def merge_histories(self, other_dataset):
+        """Merges the Histories of two individual EpdDataset objects together, when an operation involves two datasets."""
+        other_hist = other_dataset.history
+
+        # add contained epd_ids to the contained epd_ids of self if not yet present
+        self.contained_epd_ids |= other_hist.contained_epd_ids
+        # merge metadata
+        for epd_id, info in other_hist.epd_infos.items():
+            if epd_id not in self.epd_infos:
+                self.epd_infos[epd_id] = info
+        # append entries which already contain epd_id's
+        self.entries += other_hist.entries
 
     def get_history(self):
+        """Returns the entries attribute of the object"""
         return self.entries
 
+    def show_history(self, summary=True):
+        """Displays the history/logs of the epd dataset by calling the associated method in History class.
 
+        Parameters
+        ----------
+        summary : bool
+            Determines the level of detail. If True, the History entries are summarized and if not, every entry is
+            printed out separately.
+        """
+        if not summary:
+            print("Printing history entries:\n")
+            for entry in self.entries:
+                print(entry)
+                print()
+        else:
+            print("Printing summarized history:\n")
+            self._summarize_history()
+
+    def _summarize_history(self):
+        """Creates the summary based on the Entry objects in the entries attribute. It summarizes them based on
+        operations involving single datasets (per_epd) and global operations (global_entries) either involving two
+        datasets or other operations like normalization and/or weighting.The summarized information is printed out in
+        the same structured way."""
+        from collections import Counter, defaultdict
+
+        # group entries per epd_id; epd_id=None are global operations
+        per_epd = defaultdict(list)
+        global_entries = []
+        for e in self.entries:
+            if e.epd_id is None:
+                global_entries.append(e)
+            else:
+                per_epd[e.epd_id].append(e)
+
+        # per-EPD summaries
+        for epd_id, entries in per_epd.items():
+            info = self.epd_infos.get(epd_id, {})
+            name = info.get("name", "unknown")
+            source = info.get("source", "unknown")
+
+            print(f"Dataset '{name}' ({epd_id}) initialized from source '{source}'")
+
+            # scalar multiplications: show distinct factors and counts
+            scalar_factors = [e.operand for e in entries if e.kind == "mul_scalar" and e.operand is not None]
+            factor_counts = Counter(scalar_factors)
+
+            if factor_counts:
+                print("  Scalar multiplications:")
+                for factor, count in factor_counts.items():
+                    if count == 1:
+                        print(f"    - multiplied by {factor}")
+                    else:
+                        print(f"    - multiplied by {factor} (repeated {count} times)")
+
+            # replacements (just count and print messages grouped)
+            replace_msgs = [e.message for e in entries if e.kind == "replacements"]
+            replace_counts = Counter(replace_msgs)
+            if replace_counts:
+                print("  Replacement operations:")
+                for msg, count in replace_counts.items():
+                    if count == 1:
+                        print(f"    - {msg}")
+                    else:
+                        print(f"    - {msg} (repeated {count} times)")
+            # blank line between datasets
+            print()
+
+        # global operations (normalized, weighted, adds, etc.)
+        if global_entries:
+            print("Global operations (applied to the aggregated dataset):")
+            norm_msgs = [e.message for e in global_entries if e.kind == "normalize"]
+            weight_msgs = [e.message for e in global_entries if e.kind == "weighting"]
+            add_msgs = [e.message for e in global_entries if e.kind == "sum"]
+            other_msgs = [e.message for e in global_entries if e.kind not in {"normalize", "weighting", "sum"}]
+
+            for msgs, title in [
+                (norm_msgs, "  Normalization:"),
+                (weight_msgs, "  Weighting:"),
+                (add_msgs, "  Summations:"),
+                (other_msgs, "  Other:"),
+            ]:
+                if msgs:
+                    print(title)
+                    counts = Counter(msgs)
+                    for msg, count in counts.items():
+                        if count == 1:
+                            print(f"    - {msg}")
+                        else:
+                            print(f"    - {msg} (repeated {count} times)")
+                    print()
+
+    def _single_epd_id(self):
+        """If this dataset currently represents exactly one EPD, return its ID, otherwise returns None"""
+        if len(self.contained_epd_ids) == 1:
+            return next(iter(self.contained_epd_ids))
+        return None

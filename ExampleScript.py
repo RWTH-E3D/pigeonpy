@@ -7,7 +7,6 @@ from epd.epddataset.en15804A2dataset import En15804A2Dataset
 import numpy as np # Löschen, wenn Gewichtungsfaktoren über Funktion erstellt werden
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import MaxNLocator
 
@@ -61,7 +60,8 @@ weighting_factors = {
 # Benennung der Gewichtung
 example_study.lcia.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
 
-
+# Zeige Historie/Logs
+# example_study.lcia.result["indicator_values"]["total_result"].history.show_history()
 
 ###########################################################################
 ############################## Visualisation ##############################
