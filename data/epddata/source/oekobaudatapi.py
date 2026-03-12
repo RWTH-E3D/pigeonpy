@@ -259,6 +259,11 @@ class OekobaudatApi(ApiEpdSource):
         resolved_epd_data : Dict
             Contains no duplicate value entries for modules, only the values of the selected scenarios, if scenarios exist
         """
+        if pd.isna(scenario):
+            scenario = None
+        else:
+            scenario = str(scenario)
+
         resolved_epd_data = {}
         all_scenarios_module_resolved = None
         all_scenarios_unique = None

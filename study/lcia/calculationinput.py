@@ -1,5 +1,10 @@
+import csv
 import pandas as pd
 
+
+class CsvValidationError(Exception):
+    """Custom exception for input CSV issues."""
+    pass
 
 class CalculationInput(object):
     """Class that parses the input csv file and prepares the input for the calculator utilizing database structures from
@@ -27,6 +32,11 @@ class CalculationInput(object):
         self._calculation_header = ["calculation_id", "amount", "epd_id", "epd_name", "scenario", "replacement_cycle", "comment"]
         self._mandatory_columns = ["#amount", "#epd_id", "#epd_name", "#scenario"]
 
+        self._input_csv_dtypes = {
+                "#amount": "float64",
+                "#replacement_cycle": "Int64" # Capital 'I' to allow NaN values
+        }
+
         self._subset_header = ["calculation_id", "subset_name", "partition_id"]
         self._partition_header = ["partition_id", "partition_name"]
 
@@ -45,26 +55,65 @@ class CalculationInput(object):
         sep : str
             Separator used in the input csv file
         """
-        import_df = self._load_and_preprocess_csv(filepath, sep = sep)
+        import_df = self._validate_load_and_preprocess_csv(filepath, sep = sep)
 
         self._initialize_calculation_dataframes(import_df)
 
-    def _load_and_preprocess_csv(self, filepath, sep = ","):
-        """Method to load the input csv into a pandas dataframe, clean epd_id column from whitespaces, create an index
-        column and a column for the calculation of all individual datasets as a separate partition
+    def _validate_load_and_preprocess_csv(self, filepath, sep = ","):
+        """Validates the input CSV file in terms of: Correct column numbers in each row (too few/many), empty lines,
+        correct dtypes, required columns, and required values in mandatory columns.
+        Removes the '#' sign in front of mandatory columns for the resulting dataframe.
 
         Parameters
         ----------
         filepath : str
-            Path to the input csv file
+            Path to the input CSV file
+        sep : str
+            Separator used in CSV file
+
+        Raises
+        ------
+        CsvValidationError : Exception
+            See class definition above. Includes the original Error type in the error message.
         """
-        df = (pd.read_csv(filepath, sep=sep, encoding='ANSI'))
+        self._validate_column_counts(filepath, sep)
+
+        try:
+            df = pd.read_csv(
+                filepath,
+                sep=sep,
+                na_values=["", '"', "'", "NA", "NaN", None],
+                on_bad_lines="error",  # Rows with too many/few columns; NOTE: https://github.com/pandas-dev/pandas/issues/47490
+                skip_blank_lines=True, # Skips only if line is fully empty
+                dtype="string", # All columns with dtype "string" first, because type casting throws more detailed error
+                keep_default_na=False
+            )
+        except pd.errors.ParserError as e:
+            raise CsvValidationError(
+                f"Parsing of input csv file failed: {e}"
+            ) from e
+
+        df = df.dropna(how="all") # drop entirely empty rows, in case they slipped through the read_csv process
+        df = df.astype(self._input_csv_dtypes) # Cast #amount and #replacement_cycle columns to correct types
 
         try:
             df[self._mandatory_columns]
-        except KeyError as error:
-            raise KeyError(f"Column names from input csv do not match the specifications for obligatory column names."
-                           f"Columns must include: '{self._mandatory_columns}'. {error}")
+        except KeyError as e:
+            raise CsvValidationError(
+                f"Column names from input csv do not match the specifications for obligatory column "
+                f"names. Columns must include:\n '{self._mandatory_columns}' \n{e}"
+            ) from e
+
+        # columns with values required in each element; scenario is allowed to have empty elements
+        na_mask = df[["#amount", "#epd_id", "#epd_name"]].isna().any(axis=1)
+        if na_mask.any():
+            bad_rows = df.loc[na_mask]
+            pd.set_option('display.expand_frame_repr', False)
+            raise CsvValidationError(
+                f"\n{na_mask.sum()} rows have missing values in required columns "
+                f"{'#amount', '#epd_id', '#epd_name'}.\n"
+                f"Problematic rows:\n {bad_rows}"
+            )
 
         df.columns = [column.replace("#", "") for column in df.columns]
 
@@ -72,6 +121,40 @@ class CalculationInput(object):
         df.insert(0, self._calculation_header[0], df.index)
         df.insert(len(df.columns), "unique_epd", df["epd_name"])
         return df
+
+    @staticmethod
+    def _validate_column_counts(filepath, sep):
+        """Checks input csv file for correct column counts in each row based on the amount of columns in the header.
+        Pandas read_csv method only checks for rows with too many columns and has a bug if the error is present in the
+        first line after header definition.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to input CSV file
+        sep
+            Separator used in input CSV file
+        """
+        with open(filepath, newline="", encoding="utf-8") as f:
+            reader = csv.reader(f, delimiter=sep)
+
+            try:
+                header = next(reader)
+            except StopIteration:
+                raise CsvValidationError("Input CSV file is empty")
+
+            number_of_columns = len(header)
+
+            for line_no, row in enumerate(reader, start=2):
+                if not row or all(cell.strip() == "" for cell in row):
+                    continue
+
+                if len(row) != number_of_columns:
+                    raise CsvValidationError(
+                        f"Column-count mismatch in line {line_no}: "
+                        f"expected {number_of_columns} columns (from header), got {len(row)}.\n"
+                        f"Please check separators/quoting in that line."
+                    )
 
     def _initialize_calculation_dataframes(self, import_df):
         """Initialize internal calculation, partition, and subset dataframes from a preprocessed import dataframe.
