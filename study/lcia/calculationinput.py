@@ -83,7 +83,7 @@ class CalculationInput(object):
                 filepath,
                 sep=sep,
                 na_values=["", '"', "'", "NA", "NaN", None],
-                on_bad_lines="error",  # Rows with too many/few columns; NOTE: https://github.com/pandas-dev/pandas/issues/47490
+                on_bad_lines="error",
                 skip_blank_lines=True, # Skips only if line is fully empty
                 dtype="string", # All columns with dtype "string" first, because type casting throws more detailed error
                 keep_default_na=False
@@ -126,7 +126,7 @@ class CalculationInput(object):
     def _validate_column_counts(filepath, sep):
         """Checks input csv file for correct column counts in each row based on the amount of columns in the header.
         Pandas read_csv method only checks for rows with too many columns and has a bug if the error is present in the
-        first line after header definition.
+        first line after the header (https://github.com/pandas-dev/pandas/issues/47490).
 
         Parameters
         ----------
@@ -164,9 +164,6 @@ class CalculationInput(object):
         import_df : pd.DataFrame
             The loaded and preprocessed csv as dataframe
         """
-        #todo: check for datatypes of subsets. In the moment a subset of the name "00" will be transformed into an integer
-        # all subsets should be strings to ensure consistency
-
         cols_to_copy = [c for c in self._calculation_header if c in import_df]
         calculations = import_df[cols_to_copy].copy()
 
