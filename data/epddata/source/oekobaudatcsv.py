@@ -4,8 +4,8 @@ import numpy as np
 
 
 class OekobaudatCsv(FileEpdSource):
-    """Class that contains methods for fetching datasets in XML format from the oekobaudat API and loading them into
-    EpdDataset objects
+    """Class that contains methods for loading the CSV export of the Oekobaudat database and datasets within this CSV,
+    separated between the two standards EN15804+A1 and EN15804+A2.
 
     Class variables
     ----------
