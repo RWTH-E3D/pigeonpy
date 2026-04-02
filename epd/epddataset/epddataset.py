@@ -44,6 +44,8 @@ class EpdDataset(object):
         Can be used to directly assign the data array to the instance
     name : str
         Set the name of the dataset during instantiation
+    history : History
+        For passing on History instances between datasets
     """
     environmental_indicators = None
     life_cycle_stages = None
