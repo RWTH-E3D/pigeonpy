@@ -30,7 +30,7 @@ example_study.run_calculation(selected_partitions)
 
 results = example_study.lcia.result
 
-results["indicator_values"][selected_partitions][("awropo09a", 0)].show_history()
-print(results["indicator_values"][selected_partitions][("awropo09a", 0)])
+results["indicator_values"][selected_partitions][("awropo09a", "00")].show_history()
+print(results["indicator_values"][selected_partitions][("awropo09a", "00")])
 
 #[selected_partitions][("awropo09a", "00")]
