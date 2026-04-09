@@ -285,10 +285,14 @@ class EpdDataset(object):
             Determines if the uuid is added to the csv in the case of a csv export
 
         """
-        if file_format == "teco_json":
-            lca_data_output.export_single_dataset_to_json(self, path)
-        elif file_format == "csv":
-            lca_data_output.export_single_dataset_to_csv(self, path, drop_rows=drop_rows, add_uuid=add_uuid)
+        lca_data_output.export(
+            self,
+            path=path,
+            file_format=file_format,
+            drop_rows=drop_rows,
+            add_uuid=add_uuid
+        )
+
 
     def get(self, abr_indicator, abr_life_cycle_stage):
         """This function returns the value of an indicator for a specific life cycle stage

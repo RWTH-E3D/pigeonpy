@@ -1,5 +1,8 @@
+#from PIL.ImagePath import Path
+from pathlib import Path
 from study.lcia.calculator import Calculator
 from study.lcia.calculationinput import CalculationInput
+from data.output.lca_data_output import export_lcia
 from pandas import Series
 
 
@@ -171,6 +174,33 @@ class Lcia(object):
                 self.result["indicator_results"],
                 method_name, weighting_factors, weighted_dataset_class
             )
+
+    def export(self, output_dir=None, file_format="csv", drop_rows=False, add_uuid=False, merge=True):
+        """Calls the export function for the output of all results into one file (merge=True) or the output of each
+        result type (indicator_values, normalized, weighted) and calculated partition separately.
+
+        Parameters
+        ----------
+        output_dir : Path or str
+            Directory path for export
+        file_format : str
+            Export format, 'csv' or 'teco_json' (JSON) available
+        drop_rows : bool
+            Removes rows (row = life cycle stage), where all indicator values are zero.
+        add_uuid : bool
+            Creates and adds a UUID to each exported dataset
+        merge : bool
+            If True, all dictionaries in self.result are combined and exported into one file
+
+        """
+        export_lcia(
+            self.result,
+            output_dir=output_dir,
+            file_format=file_format,
+            drop_rows=drop_rows,
+            add_uuid=add_uuid,
+            merge=merge
+        )
 
     def _initialize_calculator(self):
         """If no Calculator instance is present, it creates one based on the CalculationInput instance present in the
