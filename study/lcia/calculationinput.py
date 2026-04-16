@@ -44,6 +44,8 @@ class CalculationInput(object):
         self.subset_df = None
         self.partition_df = None
 
+        self.validation_error = CsvValidationError()
+
     def load(self, filepath, sep = ","):
         """Method to set the class attributes (dataframes with calculation info, partitions, categories)
         based on the input csv
