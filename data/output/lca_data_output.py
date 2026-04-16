@@ -5,13 +5,12 @@ from pathlib import Path
 
 
 def export(data, path=None, file_format="csv", drop_rows=False, add_uuid=False):
-    """Export function handling both single datasets and pd.Series objects as present in the calculation results in
-    study.lcia.result for instance. In the case of single dataset export (data argument is an EpdDataset object), it is
-    first converted into a dictionary to allow same handling as for multiple datasets.
-    Available export formats are CSV and teco_json. When using the CSV format, the two
-    arguments drop_rows and add_uuid may be used.
-    drop_rows allows for removing rows (row = life cycle stage), where all indicator values are zero.
-    add_uuid adds a UUID column an entry to each row (teco_json export assigns UUIDs to each dataset anyway).
+    """Function to export EPD data either to CSV or JSON.
+
+    Handles both single datasets and pd.Series objects as present in the calculation results in study.lcia.result for
+    instance. In the case of single dataset export (data argument is an EpdDataset object), the EPD is first converted
+    into a dictionary to allow same handling as for multiple datasets. Available export formats are CSV and teco_json.
+    When using the CSV format, the two arguments drop_rows and add_uuid may be used.
 
     Parameters
     ----------
@@ -24,7 +23,7 @@ def export(data, path=None, file_format="csv", drop_rows=False, add_uuid=False):
     drop_rows : bool
         Removes rows (row = life cycle stage), where all indicator values are zero.
     add_uuid : bool
-        Creates and adds a UUID to each exported dataset
+        Creates and adds a UUID to each exported dataset (teco_json export assigns UUIDs to each dataset anyway).
     """
 
     # If data is single dataset -> convert into dict object for same handling
@@ -99,8 +98,10 @@ def export_lcia(result_dict, output_dir=None, file_format="csv", drop_rows=False
 
 
 def _export_to_csv(datasets, path, drop_rows, add_uuid):
-    """Exports dataset(s) in datasets argument to CSV file. Creates a list of dataframes in similar to soda4LCA datastock
-    CSV exports, then concats and writes the resulting dataframe to a CSV file."""
+    """Exports dataset(s) in datasets argument to CSV file.
+
+    Creates a list of dataframes similar to soda4LCA datastock CSV exports using the _dataset_to_dataframe function.
+    Then uses concat to combine them and the resulting dataframe is written to a CSV file at the given path."""
     frames = [
         _dataset_to_dataframe(name, ds, drop_rows, add_uuid)
         for name, ds in datasets.items()
@@ -109,8 +110,10 @@ def _export_to_csv(datasets, path, drop_rows, add_uuid):
     pd.concat(frames, ignore_index=True).to_csv(path, sep=";", index=False)
 
 def _export_to_json(datasets, path):
-    """Exports dataset(s) in datasets argument to teco_json (JSON) file. Creates a dictionary containing every dataset in
-    datasets and dumps it into a JSON file at the given path."""
+    """Exports dataset(s) in datasets argument to teco_json (JSON) file.
+
+    Creates a dictionary containing every dataset in datasets using the _dataset_to_json_dict function and dumps it into
+    a JSON file at the given path."""
     export_dict = {}
 
     for name, ds in datasets.items():
@@ -121,8 +124,19 @@ def _export_to_json(datasets, path):
 
 def _dataset_to_dataframe(name, dataset, drop_rows, add_uuid):
     """Used for CSV export. Creates a pd.Dataframe object for the given dataset with a structure similar to soda4LCA
-    datastock CSV exports. drop_rows=True removes rows (row = life cycle stage), where all indicator values are zero.
-    add_uuid=True adds a UUID column and creates a UUID for each exported dataset."""
+    datastock CSV exports.
+
+    Parameters
+    ----------
+    name : str
+        Dataset name used in the export
+    dataset : EpdDataset
+        Contains the data to be transformed into a pandas Dataframe
+    drop_rows : bool
+        If True, removes rows (row = life cycle stage), where all indicator values are zero.
+    add_uuid : bool
+        If True, adds a UUID column and creates a UUID for each exported dataset.
+    """
     df = pd.DataFrame(
         data=dataset.data.transpose(),
         columns=[indicator.abbreviation for indicator in dataset.environmental_indicators]
@@ -142,7 +156,15 @@ def _dataset_to_dataframe(name, dataset, drop_rows, add_uuid):
     return df
 
 def _dataset_to_json_dict(name, dataset):
-    """Creates dictionaries with teco_json structure to dump into JSON file."""
+    """Creates dictionaries with teco_json structure to dump into JSON file.
+
+    Parameters
+    ----------
+    name : str
+        Dataset name used in the export.
+    dataset : EpdDataset
+        Contains the data to be transformed into a dictionary with teco_json structure.
+    """
     uid = str(uuid.uuid4())
 
     result = {
@@ -166,7 +188,19 @@ def _dataset_to_json_dict(name, dataset):
 def _combine_all_datasets_into_one_dictionary(result):
     """Helper function for combining all results in the result attribute of study.lcia into one dictionary. Takes the
     result dictionary from the Lcia class as input and returns one dictionary containing the content of the result
-    dictionary."""
+    dictionary.
+
+    Parameters
+    ----------
+    result : dict
+        result attribute of Lcia class type parent dictionary containing sub dictionaries for the calculated partitions,
+        which in turn contain the EpdDataset objects.
+
+    Returns
+    -------
+    all_datasets : dict
+        One large dictionary containing all dictionaries from the result dictionary on one dictionary level.
+    """
     all_datasets = {}
 
     for result_name, result_partitions in result.items():

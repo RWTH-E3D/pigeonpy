@@ -40,22 +40,33 @@ class EpdAttributeLoader:
         Contains the LifeCycleStage objects for all available indicators of the EN15804 standard in the json file. Gets
         assigned when an instance is created.
 
-    Parameters
-    ----------
-    environmental_indicators : list
-        If it is specified and not None, it contains the environmental indicator abbreviations that are defined for the
-        study. It defaults to None, i.e. all environmental indicators from the standard/ json file are used.
-    life_cycle_stages : list
-        If it is specified and not None, it contains the life cycle stage abbreviations that are defined for the
-        study. It defaults to None, i.e. all life cycle stages from the standard/ json file are used.
-    dataset_template : EpdDataset
-        Not an instance of EpdDataset but the EpdDataset class itself (typically a subclass of EpdDataset to indicate
-        the standard). If it is specified (together with environmental_indicators and life_cycle_stages), it is used to
-        customize the indicators and life cycle stages for the dataset_template (changes are present in the whole study
-        instance/ scope) based on the given environmental_indicators and life_cycle_stages.
     """
 
-    def __init__(self, environmental_indicators: list = None, life_cycle_stages: list = None, dataset_template = None):
+    def __init__(self,
+                 environmental_indicators: list = None,
+                 life_cycle_stages: list = None,
+                 dataset_template = None
+                 ):
+        """First sets the paths to the JSON files containing the indicators and life cycle stages available in the tool.
+        Then, the content of the JSON files is loaded into the associated lists for indicators_a1, indicators_a2, and
+        life_cycle_stages by calling the _load_indicators() and _load_stages() functions.
+        When environmental_indicators and/or life_cycle_stages arguments are specified, i.e. not all are used, the lists
+        for indicators and stages of the dataset_template are modified accordingly.
+
+        Parameters
+        ----------
+        environmental_indicators : list
+            If it is specified and not None, it contains the environmental indicator abbreviations that are defined for the
+            study. It defaults to None, i.e. all environmental indicators from the standard/ JSON file are used.
+        life_cycle_stages : list
+            If it is specified and not None, it contains the life cycle stage abbreviations that are defined for the
+            study. It defaults to None, i.e. all life cycle stages from the standard/ JSON file are used.
+        dataset_template : EpdDataset
+            Not an instance of EpdDataset but the EpdDataset class itself (typically a subclass of EpdDataset to indicate
+            the standard). If it is specified (together with environmental_indicators and life_cycle_stages), it is used to
+            customize the indicators and life cycle stages for the dataset_template (changes are present in the whole study
+            instance/ scope) based on the given environmental_indicators and life_cycle_stages.
+        """
         self.indicators_a1_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a1.json"
         self.indicators_a2_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a2.json"
         self.life_cycle_stages_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "life_cycle_stages_en_15978.json"
@@ -82,7 +93,7 @@ class EpdAttributeLoader:
             )
 
     def _load_indicators(self):
-        """Opens the json files containing environmental indicators and loads the data into EnvironmentalIndicator
+        """Opens the JSON files containing environmental indicators and loads the data into EnvironmentalIndicator
         objects which are then appended to the associated list."""
         with open(self.indicators_a1_path) as a1, open(self.indicators_a2_path) as a2:
             a1_data = json.load(a1)['indicators_en_15804_a1']
@@ -96,7 +107,7 @@ class EpdAttributeLoader:
             process_indicators(a2_data, self.indicators_a2)
 
     def _load_stages(self):
-        """Opens the json file containing the life cycle stages and loads the data into LifeCycleStage objects which
+        """Opens the JSON file containing the life cycle stages and loads the data into LifeCycleStage objects which
         are then appended to the associated list."""
         with open(self.life_cycle_stages_path) as lcs:
             lcs_data = json.load(lcs)['LifeCycleStages']

@@ -5,7 +5,13 @@ import numpy as np
 
 class En15804A2Dataset(EpdDataset):
     """Class that contains information for a Dataset according to standard EN 15804+A2 and inherits from EpdDataset
-    class
+    class.
+
+    The class always contains the environmental_indicators and life_cycle_stages lists associated to the EN15804+A2
+    standard. The lists contain instances of the EnvironmentalIndicator and LifeCycleStage classes, which in turn
+    contain the indicators and stages specified in the associated JSON files in input/inputdata/. When creating a study
+    instance, the desired indicators and stages can be narrowed down by passing lists of the desired indicators and/or
+    stages.
 
     Class variables
     ----------
@@ -38,7 +44,8 @@ class En15804A2Dataset(EpdDataset):
     standard = "EN15804+A2"
 
     def __init__(self):
-
+        """Initializes the data attribute by considering the amount of indicators and stages present in the respective
+        class variables for the case of using a fraction of the original indicators and stages."""
         super().__init__()
         self.data = np.full((len(self.environmental_indicators),len(self.life_cycle_stages)), 0.0)
 
