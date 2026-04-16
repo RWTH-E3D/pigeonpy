@@ -368,12 +368,15 @@ class Soda4LcaApi(ApiEpdSource):
                 lcia_method_name = lcia_method.find(".//sapi:name[@xml:lang='en']", ns).text
                 print(f"Unknown indicator found: '{uuid}', '{lcia_method_name}'")
 
-    def contains_dataset(self, epd_id) -> bool:
-        """Only returns True for the check in EpdDatamanager, because there is no other way to check the API
-        for available datasets but to make a request. To reduce the number of requests only one is made when actually
-        loading the dataset in the _single_dataset_request() method, which handles the case for wrong epd_ids/ UUIDs
+    def contains_dataset(self, epd_id) -> NotImplementedError:
+        """Raises a NotImplementedError, when called from within EpdDataManager, which is then handled in the
+        EpdDataManager. The EpdDataManager then proceeds to the load_epd method for the Soda4LcaApi instance because,
+        which in turn raises an Error, if the dataset is not present. There is no other way to check the API for
+        available datasets but to make a request. The soda4LCA API does not allow searching for a dataset by UUID.
+        To reduce the number of requests only one is made to load the dataset in the _single_dataset_request() method,
+        which handles the case for wrong epd_ids/ UUIDs. Not optimal.
         """
-        return True
+        raise NotImplementedError
 
     def _uuid_from_latest_datastock(self):
         """Perform API request with URL for the datastock endpoint (Datastocks are different database versions).

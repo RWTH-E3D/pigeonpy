@@ -63,18 +63,29 @@ class EpdDataManager(object):
             self._load_from_cache(epd_id, epd_dataset, scenario)
             return epd_dataset
 
+        if source_key and source_key not in self.sources:
+            raise ValueError(f"No data source found with source key '{source_key}'")
+
         if source_key is None:
-            source_key = next(
-                (sk for sk, db in self.sources.items() if db.contains_dataset(epd_id)),
-                None
-            )
+            for sk, db in self.sources.items():
+                try:
+                    if db.contains_dataset(epd_id):
+                        source_key = sk
+                        self.sources[source_key].load_epd(epd_dataset, epd_id, scenario)
+                        break
+                    else:
+                        continue
+                except NotImplementedError:
+                    # API sources like the soda4LCA API nodes do not allow the search for a dataset by UUID/epd_id, so
+                    # it tries to load the dataset directly, raising an error, if it is not present in the API source
+                    source_key = sk
+                    self.sources[source_key].load_epd(epd_dataset, epd_id, scenario)
+                    break
+
             if source_key is None:
                 raise Exception(f"No dataset for epd_id '{epd_id}' found in database(s): {self.sources.keys()}")
 
-        if source_key not in self.sources:
-            raise ValueError(f"No data source found with source key '{source_key}'")
-
-        self.sources[source_key].load_epd(epd_dataset, epd_id, scenario)
+        #self.sources[source_key].load_epd(epd_dataset, epd_id, scenario)
         epd_dataset.history.add_data_source(epd_id, epd_dataset.name, source_key)
 
         self._cache_dataset_content(epd_id, epd_dataset, scenario)
