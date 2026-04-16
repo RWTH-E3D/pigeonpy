@@ -10,7 +10,11 @@ from collections import defaultdict
 
 class Soda4LcaApi(ApiEpdSource):
     """Class that contains methods for fetching datasets in XML format from soda4LCA API nodes and loading them into
-    EpdDataset objects
+    EpdDataset objects.
+
+    The class is tested for the Ökobaudat node and the EPD Norway node. Other soda4LCA nodes may be used by passing the
+    API root (/resource point) as parameter during instantiation, However, there is no guarantee for successfully loading
+    datasets from other nodes.
 
     Class variables
     ----------
@@ -37,10 +41,6 @@ class Soda4LcaApi(ApiEpdSource):
     _root : str
         The root of the API node
 
-    Parameters
-    ----------
-    root : str
-        Define the root of the soda4LCA API node (with "/resource" point, e.g. https://oekobaudat.de/OEKOBAU.DAT/resource)
     """
 
     exchange_uuid_allocations = {
@@ -128,6 +128,15 @@ class Soda4LcaApi(ApiEpdSource):
     }
 
     def __init__(self, root, *args, **kwargs):
+        """Sets the API root according to the passed root argument and sets the available standards for API sources
+        available in the tool.
+
+        Parameters
+        ----------
+        root : str
+            Define the root of the soda4LCA API node containing the "/resource" point,
+            e.g. https://oekobaudat.de/OEKOBAU.DAT/resource
+        """
         super().__init__()
         self._root = root
 
@@ -274,6 +283,13 @@ class Soda4LcaApi(ApiEpdSource):
     def _handle_scenarios(raw_epd_data, scenario, epd_id):
         """Resolves scenario dependent EPD data.
 
+        Extracts available scenarios from the dictionary containing the raw EPD data, indicated by duplicate module
+        (life cycle stage) entries. If scenarios are present, only the module entries corresponding to the indicated
+        scenario are kept. When the scenario parameter is equal to "use_first", the first scenario is used. This is
+        intended for testing the loading of datasets. When a given scenario is not found within the available scenarios
+        or no scenario is given in the case of a dataset containing scenarios, an Exception is raised. The Exception
+        prints out the associated epd_id and the available scenarios.
+
         Parameters
         ----------
         raw_epd_data : DefaultDict
@@ -287,6 +303,12 @@ class Soda4LcaApi(ApiEpdSource):
         -------
         resolved_epd_data : Dict
             Contains no duplicate value entries for modules, only the values of the selected scenarios, if scenarios exist
+
+        Raises
+        ------
+        Exception :
+            When an EPD dataset contains scenarios, but none is given, or the given scenario is not present in the
+            available scenarios.
         """
         if pd.isna(scenario):
             scenario = None
@@ -349,9 +371,16 @@ class Soda4LcaApi(ApiEpdSource):
         return resolved_epd_data
 
     def load(self, dataset_template):
-        """Checks the lcia uuid allocations by requesting the lcia methods (basically indicators) used in the latest
-        EPD Norway datastock and prints out unidentified indicators. Datastocks are different versions of the database.
-        No additional need to initiate an API connection because only single dataset requests are possible."""
+        """Checks the LCIA UUID allocations by requesting the LCIA methods, i.e. indicators, used in the latest datastock
+        and prints out unidentified indicators. Datastocks are different versions of the database. No additional need to
+        initiate an API connection because only single dataset requests are possible. Also sets the dataset template as
+        attribute. Method is called when a Soda4LcaApi source is registered in the EpdDataManager.
+
+        Parameters
+        ----------
+        dataset_template : EpdDataset
+            Indicates the standard used for the instance.
+        """
         self.dataset_template = dataset_template
 
         latest_datastock_uuid = self._uuid_from_latest_datastock()
@@ -379,8 +408,8 @@ class Soda4LcaApi(ApiEpdSource):
         raise NotImplementedError
 
     def _uuid_from_latest_datastock(self):
-        """Perform API request with URL for the datastock endpoint (Datastocks are different database versions).
-        The uuid for the datastock is needed for other requests."""
+        """Perform API request to the datastocks endpoint and return the UUID of the latest datastock. The UUID is
+        needed for another request to verify the LCIA method UUID allocations (uuid_allocations)."""
         available_datastocks = self._make_request(self._root + "/datastocks?format=JSON")
         # request returns dictionary with list of dictionaries as only entry with the key 'dataStock'
         uuid_from_latest_datastock = available_datastocks.json().get(
@@ -390,8 +419,8 @@ class Soda4LcaApi(ApiEpdSource):
         return uuid_from_latest_datastock
 
     def _single_dataset_request(self, uuid, response_format="XML"):
-        """Calls method to perform API request with the URL for the dataset endpoint of the API. Returns the XML text
-        of the response."""
+        """Calls method to perform API request with the URL for the dataset endpoint of the API. Returns the text content
+        of the response containing the XML file as plain text."""
         response = self._make_request(self._root + f"/processes/{uuid}?format={response_format}")
         if response.status_code != 200:
             raise Exception(f"Request of dataset with uuid '{uuid}' not successful. {response.text}")
@@ -399,7 +428,22 @@ class Soda4LcaApi(ApiEpdSource):
 
     def _check_compliance(self, dataset, ns, epd_id):
         """Checks the compliance UUIDs in the XML file of the epd for compliance with the defined standard in the class
-        instance and the associated compliance UUIDs (see class variables)"""
+        instance and the associated compliance UUIDs (see class variables).
+
+        Parameters
+        ----------
+        dataset : ElementTree
+            parsed XML content of the dataset
+        ns : Dict
+            Namespace dictionary for the XML
+        epd_id : str
+            UUID used to indicate the dataset, if no compliance can be found.
+
+        Raises
+        ------
+        Exception :
+            For the case, no compliance between dataset and used standard within the class instance could be found.
+        """
         compliance_declarations = dataset.findall(".//{*}referenceToComplianceSystem", namespaces=ns)
         dataset_compliance_systems = []
         for entry in compliance_declarations:
@@ -414,7 +458,8 @@ class Soda4LcaApi(ApiEpdSource):
 
     @staticmethod
     def _make_request(request_url):
-        """Method to perform a single http request to the API endpoint given in the request url."""
+        """Method to perform a single http request to the API endpoint given in the request url. If the resource is not
+        available, either an HTTP 404 error is raised or a concrete output is given, depending on the node."""
         try:
             response = requests.get(request_url)
             response.raise_for_status()
@@ -424,8 +469,8 @@ class Soda4LcaApi(ApiEpdSource):
 
     @staticmethod
     def _set_metadata(epd_dataset, epd_id, scenario, process_dataset=None, ns=None, name=None):
-        """Sets the metadata attributes in the EpdDataset object either from the XML process_dataset and the associated
-        namespaces or from the cached data directly given by the name argument"""
+        """Sets metadata attributes in the EpdDataset object either from the XML process_dataset and the associated
+        namespaces or from the cached data directly given by the name argument."""
         if (process_dataset is not None) and (ns is not None):
             epd_dataset.name = process_dataset.find(".//default:name/default:baseName", ns).text
         elif name:
@@ -435,7 +480,12 @@ class Soda4LcaApi(ApiEpdSource):
 
     @staticmethod
     def _populate_data_array(epd_dataset, epd_data):
-        """Fills the np data array of the epd_dataset instance with the values from the epd_data dictionary
+        """Fills the np data array of the epd_dataset instance with the values from the epd_data dictionary.
+
+        Uses the environmental_indicators and life_cycle_stages lists available as class variables in the EpdDataset
+        instance to extract the indicator values from the given epd_data dictionary and assign them to the correct row
+        and column indices.
+        When the a1_a3 stage is not defined, i.e. zero, the sum of a1, a2, and a3 is assigned to it.
 
         Parameters
         ----------
@@ -463,7 +513,7 @@ class Soda4LcaApi(ApiEpdSource):
     @staticmethod
     def _parse_xml(xml_data):
         """Method to parse the XML data in string form (as returned from the API request) and create a namespace
-        dictionary using the python XML library
+        dictionary using the python XML library.
 
         Parameters
         ----------

@@ -15,21 +15,24 @@ class EpdDataManager(object):
     _fetched_datasets : dict
         Caches the data array and name of an already loaded dataset with its epd_id as key.
 
-    Parameters
-    ----------
-    dataset_template : EpdDataset
-        Usually gets assigned when instantiating the study class with the dataset_template given to the study class that
-        defines the standard for the study.
     """
 
     def __init__(self, dataset_template):
+        """Initializes the EpdDataManager with an EpdDataset template.
+
+        Parameters
+        ----------
+        dataset_template : EpdDataset
+            Usually assigned automatically when instantiating a study class instance with a dataset_template to defines
+            the standard for the study.
+        """
         self.sources = {}
         self.dataset_template = dataset_template
 
         self._fetched_datasets = {}
 
     def register_source(self, source_key, source):
-        """Registers a source instance into the sources dictionary with a given key"""
+        """Registers a source instance into the sources dictionary with a given key and calls its load() method."""
         self.sources[source_key] = source
         self.sources[source_key].load(self.dataset_template)
 
@@ -56,6 +59,13 @@ class EpdDataManager(object):
         ----------
         epd_dataset : EpdDataset
             The returned dataset is filled with data and information of the EPD indicated by the epd_id.
+
+        Raises
+        ------
+        ValueError :
+            When a source_key is given, which is not present in the sources dictionary.
+        Exception :
+            A dataset for the given epd_id could not be found/loaded from a source present in the sources dictionary.
         """
         epd_dataset = epd_dataset or self._create_dataset_object()
 
@@ -85,7 +95,6 @@ class EpdDataManager(object):
             if source_key is None:
                 raise Exception(f"No dataset for epd_id '{epd_id}' found in database(s): {self.sources.keys()}")
 
-        #self.sources[source_key].load_epd(epd_dataset, epd_id, scenario)
         epd_dataset.history.add_data_source(epd_id, epd_dataset.name, source_key)
 
         self._cache_dataset_content(epd_id, epd_dataset, scenario)
@@ -93,7 +102,7 @@ class EpdDataManager(object):
         return epd_dataset
 
     def _create_dataset_object(self):
-        """Returns an instance of the dataset_template"""
+        """Returns an instance of the dataset_template."""
         return self.dataset_template()
 
     def _cache_dataset_content(self, epd_id, epd_dataset, scenario):

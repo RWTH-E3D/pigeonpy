@@ -111,9 +111,12 @@ class Soda4LcaCsv(FileEpdSource):
     def _filter_dataset(self, epd_id, epd_dataset):
         """Filters the main data for the given epd_id.
 
+        Parameter epd_dataset is only passed to indicate the standard, if a ValueError is raised.
+
         Raises
         ------
-        ValueError: If no matching dataset is found.
+        ValueError :
+            If no matching dataset is found.
         """
         dataset_binding = self.data[self.data['UUID'] == epd_id]
         if dataset_binding.empty:
@@ -126,6 +129,13 @@ class Soda4LcaCsv(FileEpdSource):
     @staticmethod
     def _handle_scenarios(lca_dataset_bind, scenario, epd_id):
         """Resolves scenario dependent EPD data.
+
+        Extracts available scenarios from the lca_dataset_bind, which are indicated by duplicate Modul entries and if
+        scenarios are present, it tries to only keep the Modul entries corresponding to the indicated scenario. When the
+        scenario parameter is equal to "use_first", the first scenario is used. This is intended for testing the loading
+        of datasets. When a given scenario is not found within the available scenarios or no scenario is given in a case
+        of a dataset that contains scenarios, an Exception is raised. The Exception prints out the associated epd_id and
+        the available scenarios.
 
         Parameters
         ----------
@@ -140,6 +150,12 @@ class Soda4LcaCsv(FileEpdSource):
         -------
         lca_dataset_bind : pd:DataFrame
             The same as above but without duplicate Modul entries. Only the Modul entry for the specified scenario
+
+        Raises
+        ------
+        Exception :
+            When an EPD dataset contains scenarios, but none is given, or the given scenario is not present in the
+            available scenarios.
         """
         duplicate_mask = lca_dataset_bind["Module"].duplicated(keep=False)
         available_scenarios = (
@@ -185,7 +201,26 @@ class Soda4LcaCsv(FileEpdSource):
 
     @staticmethod
     def _populate_data_array(epd_dataset, lca_dataset_bind):
-        """Populates the data array in the EPD dataset using grouped lifecycle stages and indicators."""
+        """Populates the data array in the EPD dataset using grouped lifecycle stages and indicators.
+
+        By iterating over the present life_cycle_stages available in the EpdDataset object and using the
+        environmental_indicators as filter, only the desired elements are loaded into the data array of the EpdDataset
+        instance.
+
+        Parameters
+        ----------
+        epd_dataset : EpdDataset
+            Used to obtain the data array with correct shape and the lists for environmental_indicators and
+            life_cycle_stages with the desired elements, e.g. when a study only considers one indicator and stage.
+        lca_dataset_bind : pd.DataFrame
+            Rows of the loaded CSV file that match the epd_id given to the load_epd method. If scenarios exist in the
+            dataset, there are multiple rows for the same module present in this lca_dataset_bind.
+
+        Returns
+        -------
+        data_array : np.ndarray
+            The numpy array containing the EPD values at their correct row and column.
+        """
         data_array = epd_dataset.data
         grouped = lca_dataset_bind.groupby("Module")
         indicator_abbreviations = [ind.abbreviation.upper() for ind in epd_dataset.environmental_indicators]
@@ -202,7 +237,8 @@ class Soda4LcaCsv(FileEpdSource):
 
     @staticmethod
     def _handle_a1_a3_column(epd_dataset, data_array):
-        """Ensures that the A1-A3 column is populated correctly."""
+        """Ensures that the A1-A3 column is populated correctly. When the column is not defined, i.e. contains zeros,
+        the sum of the columns a1, a2, a3 is set as value."""
         a1_a3_column_index = [stage.abbreviation for stage in epd_dataset.life_cycle_stages].index("a1_a3")
         if np.count_nonzero(data_array[:, a1_a3_column_index]) == 0:
             data_array[:, a1_a3_column_index] = np.sum(data_array[:, :a1_a3_column_index], axis=1)
@@ -210,6 +246,16 @@ class Soda4LcaCsv(FileEpdSource):
         return data_array
 
     def _load_en15804a1(self):
+        """Loads the datasets with standard EN15804+A1 from a CSV file (self.filepath) and returns it as pandas dataframe.
+
+        The standard is checked by comparing the row values of the compliance column with the En15804+A1 aliases defined
+        in the class variable a1_aliases.
+
+        Returns
+        -------
+        lca_dataset_bind : pd.DataFrame
+            Dropped all rows associated with datasets compliant with another standard than EN15804+A1.
+        """
         use_columns_a1 = ["UUID", "Name (en)", "Compliance", "Reference year", "Ref. quantity",
                           "Ref. unit", "Reference flow name", "Module", "Scenario",
                           "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
@@ -232,6 +278,20 @@ class Soda4LcaCsv(FileEpdSource):
         return lca_data_bind_pd
 
     def _load_en15804a2(self):
+        """Loads the datasets with standard EN15804+A2 from a CSV file (self.filepath) and returns it as pandas dataframe.
+        The standard is checked by comparing the row values of the compliance column with the aliasses defined in the
+        class variable.
+
+        The standard is checked by comparing the row values of the compliance column with the En15804+A2 aliases defined
+        in the class variable a2_aliases.
+        The environmental indicator values in the use_columns_a2 list, that are commented out, are not used within the
+        tool at this moment.
+
+        Returns
+        -------
+        lca_dataset_bind : pd.DataFrame
+            Dropped all rows associated with datasets compliant with another standard than EN15804+A2.
+        """
         use_columns_a2 = ["UUID", "Name (en)", "Compliance", "Reference year", "Ref. quantity",
                           "Ref. unit", "Reference flow name", "Module", "Scenario",
                           "PERE", "PERM", "PERT", "PENRE", "PENRM", "PENRT", "SM", "RSF", "NRSF", "FW",
@@ -263,13 +323,19 @@ class Soda4LcaCsv(FileEpdSource):
         return lca_data_bind_pd
 
     def load(self, dataset_template):
-        """Loads the section of the CSV database that contains datasets for the respective standard indicated
-         by the dataset template into the data attribute as a pandas Dataframe.
+        """Calls the method for loading the section of the CSV database that contains datasets for the
+        respective standard indicated by the dataset template. Before assigning the loaded data to the data attribute of
+        the class, the data is processed by the _clean_and_transform_data method.
 
         Parameters
         ----------
         dataset_template : EpdDataset
             Class alias of the dataset class to load EPD data into.
+
+        Raises
+        ------
+        ValueError :
+            When the standard of the dataset_template does not match the available standards in the class.
         """
         self.dataset_template = dataset_template
         if self.dataset_template.standard == "EN15804+A1":
@@ -291,8 +357,8 @@ class Soda4LcaCsv(FileEpdSource):
 
     @staticmethod
     def _clean_and_transform_data(lca_data_bind_pd):
-        """Preprocesses the data by handling missing units, replacing missing indicator values,
-        and transforming the 'Modul' column."""
+        """Preprocesses the data by handling missing units, replacing missing indicator values, and transforming the
+        'Module' column."""
         # missing units exchanged with pcs. (pieces)
         lca_data_bind_pd["Ref. unit"] = lca_data_bind_pd["Ref. unit"].fillna("pcs.")
 
