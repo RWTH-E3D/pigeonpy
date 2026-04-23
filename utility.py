@@ -65,7 +65,7 @@ def get_soda4lca_node_datastock(root,
         To view available datastocks, give arbitrary string as argument.
     Returns
     -------
-    datastock_filepath : Path
+    filepath : Path
         The path to the downloaded database file in the chosen export_format
     """
 
@@ -151,7 +151,7 @@ def _download_file(url, filename, extension):
 
     Returns
     -------
-    filepath : str
+    filepath : Path
         Full path to downloaded file
     """
     from tqdm import tqdm

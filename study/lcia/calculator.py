@@ -4,8 +4,18 @@ import numpy as np
 
 class Calculator(object):
     """Every conducted LCIA holds one Calculator object and calculation input (file) that is given during initialization.
+
+    The class contains the calculate() method, which performs calculations according to the passed partition(s), and the
+    calculate_replacements() method to include replacements, if specified.
     """
     def __init__(self, calculation_input):
+        """Initialize the Calculator with an instance of the CalculationInput class.
+
+        Parameters
+        ----------
+        calculation_input : CalculationInput
+            Instance of the CalculationInput class to create the dataframe for the calculation
+        """
         self.calc_in = calculation_input
 
     def calculate(self, *partitions, epd_datamanager, observation_period):

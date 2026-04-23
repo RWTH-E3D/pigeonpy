@@ -8,7 +8,12 @@ class CsvValidationError(Exception):
 
 class CalculationInput(object):
     """Class that parses the input csv file and prepares the input for the calculator utilizing database structures from
-    the pandas library
+    the pandas library.
+
+    The input csv file is validated and preprocessed, raising a CsvValidationError when issues occur during parsing of
+    the file with the pandas CSV parser, checking for mandatory columns, missing values in mandatory columns, empty
+    files, or row length != header. After successful parsing, the dataframes for calculation are created, i.e.
+    calculation_df, subset_df, and partition_df.
 
     Attributes
     ----------
@@ -18,6 +23,8 @@ class CalculationInput(object):
         For every partition, contains the subset value for the calculation df entries
     partition_df : pd.Dataframe
         Contains the defined partitions from the input csv
+    validation_error : CsvValidationError
+        Custom exception for input csv issues
     _calculation_header : list
         Header for the calculation_df
     _mandatory_columns : list
@@ -29,8 +36,10 @@ class CalculationInput(object):
         Header for the partition_df
     """
     def __init__(self):
+        """Initialize the class attributes, except for the three calculation dataframes calculation_df, subset_df, and
+        partition_df, which are initialized by calling the load method."""
         self._calculation_header = ["calculation_id", "amount", "epd_id", "epd_name", "scenario", "replacement_cycle", "comment"]
-        self._mandatory_columns = ["#amount", "#epd_id", "#epd_name", "#scenario"]
+        self._mandatory_columns = ["#amount", "#epd_id", "#epd_name", "#scenario", "#replacement_cycle"]
 
         self._input_csv_dtypes = {
                 "#amount": "float64",
@@ -57,13 +66,13 @@ class CalculationInput(object):
         sep : str
             Separator used in the input csv file
         """
-        import_df = self._validate_load_and_preprocess_csv(filepath, sep = sep)
+        import_df = self._validate_load_and_preprocess_csv(filepath, sep=sep)
 
         self._initialize_calculation_dataframes(import_df)
 
     def _validate_load_and_preprocess_csv(self, filepath, sep = ","):
         """Validates the input CSV file in terms of: Correct column numbers in each row (too few/many), empty lines,
-        correct dtypes, required columns, and required values in mandatory columns.
+        correct dtypes, required columns, and required values in columns "#amount", "#epd_id", and "#epd_name".
         Removes the '#' sign in front of mandatory columns for the resulting dataframe.
 
         Parameters
@@ -84,7 +93,7 @@ class CalculationInput(object):
             df = pd.read_csv(
                 filepath,
                 sep=sep,
-                na_values=["", '"', "'", "NA", "NaN", None],
+                na_values=("", '"', "'", "NA", "NaN", None),
                 on_bad_lines="error",
                 skip_blank_lines=True, # Skips only if line is fully empty
                 dtype="string", # All columns with dtype "string" first, because type casting throws more detailed error
@@ -160,6 +169,11 @@ class CalculationInput(object):
 
     def _initialize_calculation_dataframes(self, import_df):
         """Initialize internal calculation, partition, and subset dataframes from a preprocessed import dataframe.
+
+        The calculation_df contains a row for each EPD (row) specified in the input CSV file, adding a calculation_id,
+        but excluding the columns for partitions. The partition_df contains a row for each partition with a partition_id.
+        The subset_df combines the EPDs with their subset_name and partition_id by creating an entry for each
+        combination of EPD, its defined subset, and the associated partition_id.
 
         Parameters
         ----------

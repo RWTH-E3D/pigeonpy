@@ -24,11 +24,13 @@ class TecoJson(FileEpdSource):
 
         Parameters
         ----------
-        filepath : str
+        filepath : str or Path
             Path that points to the JSON file containing datasets used in Teco.
         """
         if not filepath:
             filepath = Path.cwd()  / "data" / "input" / "inputdata" / "LcaDataTeco.json"
+        else:
+            filepath = Path(filepath)
         super().__init__(filepath)
         self.standards = ["EN15804+A1"]
         self.data = None

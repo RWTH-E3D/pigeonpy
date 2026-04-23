@@ -7,8 +7,10 @@ from pandas import Series
 
 
 class Lcia(object):
-    """Every study holds one Lcia object. This class contains the results of the calculations carried out. It also
-    manages the calculation input, the calculation itself as well as the normalization and weighting of the results.
+    """Class for the Life Cycle Impact Assessment (LCIA).
+
+    Every study holds one Lcia object. This class contains the results of the calculations carried out. It also
+    manages the calculation input, the calculation itself, as well as the normalization and weighting of the results.
 
     Attributes
     ----------
@@ -29,12 +31,15 @@ class Lcia(object):
         E.g.:
         example_study.lcia.result["test_normalization"]["building_type"]["type 1"]
 
-    Parameters
-    ----------
-    dataset_template : EpdDataset
-        Gets assigned directly when creating a study with the belonging dataset_template.
     """
     def __init__(self, dataset_template):
+        """Initializes an instance with a dataset template.
+
+        Parameters
+        ----------
+        dataset_template : EpdDataset
+            Gets assigned directly when creating a study with the belonging dataset_template.
+        """
         self.input = None
         self._calculator = None
         self.dataset_template = dataset_template
@@ -43,7 +48,7 @@ class Lcia(object):
 
     def run(self, *partitions, epd_datamanager, observation_period):
         """Starts the calculation process by initializing the calculator, calculating the partition-based results, the
-        "total_result" and the "unique_epd" (each EPD multiplied with the given amount in the input csv file) result
+        'total_result' and the 'unique_epd' (each EPD multiplied with the given amount in the input csv file) result
          of the study.
 
         Parameters
@@ -66,7 +71,15 @@ class Lcia(object):
 
     def load_input(self, filepath, sep=","):
         """Instantiates CalculationInput class and calls the load function for preprocessing the input CSV file given
-        with the filepath."""
+        with the filepath.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the input CSV file.
+        sep : str
+            Separator used in the input CSV file.
+        """
         self.input = CalculationInput()
         self.input.load(filepath, sep = sep)
 
@@ -126,12 +139,13 @@ class Lcia(object):
 
     def weight(self, method_name, weighting_factors, normalization_method=None, resulting_unit='-'):
         """Performs a weighting calculation of the indicator impacts based on the given weighting_factors argument.
+
         The result of the weighting is saved to the weighted_results dict in the instance attribute. If the weighting
         should be based on a previously applied normalization, the method_name given in the normalization must be given
         as the normalization_method argument here. If no method_name is specified, the weighting is applied to the
         result attribute.
 
-        The method creates a class template for weighted datasets using the create_dimensionless_template method of the
+        A class template is created for weighted datasets using the create_dimensionless_template method of the
         EpdDataset class to provide the correct basis for weighting.
 
         Parameters
@@ -176,8 +190,10 @@ class Lcia(object):
             )
 
     def export(self, output_dir=None, file_format="csv", drop_rows=False, add_uuid=False, merge=True):
-        """Calls the export function for the output of all results into one file (merge=True) or the output of each
-        result type (indicator_values, normalized, weighted) and calculated partition separately.
+        """Calls the export function for the output of results.
+
+        Allows for the output of all results into one file (merge=True) or the output of each
+        result type (indicator_values, normalized, weighted) and calculated partition separately (merge=False).
 
         Parameters
         ----------
@@ -211,9 +227,19 @@ class Lcia(object):
         """Iterates through the partitions and creates the result for the "unique_epd" calculation that contains
         an entry for every unique EPD present in the input.
 
+        All parameters passed by the run() method.
+
         Parameters
         ----------
-        see 'run' method for explanations
+        partitions : tuple
+            Contains the partitions according to which the calculation is made. Can be a single string, tuple or a
+            combination of strings and tuples.
+        epd_datamanager : EpdDataManager
+            Instance of the EpdDataManager class that contains the registered data sources and cached datasets from
+            which the datasets are loaded during calculation.
+        observation_period : int
+            Observation period defined for the conducted study to use as the basis for the calculation of component
+            replacements.
 
         Returns
         -------
@@ -269,11 +295,20 @@ class Lcia(object):
     def _calculate_weighting(self, result, method_name, weighting_factors, weighted_dataset_class):
         """Apply weighting factors to calculation or normalization results.
 
-        Handles both pandas Series and dataset instances and stores the
-        weighted results under the given method name in ``self.result``.
+        Handles both pandas Series and dataset instances and stores the weighted results under the given method name
+        in ``self.result``.
+        This method exists to avoid duplication between weighting of indicator results and normalized results.
 
-        This method exists to avoid duplication between weighting of
-        indicator results and normalized results.
+        Parameters
+        ----------
+        result : dict or EpdDataset
+            Entry from the result attribute of the Lcia instance
+        method_name : str
+            Name of the weighting method for identification
+        weighting_factors : np.ndarray
+            Multiplication factors containing the weights
+        weighted_dataset_class : EpdDataset
+            Template for creating weighted datasets
         """
         weight_dataset = lambda dataset: weighted_dataset_class(
             data = (dataset * weighting_factors).data,
@@ -297,7 +332,7 @@ class Lcia(object):
             self.result[method_name][partition] = weighted_result
 
     def _create_array_from_dict(self, dict_to_be_converted):
-        """Converts a dictionary mapping the normalization or weighting factors to their associated indicator into
+        """Converts a dictionary, which maps the normalization or weighting factors to their associated indicator into
         a numpy array with the factors being in the correct index based on the dataset array."""
         temp_instance = self.dataset_template()
         array = temp_instance.data[:, 1][:, None]  # Turn array from shape (x) to shape (x, 1)

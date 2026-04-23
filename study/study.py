@@ -29,21 +29,6 @@ class Study(object):
     epd_datamanager : EpdDataManager
         Instance of EpdDataManager that stores the registered EPD sources and already loaded/ cached datasets.
 
-    Parameters
-    ----------
-    study_name : str
-        Can be chosen arbitrarily.
-    observation_period : int
-        Period in years used as time frame for the calculation of component replacements
-    environmental_indicators : list
-        A list of abbreviations for the environmental indicators which, if specified, define the indicators used in the
-        study. Defaults to None
-    life_cycle_stages : list
-        A list of abbreviations for the life cycle stages which, if specified, define the life cycle stages used in the
-        study. Defaults to None
-    dataset_template : type[EpdDataset()]
-        Subclass of EpdDataset (not an instance/ no parentheses). Defaults to En15804A2Dataset which then serves as the standard for the
-        study.
     """
     def __init__(
             self,
@@ -52,6 +37,28 @@ class Study(object):
             environmental_indicators=None,
             life_cycle_stages=None,
             dataset_template=En15804A2Dataset):
+        """Initializes a study instance.
+
+        Each study requires a name and observation period. The environmental indicators and life cycle stages can be
+        customized individually by passing lists of the desired indicators and life cycle stages to include in the study.
+
+        Parameters
+        ----------
+        study_name : str
+            Can be chosen arbitrarily.
+        observation_period : int
+            Period in years used as time frame for the calculation of component replacements
+        dataset_template : type(EpdDataset)
+            Subclass object of EpdDataset (not an instance of the class, i.e. no parentheses). Defaults to
+            En15804A2Dataset which then serves as the standard for the study.
+        environmental_indicators : list
+            A list of abbreviations for the environmental indicators which, if specified, define the indicators used in the
+            study. Defaults to None
+        life_cycle_stages : list
+            A list of abbreviations for the life cycle stages which, if specified, define the life cycle stages used in the
+            study. Defaults to None
+
+        """
 
         self.study_name = study_name
         self.observation_period = observation_period
@@ -82,13 +89,29 @@ class Study(object):
         )
 
     def load_calculation_input(self, filepath, sep=","):
-        """Loads the input CSV file based on the filepath"""
+        """Loads the input CSV file based on the filepath.
+
+        Parameters
+        ----------
+        filepath : str or Path
+            Path to the input CSV file.
+        sep : str
+            Separator used in the input CSV file.
+        """
         self.lcia.load_input(filepath, sep=sep)
 
     def _customize_dataset_template(self, indicators, stages):
         """If environmental_indicators or life_cycle_stages are given during initialization of the study this method
         creates a new subclass of the dataset_template containing only the desired indicators and life cycle stages,
-        leaving the original template class unchanged."""
+        leaving the original template class unchanged.
+
+        Parameters
+        ----------
+        indicators : list
+            Abbreviations for the desired indicators to use in the study.
+        stages : list
+            Abbreviations for the desired life cycle stages to use in the study.
+        """
         # Create a new subclass to avoid mutating the original template class
         custom_class = type(
             f"{self.dataset_template.__name__}_{self.study_name}",

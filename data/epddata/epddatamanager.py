@@ -94,6 +94,8 @@ class EpdDataManager(object):
 
             if source_key is None:
                 raise Exception(f"No dataset for epd_id '{epd_id}' found in database(s): {self.sources.keys()}")
+        else:
+            self.sources[source_key].load_epd(epd_dataset, epd_id, scenario)
 
         epd_dataset.history.add_data_source(epd_id, epd_dataset.name, source_key)
 

@@ -5,8 +5,11 @@ from epd.epddataset.en15804A1dataset import En15804A1Dataset
 from study.study import Study
 
 class TestStudySystem(unittest.TestCase):
+    """Tests for calculating results with the study class"""
 
     def test_study_system_testcase1_total_result(self):
+        """Test calculation of the total_result"""
+
         #normalization
         normalization_factors = {
             "gwp": 9220,
@@ -21,8 +24,8 @@ class TestStudySystem(unittest.TestCase):
             "pocp": 0.34
         }
 
-        input_json_path = Path.cwd() / "test_data" / "Teco_EN15804A1_testcase1.json"
-        input_csv_path = Path.cwd() / "test_data" / "input_testcase1.csv"
+        input_json_path = Path(__file__).resolve().parents[1] / "tests" / "test_data" / "Teco_EN15804A1_testcase1.json"
+        input_csv_path = Path(__file__).resolve().parents[1] / "tests" / "test_data" / "input_testcase1.csv"
         test_study = Study(
             study_name="test_study",
             environmental_indicators=["gwp", "pocp", "odp"],
@@ -82,6 +85,8 @@ class TestStudySystem(unittest.TestCase):
         self.assertAlmostEqual(test_study.lcia.result["test_weighting"]["total_result"].get("gwp", "d"), 0)
 
     def test_study_system_testcase1_partitions(self):
+        """Test the calculation of results based on partitions."""
+
         # normalization
         normalization_factors = {
             "gwp": 9220,
@@ -96,8 +101,8 @@ class TestStudySystem(unittest.TestCase):
             "pocp": 0.34
         }
 
-        input_json_path = Path.cwd() / "test_data" / "Teco_EN15804A1_testcase1.json"
-        input_csv_path = Path.cwd() / "test_data" / "input_testcase1.csv"
+        input_json_path = Path(__file__).resolve().parents[1] / "tests" / "test_data" / "Teco_EN15804A1_testcase1.json"
+        input_csv_path = Path(__file__).resolve().parents[1] / "tests" / "test_data" / "input_testcase1.csv"
         test_study = Study(
             study_name="test_study",
             environmental_indicators=["gwp", "pocp", "odp"],
