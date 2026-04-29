@@ -4,10 +4,15 @@ import uuid
 from pathlib import Path
 
 
-def export(data, path=None, file_format="csv", drop_rows=False, add_uuid=False):
+def export(data,
+           path=None,
+           file_format="csv",
+           drop_rows=False,
+           add_uuid=False):
+
     """Function to export EPD data either to CSV or JSON.
 
-    Handles both single datasets and pd.Series objects as present in the calculation results in study.lcia.result for
+    Handles both single datasets and pd.Series objects as present in the calculation results in study.result for
     instance. In the case of single dataset export (data argument is an EpdDataset object), the EPD is first converted
     into a dictionary to allow same handling as for multiple datasets. Available export formats are CSV and teco_json.
     When using the CSV format, the two arguments drop_rows and add_uuid may be used.
@@ -43,14 +48,25 @@ def export(data, path=None, file_format="csv", drop_rows=False, add_uuid=False):
 
     print(f"Exported data to: {path}")
 
-def export_lcia(result_dict, output_dir=None, file_format="csv", drop_rows=False, add_uuid=False, merge=True):
-    """If merge=True, this function combines all result dictionaries present in study.lcia.result into one dictionary to
+def export_study_result(study_name,
+                        result_dict,
+                        output_dir=None,
+                        file_format="csv",
+                        drop_rows=False,
+                        add_uuid=False,
+                        merge=True):
+
+    """Function to export study results either to a CSV or a JSON file.
+
+    If merge=True, this function combines all result dictionaries present in study.result into one dictionary to
     export one file for the whole result. If merge=False, all results are stored separately with the following nameing
     convention:
     <result_name e.g. indicator_value>_<result_partition>.<file_format>
 
+    study_name : str
+        Defined name of the study to export
     result_dict: Dict
-        Result dictionaries present in the result attribute in the Lcia class.
+        Result dictionaries present in the result attribute in the Study class.
     output_dir: Path or str
         Path to the output directory (not file). If None, output in data/output/outputdata/
     file_format : str
@@ -67,9 +83,9 @@ def export_lcia(result_dict, output_dir=None, file_format="csv", drop_rows=False
         datasets = _combine_all_datasets_into_one_dictionary(result_dict)
 
         if output_dir:
-            output_path = Path(output_dir) / f"lcia_export.{file_format}"
+            output_path = Path(output_dir) / f"{study_name}_export.{file_format}"
         else:
-            output_path = Path(__file__).parent.parent.parent / "data" / "output" / "outputdata" / f"lcia_export.{file_format}"
+            output_path = Path(__file__).parent.parent.parent / "data" / "output" / "outputdata" / f"{study_name}_export.{file_format}"
 
         export(
             datasets,
@@ -186,15 +202,15 @@ def _dataset_to_json_dict(name, dataset):
 
 
 def _combine_all_datasets_into_one_dictionary(result):
-    """Helper function for combining all results in the result attribute of study.lcia into one dictionary. Takes the
-    result dictionary from the Lcia class as input and returns one dictionary containing the content of the result
+    """Helper function for combining all results in the result attribute of the Study class into one dictionary. Takes
+    the result dictionary from the Study class as input and returns one dictionary containing the content of the result
     dictionary.
 
     Parameters
     ----------
     result : dict
-        result attribute of Lcia class type parent dictionary containing sub dictionaries for the calculated partitions,
-        which in turn contain the EpdDataset objects.
+        result attribute of the Study class type parent dictionary containing sub dictionaries for the calculated
+        partitions, which in turn contain the EpdDataset objects.
 
     Returns
     -------

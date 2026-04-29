@@ -4,7 +4,7 @@ from study.calculationinput import CalculationInput
 from study.calculator import calculate
 from data.epddata.epddatamanager import EpdDataManager
 from data.epdattributeloader import EpdAttributeLoader
-from data.output.lca_data_output import export_lcia
+from data.output.lca_data_output import export_study_result
 from epd.epddataset.epddataset import EpdDataset
 from epd.epddataset.en15804A2dataset import En15804A2Dataset
 
@@ -244,7 +244,8 @@ class Study(object):
             If True, all dictionaries in self.result are combined and exported into one file
 
         """
-        export_lcia(
+        export_study_result(
+            self.study_name,
             self.result,
             output_dir=output_dir,
             file_format=file_format,
@@ -341,7 +342,7 @@ class Study(object):
         Parameters
         ----------
         result : dict or EpdDataset
-            Entry from the result attribute of the Lcia instance
+            Entry from the result attribute of the Study instance
         method_name : str
             Name of the weighting method for identification
         weighting_factors : np.ndarray
