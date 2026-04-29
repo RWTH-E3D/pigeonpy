@@ -77,8 +77,8 @@ class Study(object):
             self._customize_dataset_template(environmental_indicators, life_cycle_stages)
 
         self.epd_datamanager = EpdDataManager(self.dataset_template)
+        self.calculation_input = CalculationInput()
 
-        self.calculation_input = None
         self.result = {}
 
     def run_calculation(self, *partitions):
@@ -103,7 +103,7 @@ class Study(object):
 
 
     def load_calculation_input(self, filepath, sep=","):
-        """Loads the input CSV file based on the filepath.
+        """Loads an input CSV file (filepath) with the CalculationInput instance in the calculation_input attribute.
 
         Parameters
         ----------
@@ -112,8 +112,6 @@ class Study(object):
         sep : str
             Separator used in the input CSV file.
         """
-
-        self.calculation_input = CalculationInput()
         self.calculation_input.load(filepath, sep=sep)
 
 
