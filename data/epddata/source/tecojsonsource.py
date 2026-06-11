@@ -3,8 +3,8 @@ from pathlib import Path
 import json
 
 class TecoJson(FileEpdSource):
-    """A class to handle EPD (Environmental Product Declaration) data stored in a JSON file according to the software
-    tool Teco (Teaser+eco).
+    """A class to handle EPD (Environmental Product Declaration) data stored in a JSON file structured according to the
+    convention used in the software tool Teco (Teaser+eco), https://github.com/RWTH-E3D/Teco.
 
     Attributes
     ----------
@@ -16,16 +16,21 @@ class TecoJson(FileEpdSource):
     data : dict
         Contains the EPD data in form of a dictionary using the uuids as key
     dataset_template : EpdDataset
-
-    Parameters
-    ----------
-    filepath : Path or str
-        Path to the oekobaudat csv file. Defaults to: Path.cwd()  / "data" / "input" / "inputdata" / "LcaDataTeco.json"
+        Determines the standard used for loading datasets.
     """
 
     def __init__(self, filepath=None):
+        """Initialize the TecoJson class with the filepath to the JSON source file for Teco EPD data.
+
+        Parameters
+        ----------
+        filepath : str or Path
+            Path that points to the JSON file containing datasets used in Teco.
+        """
         if not filepath:
             filepath = Path.cwd()  / "data" / "input" / "inputdata" / "LcaDataTeco.json"
+        else:
+            filepath = Path(filepath)
         super().__init__(filepath)
         self.standards = ["EN15804+A1"]
         self.data = None

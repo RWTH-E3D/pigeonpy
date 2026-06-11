@@ -8,9 +8,12 @@ import data.output.lca_data_output as lca_data_output
 
 
 class EpdDataset(object):
-    """Class that serves as parent class for all implemented dataset classes/ standards. It defines basic attributes and
-    contains methods that are used by all dataset subclasses, including dunder methods for the calculation operations
-    with datasets, printing the class (__str__) and a method to create custom dataset_templates during runtime.
+    """Class that serves as parent class for all implemented dataset classes/ standards.
+
+    The class defines basic attributes and contains methods that are used by all dataset subclasses, including dunder
+    methods for the calculation operations with datasets, printing the class (__str__) and a method to create custom
+    dataset_templates during runtime. Each EpdDataset instance also contains a History class instance storing the
+    operations performed on the instance.
 
     Class variables
     ----------
@@ -38,12 +41,6 @@ class EpdDataset(object):
     history : History
         Contains a list of logs for the history of the dataset (data source, calculations, etc.)
 
-    Parameters
-    ----------
-    data : np.ndarray
-        Can be used to directly assign the data array to the instance
-    name : str
-        Set the name of the dataset during instantiation
     """
     environmental_indicators = None
     life_cycle_stages = None
@@ -51,6 +48,18 @@ class EpdDataset(object):
     epd_attribute_loader = EpdAttributeLoader()
 
     def __init__(self, data=None, name=None, history=None):
+        """Initializes the EpdDataset class with the passed parameters, or creates an empty instance. A History class
+        instance is always assigned.
+
+        Parameters
+        ----------
+        data : np.ndarray
+            Can be used to directly assign the data array to the instance
+        name : str
+            Set the name of the dataset during instantiation
+        history : History
+            For passing on History instances between datasets
+        """
         self.epd_id = None
         self.name = name
         self.ref_flow_value = None
@@ -61,7 +70,7 @@ class EpdDataset(object):
         self.history = history or History()
 
     def __str__(self):
-        """Dunder method for a readable representation of a dataset and its data matrix"""
+        """Provides a readable representation of a dataset with its data matrix."""
         row_labels = [indicators.abbreviation for indicators in self.environmental_indicators]
         col_labels = [stages.abbreviation for stages in self.life_cycle_stages]
         data_to_print = np.round(self.data, 4)
@@ -75,6 +84,8 @@ class EpdDataset(object):
     def __mul__(self, other):
         """Method to multiply the dataset with another dataset or a scalar.
 
+        The calculation is logged using the history instance of the newly created result dataset.
+
         Parameters
         ----------
         other: EpdDataset or numeric
@@ -84,6 +95,13 @@ class EpdDataset(object):
         -------
         result_epd: EpdDataset
             dataset multiplied with other dataset or scalar
+
+        Raises
+        ------
+        TypeError :
+            If other is not a valid object for multiplication, i.e. not an EpdDataset, numpy array, integer, or float
+        ValueError :
+            If the shape between the data attribute of self and other do not fit.
         """
         if not isinstance(other, (EpdDataset, np.ndarray, int, float)):
             raise TypeError(f"Multiplication with type '{type(other).__name__}' is not supported.")
@@ -111,6 +129,8 @@ class EpdDataset(object):
     def __add__(self, other):
         """Method to add two EpdDataset objects.
 
+        The calculation is logged using the history instance of the newly created result dataset.
+
         Parameters
         ----------
         other: EpdDataset
@@ -120,6 +140,13 @@ class EpdDataset(object):
         -------
         result_epd: EpdDataset
             sum of self and other EpdDataset object
+
+        Raises
+        ------
+        TypeError :
+            If other is not a valid object for multiplication, i.e. not an EpdDataset.
+        ValueError :
+            If the shape between the data attribute of self and other do not fit.
         """
         if not isinstance(other, EpdDataset):
             raise TypeError(f"Addition with type '{type(other).__name__}' is not supported.")
@@ -145,6 +172,8 @@ class EpdDataset(object):
     def __sub__(self, other):
         """Method to subtract other EpdDataset from self
 
+        The calculation is logged using the history instance of the newly created result dataset.
+
         Parameters
         ----------
         other: EpdDataset
@@ -154,6 +183,13 @@ class EpdDataset(object):
         -------
         result_epd: EpdDataset
             Difference of self and other EpdDataset object
+
+        Raises
+        ------
+        TypeError :
+            If other is not a valid object for multiplication, i.e. not an EpdDataset.
+        ValueError :
+            If the shape between the data attribute of self and other do not fit.
         """
         if not isinstance(other, EpdDataset):
             raise TypeError(f"Subtraction with type '{type(other).__name__}' is not supported.")
@@ -178,6 +214,9 @@ class EpdDataset(object):
     def __truediv__(self, other):
         """Method to divide a dataset by a scalar or another EpdDataset
 
+        The calculation is logged using the history instance of the newly created result dataset. Prevents a division by
+        zero using the numpy.divide function with the argument 'where=divisor != 0.0'.
+
         Parameters
         ----------
         other : EpdDataset or numerical
@@ -187,6 +226,13 @@ class EpdDataset(object):
         -------
         result_epd: EpdDataset
             Dataset divided by other
+
+        Raises
+        ------
+        TypeError :
+            If other is not a valid object for multiplication, i.e. not an EpdDataset, numpy array, integer, or float
+        ValueError :
+            If the shape between the data attribute of self and other do not fit.
         """
         if not isinstance(other, (EpdDataset, np.ndarray, int, float)):
             raise TypeError(f"Division with type '{type(other).__name__}' is not supported.")
@@ -267,79 +313,87 @@ class EpdDataset(object):
         print(f"History for dataset '{self.name}': ")
         self.history.show_history(summary=summary)
 
-    def export(self, path=None, file_format="teco_json", drop_rows=False, add_uuid=False):
-        """Exports the datasets data to either 'teco_json' format or 'csv' format. The drop_rows and add_uuid parameters
-        are only relevant for the csv export.
+    def export(self, path=None, file_format="csv", drop_rows=False, add_uuid=False):
+        """Exports the datasets data to either 'teco_json' format or 'csv' format.
+
+        The export is carried out by the export function in the lca_data_output module. The drop_rows and add_uuid
+        parameters are only relevant for the csv export.
 
         Parameters
         ----------
         path : str or Path
             The path to where the exported file should be located. Defaults to None
         file_format : str
-            Indicates the file format for the export. Defaults to 'teco_json'
+            Indicates the file format for the export. 'csv' and 'teco_json' are available. Defaults to 'csv'
         drop_rows : bool
             Determines if rows in the data matrix where all values are equal to zero should be neglected for the export
         add_uuid : bool
             Determines if the uuid is added to the csv in the case of a csv export
 
         """
-        if file_format == "teco_json":
-            lca_data_output.export_single_dataset_to_json(self, path)
-        elif file_format == "csv":
-            lca_data_output.export_single_dataset_to_csv(self, path, drop_rows=drop_rows, add_uuid=add_uuid)
+        lca_data_output.export(
+            self,
+            path=path,
+            file_format=file_format,
+            drop_rows=drop_rows,
+            add_uuid=add_uuid
+        )
+
 
     def get(self, abr_indicator, abr_life_cycle_stage):
-        """This function returns the value of an indicator for a specific life cycle stage
+        """This function returns the value of an indicator for a specific life cycle stage.
 
         Parameters
         ----------
-        abr_indicator: str
-            the abbreviation of the requested indicator
-        abr_life_cycle_stage: str
-            the abbreviation of the requested life cycle stage
+        abr_indicator : str
+            The abbreviation of the requested indicator
+        abr_life_cycle_stage : str
+            The abbreviation of the requested life cycle stage
 
         Returns
         -------
-        value: float
-            the value of the requested indicator for the requested life cycle stage
+        value : float
+            The value of the requested indicator for the requested life cycle stage
         """
         id_indicator = self._get_index_indicator(abr_indicator)
         id_life_cycle_stage = self._get_index_life_cycle_stage(abr_life_cycle_stage)
         return self.data[id_indicator, id_life_cycle_stage]
 
     def get_indicator(self, abr_indicator):
-        """This functions returns a vector of all values of the requested indicator, i.e. a row of the data matrix
+        """This functions returns a vector of all values of the requested indicator, i.e. a row of the data matrix.
 
         Parameters
         ----------
-        abr_indicator: str
-            the abbreviation of the requested indicator
+        abr_indicator : str
+            The abbreviation of the requested indicator
 
         Returns
         -------
-        value vector: np.ndarray
-            vector with every value of the requested indicator row
+        vector : np.ndarray
+            Vector with every value of the requested indicator row
         """
         id_indicator = self._get_index_indicator(abr_indicator)
         return self.data[id_indicator, :]
 
     def get_sum(self, abr_indicator=None, excluded_stages=None):
-        """This method sums up the indicator values over the life cycle stages. If the abr_indicator argument is
-        specified, only the sum for this indicator is returned and if nothing is specified, a vector containing the sums
-        for every indicator available is returned. With the excluded_stages argument, one can define a list with
-        life cycle stages that should not be included in the calculation of the sum(s).
+        """This method sums up the indicator values over the life cycle stages.
+
+        If the abr_indicator argument is specified, only the sum for this indicator is returned and if nothing is
+        specified, a vector containing the sums for every indicator available is returned. With the excluded_stages
+        argument, one can define a list with life cycle stages that should not be included in the calculation of the
+        sum(s).
 
         Parameters
         ----------
-        abr_indicator: str
+        abr_indicator : str
             The abbreviation of the requested indicator. If None, all indicators are summed up.
-        excluded_stages: list
+        excluded_stages : list
             Contains abbreviations of the life cycle stages that should not be summed up
 
         Returns
         -------
-        sum: float or np.ndarray
-            sum of all life cycle stages ot the requested indicator, except these given in "excluded_stages"
+        sum : float or np.ndarray
+            Sum of all life cycle stages ot the requested indicator, except these given in "excluded_stages"
         """
         if excluded_stages is not None:
             column_indexes_to_exclude = [self._get_index_life_cycle_stage(stage_abr) for stage_abr in excluded_stages]
@@ -353,30 +407,49 @@ class EpdDataset(object):
             return data_copy.sum(axis=1)
 
     def _get_index_life_cycle_stage(self, abr_life_cycle_stage):
-        """Returns the index of the life cycle stage given by abbreviation for the data array."""
+        """Returns the index of the life cycle stage in the data array for the given abbreviation."""
         for index, life_cycle_stage in enumerate(self.life_cycle_stages):
             if life_cycle_stage.abbreviation == abr_life_cycle_stage:
                 return index
         raise KeyError(f"There is no life cycle stage {abr_life_cycle_stage}")
 
     def _get_index_indicator(self, abr_indicator):
-        """Returns the index of the environmental indicator given by abbreviation for the data array."""
+        """Returns the index of the environmental indicator given in the data array for the given abbreviation."""
         for index, indicator in enumerate(self.environmental_indicators):
             if indicator.abbreviation == abr_indicator:
                 return index
         raise KeyError(f"There is no indicator {abr_indicator}")
 
-    def sum_to_stage(self, stage):
-        indicator_sums = self.data.sum(axis = 1)
-        self.data = np.zeros_like(self.data)
-        stage_id = self._get_index_life_cycle_stage(stage)
-        self.data[:, stage_id] = indicator_sums
-        #todo: Find out whether it makes more sense to overwrite self.data or return a new data record and adjust it if necessary.
+    def replace(self, replacements, replacement_stage=None):
+        """Includes the replacement of the object represented by the dataset.
+
+        If replacement_stage is specified, the method sums up all indicator values into one column, multiplies it with
+        the amount of replacements, and assigns it to the stage passed to the method by replacement_stage. For example
+        stage 'b5', intended for replacements, as defined in EN 15978.
+        For the case of no specified replacement_stage, i.e. None, the whole data array is multiplied by the amount of
+        replacements.
+
+        Parameters
+        ----------
+        replacements : int
+            Number of replacements
+        replacement_stage : str
+            If specified, the abbreviation for the life cycle stage, where the calculated replacements are assigned
+        """
+        if replacement_stage:
+            stage_idx = self._get_index_life_cycle_stage(replacement_stage)
+            indicator_sums = self.get_sum()
+            self.data[:, stage_idx] = indicator_sums * (replacements + 1)
+            self.history.log_replacements(replacements) # include specification of stage? User should probably know...
+        else:
+            self.data *= (replacements + 1)
+            self.history.log_replacements(replacements)
 
     @staticmethod
     def _format_data_array_element_for_printing(width, value):
-        """Formats each field of the printed data array, so it has the correct width. Digits parameter gives maximum for
-        field width and num is the value to be formatted."""
+        """Formats each field of the printed data array, so it has the correct width.
+
+        Digits parameter gives maximum for field width and num is the value to be formatted."""
         value_str = str(value)
         value_len = len(value_str)
 
@@ -388,8 +461,10 @@ class EpdDataset(object):
     @classmethod
     def create_dimensionless_template(cls, name, resulting_unit):
         """Method to create a template for a dataset class with dimensionless environmental indicators inheriting from
-        this class. The created template is used for normalization or weighting methods that result in dimensionless
-        data (or data with special unit given by resulting unit) due to their calculation.
+        EpdDataset.
+
+        The created template is used for normalization or weighting methods that result in dimensionless data
+        (or data with special unit given by resulting unit) due to their calculation.
 
         Parameters
         ----------
@@ -428,9 +503,10 @@ class EpdDataset(object):
 
 
 class History:
-    """Class for logging operations and calculations performed on EpdDataset objects. Every operation or calculation
-    step creates a text element that is appended to the 'entries' attribute. An instance gets initialized every time a
-    EpdDataset object is created.
+    """Class for logging operations and calculations performed on EpdDataset objects.
+
+    Every operation or calculation step creates a text element that is appended to the 'entries' attribute.
+    An instance gets initialized every time a EpdDataset object is created.
 
     Attributes
     ----------
@@ -458,9 +534,14 @@ class History:
 
     @dataclass(frozen=True)
     class Entry:
-        """Single history entry.
+        """Single history entry to store information about logged operations.
 
-        kind:
+        Contains the operation performed on the dataset (kind), an explanatory string (message), an operand (if the
+        operation was a calculation), and the epd_id of the dataset, the operation was performed on.
+
+        Attributes
+        ----------
+        kind : str
             "init"              – dataset initialized from source
             "mul_scalar"        – multiplied by factor (scalar or array)
             "mul_other"         – multiplied by other dataset
@@ -472,11 +553,11 @@ class History:
             "normalize"         – normalization
             "weighting"         – weighting
             "other"             – generic
-        message:
+        message : str
             String object that describes the operation associated with the entry 
-        factor:
+        operand : float
             Stores the numeric factor for scalar operations (e.g. multiply, divide)
-        epd_id:
+        epd_id : str
             The id of the EPD, the operation was performed on or None, if the operation involved more than 1 dataset
         """
         kind: str
@@ -510,7 +591,7 @@ class History:
         return clone
 
     def add_data_source(self, epd_id, epd_name, source_key):
-        """Creates the first entry and sets the objects attributes.
+        """Creates the first History entry and sets the objects attributes.
 
         Parameters
         ----------
@@ -518,7 +599,7 @@ class History:
             The epd_id of the EPD
         epd_name : str
             The name of the EPD
-        source_key :
+        source_key : str
             The user defined name/ key of the EpdSource object given when registering the source, not the one given when
             creating the source.
         """
@@ -534,8 +615,18 @@ class History:
 
     def log_operation(self, entry, replace_last=False):
         """Adds a given entry to the entries list with the option to replace the last entry with the given entry.
+
         If the entry is not yet an Entry object, this will be created first, before appending it either as the last
-        element of entries or replacing the current last entry, when replace_last is set to True."""
+        element of entries or replacing the current last entry, when replace_last is set to True.
+
+        Parameters
+        ----------
+        entry : Entry object or str
+            If entry is a string, it gets converted into an Entry object, which contains the information for the logged
+            operations. See Entry attributes.
+        replace_last : bool
+            If true, the last entry in the entries attribute gets replaced by the new one.
+        """
         if not isinstance(entry, History.Entry):
             entry = History.Entry(kind="other", message=entry, epd_id=self._single_epd_id())
 
@@ -582,8 +673,7 @@ class History:
         """Logs the calculation of a replacement with kind: replacements, and replaces it with the last existing log,
         which was automatically generated by the replacement calculation of kind: mul_scalar."""
         msg = f"Calculated component replacements: {self.initial_name} += {replacements} * {self.initial_name}"
-        # Replace last existing entry in self.entries, since the replacement calculation already called log_add()
-        self.entries[-1] = History.Entry(kind="replacements", message=msg, operand=replacements, epd_id=self._single_epd_id())
+        self.entries.append(History.Entry(kind="replacements", message=msg, operand=replacements, epd_id=self._single_epd_id()))
 
     def log_normalize(self, method_name, reference_result):
         """Logs a normalization calculation with a reference result."""
@@ -596,7 +686,15 @@ class History:
         self.entries.append(History.Entry(kind="weighting", message=msg, operand=weighting_factors, epd_id=None))
 
     def merge_histories(self, other_dataset):
-        """Merges the Histories of two individual EpdDataset objects together, when an operation involves two datasets."""
+        """Merges the Histories and attributes of two individual EpdDataset objects together.
+
+        Typically used when a calculation operation involves two datasets.
+
+        Parameters
+        ----------
+        other_dataset : EpdDataset
+            The dataset whose entries are being merged into the current instance.
+        """
         other_hist = other_dataset.history
 
         # add contained epd_ids to the contained epd_ids of self if not yet present
@@ -613,7 +711,9 @@ class History:
         return self.entries
 
     def show_history(self, summary=True):
-        """Displays the history/logs of the epd dataset by calling the associated method in History class.
+        """Displays the history/logs of an EPD dataset by calling the associated method in History class.
+
+        The History can either be printed in a summarized form or each Entry individually.
 
         Parameters
         ----------
@@ -631,10 +731,13 @@ class History:
             self._summarize_history()
 
     def _summarize_history(self):
-        """Creates the summary based on the Entry objects in the entries attribute. It summarizes them based on
-        operations involving single datasets (per_epd) and global operations (global_entries) either involving two
-        datasets or other operations like normalization and/or weighting.The summarized information is printed out in
-        the same structured way."""
+        """Creates the summary based on the Entry objects in the entries attribute.
+
+        The method summarizes entries based on operations involving single datasets (per_epd) and global operations
+        (global_entries) either involving two datasets or other operations like normalization and/or weighting.
+
+        The summarized information is printed out in the same structured way.
+        """
         from collections import Counter, defaultdict
 
         # group entries per epd_id; epd_id=None are global operations

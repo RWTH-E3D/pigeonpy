@@ -43,17 +43,17 @@
     {
       "abbreviation": "b3",
       "name": "Repair",
-      "description": "Renovation activities during the operational life of the building"
+      "description": "Repair activities, i.e. unscheduled replacements, during the operational life of the building"
     },
     {
       "abbreviation": "b4",
       "name": "Replacement",
-      "description": "Repair activities during the operational life of the building"
+      "description": "Scheduled replacement during the operational life of the building, including construction and end-of-life phases"
     },
     {
       "abbreviation": "b5",
       "name": "Refurbishment",
-      "description": "Replacement of building components during the operational life of the building"
+      "description": "Replacement of building components as part of a renovation during the operational life of the building"
     },
     {
       "abbreviation": "b6",

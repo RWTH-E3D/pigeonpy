@@ -28,9 +28,7 @@ selected_partitions = ("Dataholz ID", "Dataholz Variant")
 
 example_study.run_calculation(selected_partitions)
 
-results = example_study.lcia.result
+results = example_study.result
 
-results["indicator_values"][selected_partitions][("awropo09a", 0)].show_history()
-print(results["indicator_values"][selected_partitions][("awropo09a", 0)])
-
-#[selected_partitions][("awropo09a", "00")]
+results["indicator_values"][selected_partitions][("awropo09a", "00")].show_history()
+print(results["indicator_values"][selected_partitions][("awropo09a", "00")])

@@ -16,6 +16,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
     """Test calculation dunder methods for EpdDataset objects"""
 
     def setUp(self):
+        """Initialize EpdDataset instances with data array shapes according to available standards."""
         self.a1_1_EpdDataset_class = EpdDataset()
         self.a1_1_EpdDataset_class.data = epd_dataset_a1_1
         self.a1_2_En15804A1_class = En15804A1Dataset()
@@ -25,6 +26,8 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
         self.a2_2_En15804A2_class = En15804A2Dataset()
         self.a2_2_En15804A2_class.data = epd_dataset_a2_2
 
+
+    """Tests for __add__ method"""
 
     def test_add_returned_object_type(self):
         self.assertIsInstance((self.a1_1_EpdDataset_class + self.a1_2_En15804A1_class), EpdDataset)

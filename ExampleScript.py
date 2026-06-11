@@ -50,7 +50,7 @@ normalization_factors = {
     "pocp": 31.7
 }
 # Benennung der Normalisierung
-example_study.lcia.normalize("test_normalization", normalization_factors)
+example_study.normalize("test_normalization", normalization_factors)
 
 # Weighting
 weighting_factors = {
@@ -59,23 +59,23 @@ weighting_factors = {
     "pocp": 0.34
 }
 # Benennung der Gewichtung
-example_study.lcia.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
+example_study.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
 
 # Zeige Historie/Logs
-# example_study.lcia.result["indicator_values"]["total_result"].history.show_history()
+# example_study.result["indicator_values"]["total_result"].history.show_history()
 
 ###########################################################################
 ############################## Visualisation ##############################
 ###########################################################################
 
 # Daten sammeln
-print('example_study.lcia.result["test_weighting"]["building_type"]["type 1"]: ', example_study.lcia.result["test_weighting"]["building_type"]["type 1"])
+print('example_study.result["test_weighting"]["building_type"]["type 1"]: ', example_study.result["test_weighting"]["building_type"]["type 1"])
 
 building_types = ["type 1", "type 2", "type 3", "type 4"]
 life_cycle_stages=["a1_a3", "c1", "c2", "c3", "c4", "d"]                        #"b6",
 environmental_indicators=["gwp-total", "odp", "pocp"]
 
-#data = example_study.lcia.weighted_results["test_weighting"]["Total result"]
+#data = example_study.weighted_results["test_weighting"]["Total result"]
 
 # Dictionary zur Speicherung der Ergebnisse
 results = {}
@@ -84,7 +84,7 @@ df = pd.DataFrame(columns=colums)
 
 # Iteration über die Gebäudetypen
 for type in building_types:
-    #example_study.lcia.weighted_results["test_weighting"]["building_type"][type]
+    #example_study.weighted_results["test_weighting"]["building_type"][type]
 
     # Iteration über die Umweltindikatoren
     for stage in life_cycle_stages:
@@ -94,7 +94,7 @@ for type in building_types:
 
         # Iteration über die Lebenszyklusphasen
         for indicator in environmental_indicators:
-            value = example_study.lcia.result["test_weighting"]["building_type"][type].get(indicator, stage)
+            value = example_study.result["test_weighting"]["building_type"][type].get(indicator, stage)
             #print("indicator: ", indicator)
             results[stage].append(value)
             new_index = len(df)
@@ -133,7 +133,7 @@ for indicator in environmental_indicators:
 
     # Iteration über die Lebenszyklusphasen
     for stage in life_cycle_stages:
-        wert = example_study.lcia.weighted_results["test_weighting"]["Total result"].get(indicator, stage)
+        wert = example_study.weighted_results["test_weighting"]["Total result"].get(indicator, stage)
         results[stage].append(wert)
 
 # Ausgabe der Ergebnisse für jeden Indikator

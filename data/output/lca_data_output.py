@@ -1,183 +1,251 @@
 import pandas as pd
 import json
 import uuid
-import os
+from pathlib import Path
 
 
-def export_calculated_dataframe(df, path="lca_data_export.csv", file_format="csv", drop_rows=False, add_uuid=False):
-    """Function to handle the given/ not given path and call the correct function depending on file_format
+def export(data,
+           path=None,
+           file_format="csv",
+           drop_rows=False,
+           add_uuid=False):
+
+    """Function to export EPD data either to CSV or JSON.
+
+    Handles both single datasets and pd.Series objects as present in the calculation results in study.result for
+    instance. In the case of single dataset export (data argument is an EpdDataset object), the EPD is first converted
+    into a dictionary to allow same handling as for multiple datasets. Available export formats are CSV and teco_json.
+    When using the CSV format, the two arguments drop_rows and add_uuid may be used.
 
     Parameters
     ----------
-    df : pd Dataframe
-        Pandas dataframe containing calculation results
-    path : str
-        Path to location where exported file is created containing filename
-    file_format: str
-        String containing the file format the calculation results are exported to
-    drop_rows: Boolean
-        If True, rows/ life_cycle_stages of a dataset that are empty (all equal to 0) are dropped in the export dataframe
-    add_uuid: Boolean
-        If True, adds an uuid column to the exported csv file
+    data : EpdDataset or pd.Series
+        Data for export
+    path : Path or str
+        If no path is given, data is exported into data/output/outputdata/
+    file_format : str
+        Export format, 'csv' or 'teco_json' (JSON) available
+    drop_rows : bool
+        Removes rows (row = life cycle stage), where all indicator values are zero.
+    add_uuid : bool
+        Creates and adds a UUID to each exported dataset (teco_json export assigns UUIDs to each dataset anyway).
     """
 
-    dir_path = os.path.dirname(__file__)
-    if file_format == "teco_json":
-        if path == "lca_data_export.csv":
-            export_dataframe_to_teco_json(df=df, path=os.path.join(dir_path, "lca_data_export.json"))
-        else:
-            export_dataframe_to_csv(df=df, path=path)
+    # If data is single dataset -> convert into dict object for same handling
+    if hasattr(data, "items"):
+        datasets = data
+        path = _resolve_path(path, file_format)
     else:
-        if path == "lca_data_export.csv":
-            export_dataframe_to_csv(df=df, path=os.path.join(dir_path, path), drop_rows=drop_rows, add_uuid=add_uuid)
-        else:
-            export_dataframe_to_csv(df=df, path=path, drop_rows=drop_rows, add_uuid=add_uuid)
+        datasets = {data.name: data}
+        path = _resolve_path(path, file_format, default_name=data.name)
 
+    if file_format == "csv":
+        _export_to_csv(datasets, path, drop_rows, add_uuid)
+    elif file_format == "teco_json":
+        _export_to_json(datasets, path)
+    else:
+        raise ValueError(f"Unsupported format: {file_format}")
 
-def export_dataframe_to_csv(df, path, drop_rows=False, add_uuid=False):
-    """Function that exports the given dataframe with calculation results to a csv file in the location given by path
+    print(f"Exported data to: {path}")
 
-    Parameters
-    ----------
-    df : pd Dataframe
-        Pandas dataframe containing calculation results
-    path : str
-        Path to location where exported file is created containing filename
-    drop_rows: Boolean
-        If True, rows/ life_cycle_stages of a dataset that are empty (all equal to 0) are dropped in the export dataframe
-    add_uuid: Boolean
-        If True, adds an uuid column to the exported csv file
+def export_study_result(study_name,
+                        result_dict,
+                        output_dir=None,
+                        file_format="csv",
+                        drop_rows=False,
+                        add_uuid=False,
+                        merge=True):
+
+    """Function to export study results either to a CSV or a JSON file.
+
+    If merge=True, this function combines all result dictionaries present in study.result into one dictionary to
+    export one file for the whole result. If merge=False, all results are stored separately with the following nameing
+    convention:
+    <result_name e.g. indicator_value>_<result_partition>.<file_format>
+
+    study_name : str
+        Defined name of the study to export
+    result_dict: Dict
+        Result dictionaries present in the result attribute in the Study class.
+    output_dir: Path or str
+        Path to the output directory (not file). If None, output in data/output/outputdata/
+    file_format : str
+        Export format, 'csv' or 'teco_json' (JSON) available
+    drop_rows : bool
+        Removes rows (row = life cycle stage), where all indicator values are zero.
+    add_uuid : bool
+        Creates and adds a UUID to each exported dataset
+    merge : bool
+        If True, all dictionaries/results are combined and exported as one dictionary/result
     """
+    # Export everything into one file
+    if merge:
+        datasets = _combine_all_datasets_into_one_dictionary(result_dict)
 
-    export_dataframe = pd.DataFrame()
-
-    for index, row in df.items():
-        dataset = row
-        temp_df = pd.DataFrame(data=dataset.data.transpose(),
-                               index=[x for x in range(len(dataset.life_cycle_stages))],
-                               columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
-
-        temp_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
-        if dataset.standard == "EN15804+A1":
-            temp_df.insert(0, "Konformität", value="'EN 15804'")
+        if output_dir:
+            output_path = Path(output_dir) / f"{study_name}_export.{file_format}"
         else:
-            temp_df.insert(0, "Konformität", value="'EN 15804+A2'")
-        temp_df.insert(0, "Name (de)", value=str(index))
+            output_path = Path(__file__).parent.parent.parent / "data" / "output" / "outputdata" / f"{study_name}_export.{file_format}"
 
-        if add_uuid:
-            temp_df.insert(0, "UUID", value=str(uuid.uuid1()))
+        export(
+            datasets,
+            path=output_path,
+            file_format=file_format,
+            drop_rows=drop_rows,
+            add_uuid=add_uuid
+        )
+    # Export each result type and partition into an individual file
+    else:
+        for result_name, result_partitions in result_dict.items():
+            for result_partition, result_object in result_partitions.items():
 
-        # drop rows/ life cycle stages where all values are equal to zero
-        help_column_index = temp_df.columns.get_loc('pere')
-        if drop_rows:
-            temp_df = temp_df[~temp_df.iloc[:, help_column_index:].isin([0]).all(axis=1)]
+                if output_dir:
+                    output_path = Path(output_dir) / f"{result_name}_{result_partition}.{file_format}"
+                else:
+                    output_path = Path(__file__).parent.parent.parent / "data" / "output" / "outputdata" / f"{result_name}_{result_partition}.{file_format}"
 
-        export_dataframe = pd.concat([export_dataframe, temp_df], ignore_index=True)
+                export(
+                    result_object,
+                    path=output_path,
+                    file_format=file_format,
+                    drop_rows=drop_rows,
+                    add_uuid=add_uuid
+                )
 
-    export_dataframe.to_csv(path, sep=';', index=False)
 
+def _export_to_csv(datasets, path, drop_rows, add_uuid):
+    """Exports dataset(s) in datasets argument to CSV file.
 
-def export_dataframe_to_teco_json(df, path):
-    """Function that exports the given dataframe with calculation results to a json file formatted according to the
-     teco_json format in the location given by path
+    Creates a list of dataframes similar to soda4LCA datastock CSV exports using the _dataset_to_dataframe function.
+    Then uses concat to combine them and the resulting dataframe is written to a CSV file at the given path."""
+    frames = [
+        _dataset_to_dataframe(name, ds, drop_rows, add_uuid)
+        for name, ds in datasets.items()
+    ]
 
-    Parameters
-    ----------
-    df : pd Dataframe
-        Pandas dataframe containing calculation results
-    path : str
-        Path to location where exported file is created containing filename
-    """
+    pd.concat(frames, ignore_index=True).to_csv(path, sep=";", index=False)
 
+def _export_to_json(datasets, path):
+    """Exports dataset(s) in datasets argument to teco_json (JSON) file.
+
+    Creates a dictionary containing every dataset in datasets using the _dataset_to_json_dict function and dumps it into
+    a JSON file at the given path."""
     export_dict = {}
-    for index, row in df.items():
-        dataset = row
-        temp_uuid = str(uuid.uuid1())
-        # add ref_flow attributes here when meta-data is passed by dunder methods in EpdDataset
-        temp_dict = {temp_uuid: {'name': str(index),
-                                 'ref_flow': {
-                                     'value': '',
-                                     'unit': ''
-                                 }}}
 
-        for indicator_index, indicator in enumerate(dataset.environmental_indicators):
-            temp_dict[temp_uuid][indicator.abbreviation] = {'unit': indicator.unit}
-            for stage_index, stage in enumerate(dataset.life_cycle_stages):
-                if dataset.data[indicator_index][stage_index] != 0.0:
-                    temp_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset.data[indicator_index][
-                        stage_index]
+    for name, ds in datasets.items():
+        export_dict.update(_dataset_to_json_dict(name, ds))
 
-        export_dict.update(temp_dict)
+    with open(path, "w") as f:
+        json.dump(export_dict, f, indent=4)
 
-    with open(path, 'w') as f:
-        json.dump(export_dict, f, indent=4, separators=(',', ': '))
-
-
-def export_single_dataset_to_csv(dataset, path, drop_rows=False, add_uuid=False):
-    """Function that exports the data matrix of a single dataset to a csv file in the location given by path
+def _dataset_to_dataframe(name, dataset, drop_rows, add_uuid):
+    """Used for CSV export. Creates a pd.Dataframe object for the given dataset with a structure similar to soda4LCA
+    datastock CSV exports.
 
     Parameters
     ----------
+    name : str
+        Dataset name used in the export
     dataset : EpdDataset
-        Instance of EpdDataset
-    path : str
-        Path to location where exported file is created containing filename
-    drop_rows: Boolean
-        If True, rows/ life_cycle_stages of the dataset that are empty (all equal to 0) are dropped in the export dataframe
-    add_uuid: Boolean
-        If True, adds an uuid column to the exported csv file
+        Contains the data to be transformed into a pandas Dataframe
+    drop_rows : bool
+        If True, removes rows (row = life cycle stage), where all indicator values are zero.
+    add_uuid : bool
+        If True, adds a UUID column and creates a UUID for each exported dataset.
     """
+    df = pd.DataFrame(
+        data=dataset.data.transpose(),
+        columns=[indicator.abbreviation for indicator in dataset.environmental_indicators]
+    )
 
-    if path is None:
-        path = os.path.join(os.path.dirname(__file__), (dataset.name + ".csv"))
+    df.insert(0, "Module", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
+    df.insert(0, "Compliance", _get_compliance(dataset))
+    df.insert(0, "Name (en)", str(name))
 
-    export_df = pd.DataFrame(data=dataset.data.transpose(),
-                             index=[x for x in range(len(dataset.life_cycle_stages))],
-                             columns=[indicator.abbreviation for indicator in dataset.environmental_indicators])
-    export_df.insert(0, "Modul", value=pd.Series([stage.abbreviation for stage in dataset.life_cycle_stages]))
-    if dataset.standard == "EN15804+A1":
-        export_df.insert(0, "Konformität", value="'EN 15804'")
-    else:
-        export_df.insert(0, "Konformität", value="'EN 15804+A2'")
-    export_df.insert(0, "Name (de)", value=str(dataset.name))
     if add_uuid:
-        export_df.insert(0, "UUID", value=str(uuid.uuid1()))
-    # drop rows/ life cycle stages where all values are equal to zero
+        df.insert(0, "UUID", str(uuid.uuid4()))
+
     if drop_rows:
-        help_column_index = export_df.columns.get_loc('Modul') + 1
-        export_df = export_df[~export_df.iloc[:, help_column_index:].isin([0]).all(axis=1)]
+        start_idx = df.columns.get_loc("Module") + 1
+        df = df[~df.iloc[:, start_idx:].eq(0).all(axis=1)]
 
-    export_df.to_csv(path, sep=';', index=False)
+    return df
 
-
-def export_single_dataset_to_json(dataset, path):
-    """Function that exports the given dataframe with calculation results to a json file formatted according to the
-     teco_json format in the location given by path
+def _dataset_to_json_dict(name, dataset):
+    """Creates dictionaries with teco_json structure to dump into JSON file.
 
     Parameters
     ----------
+    name : str
+        Dataset name used in the export.
     dataset : EpdDataset
-        Instance of EpdDataset
-    path : str
-        Path to location where exported file is created containing filename
+        Contains the data to be transformed into a dictionary with teco_json structure.
     """
-    if path is None:
-        path = os.path.join(os.path.dirname(__file__), (dataset.name + ".json"))
+    uid = str(uuid.uuid4())
 
-    temp_uuid = str(uuid.uuid1())
-    # add ref_flow attributes here when meta-data is passed by dunder methods in EpdDataset
-    export_dict = {temp_uuid: {'name': str(dataset.name),
-                               'ref_flow': {
-                                   'value': '',
-                                   'unit': ''
-                               }}}
+    result = {
+        uid: {
+            "name": str(name),
+            "ref_flow": {"value": "", "unit": ""}
+        }
+    }
 
-    for indicator_index, indicator in enumerate(dataset.environmental_indicators):
-        export_dict[temp_uuid][indicator.abbreviation] = {'unit': indicator.unit}
-        for stage_index, stage in enumerate(dataset.life_cycle_stages):
-            if dataset.data[indicator_index][stage_index] != 0.0:
-                export_dict[temp_uuid][indicator.abbreviation][stage.abbreviation] = dataset.data[indicator_index][
-                    stage_index]
+    for i, indicator in enumerate(dataset.environmental_indicators):
+        result[uid][indicator.abbreviation] = {"unit": indicator.unit}
 
-    with open(path, 'w') as f:
-        json.dump(export_dict, f, indent=4, separators=(',', ': '))
+        for j, stage in enumerate(dataset.life_cycle_stages):
+            value = dataset.data[i][j]
+            if value != 0.0:
+                result[uid][indicator.abbreviation][stage.abbreviation] = value
+
+    return result
+
+
+def _combine_all_datasets_into_one_dictionary(result):
+    """Helper function for combining all results in the result attribute of the Study class into one dictionary. Takes
+    the result dictionary from the Study class as input and returns one dictionary containing the content of the result
+    dictionary.
+
+    Parameters
+    ----------
+    result : dict
+        result attribute of the Study class type parent dictionary containing sub dictionaries for the calculated
+        partitions, which in turn contain the EpdDataset objects.
+
+    Returns
+    -------
+    all_datasets : dict
+        One large dictionary containing all dictionaries from the result dictionary on one dictionary level.
+    """
+    all_datasets = {}
+
+    for result_name, result_partitions in result.items():
+        for result_partition, result_object in result_partitions.items():
+
+            prefix = f"{result_name}_{result_partition}"
+
+            # Multiple datasets (dict-like/Series)
+            if hasattr(result_object, "items"):
+                for name, ds in result_object.items():
+                    all_datasets[f"{prefix}_{name}"] = ds
+            # Single dataset
+            else:
+                all_datasets[prefix] = result_object
+
+    return all_datasets
+
+def _resolve_path(path, file_format, default_name="lca_data_export"):
+    """Helper function to create a path, if None is given to export function. Path creation either uses the default_name
+    'lca_data_export' for filename (export of Series/multiple datasets into one file) or uses the name given with
+    default_name, which equals to the dataset name (export of single dataset)."""
+    if path:
+        return Path(path)
+
+    extension = "json" if file_format == "teco_json" else "csv"
+    filename = f"{default_name}.{extension}"
+
+    return Path(__file__).parent / "outputdata" / filename
+
+def _get_compliance(dataset):
+    """Helper function to reduce redundancy."""
+    return "'EN 15804'" if dataset.standard == "EN15804+A1" else "'EN 15804+A2'"

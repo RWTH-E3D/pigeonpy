@@ -40,52 +40,79 @@ def linear_interpolate(dataset1, dataset2, steps, return_datasets=True):
     return interpolation_results
 
 
-def get_latest_oekobaudat_csv(datastock_uuid=None):
-    """Function that requests the csv download for a specific datastock of the Oekobaudat database. It fetches the
-    available datastocks (different database versions) of the Oekobaudat, chooses either the latest standard/'OBD'
-    versionone or the one specified with datastock_uuid, and proceeds to request its CSV file.
+def get_soda4lca_node_datastock(root,
+                                export_format="csv",
+                                shortname_identifier=None,
+                                datastock_uuid=None
+                                ):
+    """Function that requests the download for a specific datastock of a soda4LCA node specified by the root URL.
+    If no datastock_uuid or shortname_identifier is specified (None), the latest available datastock is requested.
+    Alternative format for download is "ZIP", which can get pretty large (Epd International ~18GB zip file).
+    Note that CSV export is not available for every soda4LCA node.
 
     Parameters
     ----------
+    root : str
+        URL for the soda4LCA API entry point; Including resource, e.g. 'https://oekobaudat.de/OEKOBAU.DAT/resource'
+    export_format : str
+        Either "csv" (default) or "zip"
+    shortname_identifier : str
+        Used to select a datastock at the associated endpoint, e.g.
+        https://oekobaudat.de/OEKOBAU.DAT/resource/datastocks?format=JSON
+        To view available datastocks, give arbitrary string as argument.
     datastock_uuid : str or None
-        If specified available, it is used to select the datastock to be downloaded.
-
+        Alternative identifier to select a datastock for download.
+        To view available datastocks, give arbitrary string as argument.
     Returns
     -------
-    datastock_csv_filepath : Path
-        The path to the downloaded database in CSV format
+    filepath : Path
+        The path to the downloaded database file in the chosen export_format
     """
 
-    root = "https://oekobaudat.de/OEKOBAU.DAT/resource"
+    root = root
     datastocks_endpoint = root + "/datastocks?format=JSON"
 
-    latest_datastock = _fetch_datastock_metadata(datastocks_endpoint, datastock_uuid=datastock_uuid)
-    if not latest_datastock:
-        raise ValueError("Error during download of datastock csv. No available datastocks found")
+    datastock_dict = _fetch_datastock_metadata(
+        datastocks_endpoint,
+        datastock_uuid=datastock_uuid,
+        shortname_identifier=shortname_identifier
+    )
+    if not datastock_dict:
+        raise ValueError("Error during request of datastock. No datastock was selected.")
 
-    datastock_csv_export = _fetch_datastock_csv(root, latest_datastock["uuid"])
-    datastock_csv_filepath = _save_csv_file(datastock_csv_export, latest_datastock["shortName"])
+    remove_punctuation_map = dict((ord(char), None) for char in '\\/*?:"<>|')
+    filename = datastock_dict["shortName"].translate(remove_punctuation_map)
 
-    print(f"Download successful: '{datastock_csv_filepath.name}' saved in project directory.")
+    if export_format=="csv":
+        csv_export_endpoint = f"{root}/datastocks/{datastock_dict["uuid"]}/exportCSV"
+        filepath = _download_file(url=csv_export_endpoint, filename=filename, extension=export_format)
+    elif export_format=="zip":
+        zip_export_endpoint = f"{root}/datastocks/{datastock_dict["uuid"]}/export"
+        filepath = _download_file(url=zip_export_endpoint, filename=filename, extension=export_format)
+    else:
+        raise ValueError(f"Error during request of datastock. Given export format '{export_format}' not supported.")
 
-    return datastock_csv_filepath
+    print(f"Download successful: '{filepath}'")
 
-def _fetch_datastock_metadata(endpoint, datastock_uuid):
-    """Requests the latest OBD datastock (if datastock_uuid=None) or the datastock specified by datastock_uuid from the
-    associated API endpoint.
+    return filepath
+
+def _fetch_datastock_metadata(endpoint, datastock_uuid, shortname_identifier):
+    """Requests the latest datastock or the datastock specified by datastock_uuid or the shortname_identifier
+    from the associated API endpoint.
 
     Parameters
     ----------
     endpoint : str
         URL to the API endpoint
     datastock_uuid : str or None
-        Used to select the datastock in the list of available datastocks if given.
+        Used to select the datastock in the list of available datastocks
+    shortname_identifier : str or None
+        Alternative for selecting a datastock for request
 
     Returns
     -------
     datastock : Dict or None
-        The dictionary element from the list of available datastocks, which is either the latest datastock with "OBD" in
-        its name, the datastock specified by datastock_uuid, or None if the two options before where not successful.
+        The dictionary element selected from the list of available datastocks
     """
     try:
         response = requests.get(endpoint)
@@ -99,46 +126,54 @@ def _fetch_datastock_metadata(endpoint, datastock_uuid):
         for datastock in available_datastocks:
             if datastock.get("uuid") == datastock_uuid:
                 return datastock
-
-        raise KeyError(f"Error during fetch of oekobaudat csv.\nGiven datastock_uuid '{datastock_uuid}' not in"
-                       f"available datastocks.")
-    else:
-        for datastock in reversed(available_datastocks):
-            if "OBD" in datastock.get("shortName"):
+        raise KeyError(f"Error during fetch of datastock. Given datastock UUID '{datastock_uuid}' not in"
+                       f"available datastocks. Datastocks available: {available_datastocks}")
+    elif shortname_identifier:
+        for datastock in available_datastocks:
+            if shortname_identifier in datastock.get("shortName"):
                 return datastock
+        raise KeyError(f"Error during fetch of datastock. shortName identifier '{shortname_identifier}' not in "
+                       f"available datastocks. Datastocks available: {available_datastocks}")
+    else:
+        return available_datastocks[-1]
 
-    return None
-
-def _fetch_datastock_csv(root, uuid):
-    """Requests the datastock identified by the given UUID and returns it as text content.
+def _download_file(url, filename, extension):
+    """Requests and writes datastock to file with the filetype determined by the extension argument.
 
     Parameters
     ----------
-    root : str
-        The URL to the CSV export endpoint for a datastock
-    uuid : str
-        The UUID that indicates the datastock
+    url : str
+        URL to the API endpoint for datastock export
+    filename : str
+        shortName identifier from the datastock specified in the URL with its UUID
+    extension : str
+        Either 'csv' or 'zip'
 
     Returns
     -------
-    response.text : str
-        Contains the CSV content
+    filepath : Path
+        Full path to downloaded file
     """
-    datastock_csv_export_endpoint = f"{root}/datastocks/{uuid}/exportCSV"
-    try:
-        response = requests.get(datastock_csv_export_endpoint)
-        response.raise_for_status()
-        return response.text
-    except (requests.ConnectionError, requests.HTTPError) as error:
-        raise Exception(f"Error downloading CSV from {datastock_csv_export_endpoint}: {error}")
-
-def _save_csv_file(csv_content, filename):
-    """Saves the CSV content to a file in the project directory."""
+    from tqdm import tqdm
 
     remove_punctuation_map = dict((ord(char), None) for char in '\\/*?:"<>|')
     filename = filename.translate(remove_punctuation_map)
+    filepath = Path.cwd() / f"{filename}.{extension}"
 
-    filepath = Path.cwd() / f"{filename}.csv"
-    with open(filepath, 'w') as f:
-        f.write(csv_content)
+    with requests.get(url, stream=True) as response:
+        response.raise_for_status()
+        total_size = int(response.headers.get("content-length", 0))
+
+        with open(filepath, 'wb') as f, tqdm(
+            desc=filename,
+            total=total_size,
+            unit="B",
+            unit_scale=True,
+            unit_divisor=1024
+        ) as bar:
+            for chunk in response.iter_content(chunk_size=1024 * 1024):
+                if chunk:
+                    f.write(chunk)
+                    bar.update(len(chunk))
+
     return filepath

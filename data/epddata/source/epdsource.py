@@ -1,5 +1,5 @@
 class EpdSource(object):
-    """Abstract class containing basic attributes and methods utilized in all subclasses, i.e. implemented EPD sources
+    """Abstract class containing basic attributes and methods utilized in all subclasses, i.e. implemented EPD sources.
 
     Attributes
     ----------
@@ -14,14 +14,29 @@ class EpdSource(object):
         self.dataset_template = None
 
     def load_epd(self, epd_dataset, epd_id, scenario):
-        """Method to load the EPD dataset given by an epd_id from the respective source."""
+        """Method to load the EPD dataset given by an epd_id from the respective source.
+
+        Parameters
+        ----------
+        epd_dataset : EpdDataset
+            Instance to store the loaded EPD data.
+        epd_id : str
+            Identifier, e.g. UUID, for finding an EPD dataset within a source.
+        scenario : str
+            Used to select the scenario for an EPD dataset, if scenarios are present.
+        """
         pass
 
     def load(self, dataset_template):
-        """Method to initialize the respective datasource, e.g. load file bindings for database. The dataset template
-        is used to determine the standard for the datasource, among other things."""
+        """Initializes the datasource, e.g. by loading file bindings for the database.
+
+        Parameters
+        ----------
+        dataset_template : EpdDataset
+            The dataset template is used to determine the standard for the datasource.
+        """
         pass
 
     def contains_dataset(self, epd_id) -> bool:
-        """Method that checks if the respective source contains a specific dataset given by the epd_id."""
+        """Method that checks if the respective source contains a dataset specified by the given epd_id."""
         pass
