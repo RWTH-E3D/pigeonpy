@@ -69,6 +69,7 @@ class EpdAttributeLoader:
         """
         self.indicators_a1_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a1.json"
         self.indicators_a2_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_en_15804_a2.json"
+        self.indicators_iso_21930_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "indicators_iso_21930.json"
         self.life_cycle_stages_path = Path(__file__).parent.parent / "data" / "input" / "inputdata" / "life_cycle_stages_en_15978.json"
         self.environmental_indicators_to_be_used = environmental_indicators
         self.life_cycle_stages_to_be_used = life_cycle_stages
@@ -76,6 +77,7 @@ class EpdAttributeLoader:
 
         self.indicators_a1 = []
         self.indicators_a2 = []
+        self.indicators_iso_21930 = []
         self.life_cycle_stages = []
 
         self._load_indicators()
@@ -95,9 +97,13 @@ class EpdAttributeLoader:
     def _load_indicators(self):
         """Opens the JSON files containing environmental indicators and loads the data into EnvironmentalIndicator
         objects which are then appended to the associated list."""
-        with open(self.indicators_a1_path) as a1, open(self.indicators_a2_path) as a2:
+        with (open(self.indicators_a1_path) as a1,
+              open(self.indicators_a2_path) as a2,
+              open(self.indicators_iso_21930_path) as iso_21930):
+
             a1_data = json.load(a1)['indicators_en_15804_a1']
             a2_data = json.load(a2)['indicators_en_15804_a2']
+            iso_21930_data = json.load(iso_21930)['indicators_iso_21930']
 
             def process_indicators(data, indicators_list):
                 for indicator in data:
@@ -105,6 +111,7 @@ class EpdAttributeLoader:
 
             process_indicators(a1_data, self.indicators_a1)
             process_indicators(a2_data, self.indicators_a2)
+            process_indicators(iso_21930_data, self.indicators_iso_21930)
 
     def _load_stages(self):
         """Opens the JSON file containing the life cycle stages and loads the data into LifeCycleStage objects which
