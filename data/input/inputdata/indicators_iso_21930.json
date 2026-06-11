@@ -1,0 +1,34 @@
+{
+  "indicators_iso_21930": [
+    {
+      "abbreviation": "gwp",
+      "name": "Global Warming Potential",
+      "unit": "kg CO2 eq.",
+      "description": "The total greenhouse gas emissions expressed as carbon dioxide equivalents"
+    },
+    {
+      "abbreviation": "odp",
+      "name": "Ozone Depletion Potential",
+      "unit": "kg CFC-11 eq.",
+      "description": "The potential of a substance to cause the depletion of the ozone layer"
+    },
+    {
+      "abbreviation": "ep",
+      "name": " Potential",
+      "unit": "kg SO2 eq.",
+      "description": "The potential of a substance to cause over-fertilisation"
+    },
+    {
+      "abbreviation": "ap",
+      "name": "Acidification Potential",
+      "unit": "mol H+ eq.",
+      "description": "The potential of a substance to cause acidification of the environment"
+    },
+    {
+      "abbreviation": "pocp",
+      "name": " Potential",
+      "unit": "kg C2H2 eq.",
+      "description": "The potential of a substance to contribute to the formation of ground-level ozone"
+    }
+  ]
+}
