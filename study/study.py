@@ -74,7 +74,9 @@ class Study(object):
         self.dataset_template = dataset_template
 
         if environmental_indicators or life_cycle_stages:
-            self._customize_dataset_template(environmental_indicators, life_cycle_stages)
+            self.dataset_template = self.dataset_template.get_customized_dataset_class(environmental_indicators,
+                                                                                       life_cycle_stages,
+                                                                                       class_name = f"{self.dataset_template.__name__}_{self.study_name}")
 
         self.epd_datamanager = EpdDataManager(self.dataset_template)
         self.calculation_input = CalculationInput()
@@ -388,34 +390,3 @@ class Study(object):
             array[index] = value
 
         return array
-
-
-    def _customize_dataset_template(self, indicators, stages):
-        """If environmental_indicators or life_cycle_stages are given during initialization of the study this method
-        creates a new subclass of the dataset_template containing only the desired indicators and life cycle stages,
-        leaving the original template class unchanged.
-
-        Parameters
-        ----------
-        indicators : list
-            Abbreviations for the desired indicators to use in the study.
-        stages : list
-            Abbreviations for the desired life cycle stages to use in the study.
-        """
-        # Create a new subclass to avoid mutating the original template class
-        custom_class = type(
-            f"{self.dataset_template.__name__}_{self.study_name}",
-            (self.dataset_template,),
-            {
-                "environmental_indicators": copy.deepcopy(self.dataset_template.environmental_indicators),
-                "life_cycle_stages": copy.deepcopy(self.dataset_template.life_cycle_stages),
-                "standard": self.dataset_template.standard,
-            }
-        )
-
-        # Let EpdAttributeLoader filter the attributes on the NEW class
-        attribute_loader = EpdAttributeLoader(indicators, stages, custom_class)
-        custom_class.epd_attribute_loader = attribute_loader
-
-        # Update to use the new custom class
-        self.dataset_template = custom_class
