@@ -277,7 +277,7 @@ class Soda4LcaApi(ApiEpdSource):
         if invalid_module_counter > 0:
             section = xml_base_path.split("/")[2].split(":")[1]
             print(f"Warning: {invalid_module_counter} module values for '{section}' in dataset "
-                  f"'{process_dataset.find(".//common:UUID", ns).text}' could not be converted to float and were "
+                  f"'{process_dataset.find('.//common:UUID', ns).text}' could not be converted to float and were "
                   f"replaced with 0.0")
             # for indicator, invalid_entries in invalid_module_definitions.items():
             #     formatted = ", ".join(

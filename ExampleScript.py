@@ -62,7 +62,7 @@ weighting_factors = {
 example_study.weight("test_weighting", weighting_factors, normalization_method="test_normalization")
 
 # Zeige Historie/Logs
-# example_study.result["indicator_values"]["total_result"].history.show_history()
+example_study.result["test_weighting"]["total_result"].show_history()
 
 ###########################################################################
 ############################## Visualisation ##############################
