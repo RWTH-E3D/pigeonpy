@@ -20,11 +20,11 @@ def plot_ap_overview(study, partition_keys, save_path=None):
         Three-element tuples (Dataholz ID, Dataholz insulation option, <attribute>)
         as passed to run_calculation().
     save_path : Path or str, optional
-        Output path for the PNG. Defaults to ap_overview.png in cwd.
+        Output path for the PNG. Defaults to v_ap_overview.png in cwd.
     """
     script_dir = Path(__file__).parent
     if save_path is None:
-        save_path = Path.cwd() / "ap_overview.png"
+        save_path = Path.cwd() / "v_ap_overview.png"
 
     # ---- Insulation label lookup ----
     calc_in = study.calculation_input
@@ -250,10 +250,10 @@ def plot_weighted_score_bar(study, result_reference_flow, u_values, save_path=No
     u_values : dict
         Dict with the same keys mapping to U-values [W/(m²·K)].
     save_path : Path or str, optional
-        Output path for the chart. Defaults to weighted_score_bar.png in cwd.
+        Output path for the chart. Defaults to v_weighted_score_bar.png in cwd.
     """
     if save_path is None:
-        save_path = Path.cwd() / "weighted_score_bar.png"
+        save_path = Path.cwd() / "v_weighted_score_bar.png"
 
     keys, tick_labels, construction_ids, x, fig_w = _bar_chart_setup(study, result_reference_flow)
     weighted_values = [float(result_reference_flow[k] / u_values[k]) for k in keys]
@@ -285,10 +285,10 @@ def plot_reference_flow_bar(study, result_reference_flow, u_values, save_path=No
     u_values : dict
         Dict with the same keys mapping to U-values [W/(m²·K)].
     save_path : Path or str, optional
-        Output path for the chart. Defaults to reference_flow_bar.png in cwd.
+        Output path for the chart. Defaults to v_reference_flow_bar.png in cwd.
     """
     if save_path is None:
-        save_path = Path.cwd() / "reference_flow_bar.png"
+        save_path = Path.cwd() / "v_reference_flow_bar.png"
 
     keys, tick_labels, construction_ids, x, fig_w = _bar_chart_setup(study, result_reference_flow)
     ref_flow_values = [float(result_reference_flow[k]) for k in keys]
@@ -334,10 +334,10 @@ def plot_indicators_bar(study, result_reference_flow,
         Partition key used to look up raw indicator values from study.lcia.result["indicator_values"].
         Defaults to ("Dataholz ID", "Dataholz insulation option").
     save_path : Path or str, optional
-        Output path for the chart. Defaults to indicators_bar.png in cwd.
+        Output path for the chart. Defaults to v_indicators_bar.png in cwd.
     """
     if save_path is None:
-        save_path = Path.cwd() / "indicators_bar.png"
+        save_path = Path.cwd() / "v_indicators_bar.png"
 
     keys, tick_labels, construction_ids, x, fig_w = _bar_chart_setup(study, result_reference_flow)
 
