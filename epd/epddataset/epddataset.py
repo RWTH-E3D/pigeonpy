@@ -677,12 +677,12 @@ class History:
 
     def log_normalize(self, method_name, reference_result):
         """Logs a normalization calculation with a reference result."""
-        msg = f"Normalized with normalization method '{method_name}' and reference values\n{reference_result}"
+        msg = f"Normalized with normalization method '{method_name}' using following reference values:\n{reference_result}"
         self.entries.append(History.Entry(kind="normalize", message=msg, operand=reference_result, epd_id=None))
 
     def log_weighting(self, method_name, weighting_factors):
         """Logs a weighting calculation with weighting factors."""
-        msg = f"Weighted with weighting method '{method_name}' and weighting factors\n{weighting_factors}"
+        msg = f"Weighted with weighting method '{method_name}' using following weights:\n{weighting_factors}"
         self.entries.append(History.Entry(kind="weighting", message=msg, operand=weighting_factors, epd_id=None))
 
     def merge_histories(self, other_dataset):

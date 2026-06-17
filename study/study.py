@@ -153,8 +153,12 @@ class Study(object):
             name = dataset.name + "_normalized",
             history = dataset.history.create_clone()
         )
+
+        reference_result_log = ""
+        for idx, indicator in enumerate(normalized_dataset_class.environmental_indicators):
+            reference_result_log += f"      {indicator.abbreviation}: {reference_result[idx, 0]}\n"
         def log_normalization(dataset):
-            dataset.history.log_normalize(method_name, reference_result)
+            dataset.history.log_normalize(method_name, reference_result_log)
             return dataset
 
         for partition, value in self.result["indicator_values"].items():
@@ -334,7 +338,7 @@ class Study(object):
         """Apply weighting factors to calculation or normalization results.
 
         Handles both pandas Series and dataset instances and stores the weighted results under the given method name
-        in ``self.result``.
+        in 'self.result'.
         This method exists to avoid duplication between weighting of indicator results and normalized results.
 
         Parameters
@@ -353,8 +357,12 @@ class Study(object):
             name = dataset.name + "_weighted",
             history = dataset.history.create_clone()
         )
+
+        weighting_factors_log = ""
+        for idx, indicator in enumerate(weighted_dataset_class.environmental_indicators):
+            weighting_factors_log += f"      {indicator.abbreviation}: {weighting_factors[idx, 0]*100} %\n"
         def log_weighting(dataset):
-            dataset.history.log_weighting(method_name, weighting_factors)
+            dataset.history.log_weighting(method_name, weighting_factors_log)
             return dataset
 
         for partition, value in result.items():
