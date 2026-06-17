@@ -65,6 +65,13 @@ class Soda4LcaApi(ApiEpdSource):
     }
 
     lcia_uuid_allocations = {
+        "ISO21930": {
+            "77e416eb-a363-4258-a04e-171d843a6460": "gwp",
+            "06dcd26f-025f-401a-a7c1-5e457eb54637": "odp",
+            "1e84a202-dae6-42aa-9e9d-71ea48b8be00": "pocp",
+            "b4274add-93b7-4905-a5e4-2e878c4e4216": "ap",
+            "f58827d0-b407-4ec6-be75-8b69efb98a0f": "ep"
+        },
         "EN15804+A1": {
             "77e416eb-a363-4258-a04e-171d843a6460": "gwp",
             "06dcd26f-025f-401a-a7c1-5e457eb54637": "odp",
@@ -120,6 +127,7 @@ class Soda4LcaApi(ApiEpdSource):
     module_not_declared_synonyms = ["MND", "ND"]
 
     compliance_uuids = {
+        "ISO21930": "9c1e8451-2321-4498-b459-b6568b6b6547",
         "EN15804+A1": "b00f9ec0-7874-11e3-981f-0800200c9a66",
         "EN15804+A2": [
             "c0016b33-8cf7-415c-ac6e-deba0d21440d",  # Environmental Footprint (EF) 3.0 source dataset
