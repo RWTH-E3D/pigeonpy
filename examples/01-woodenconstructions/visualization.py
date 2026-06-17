@@ -206,10 +206,10 @@ def plot_ap_overview(study, partition_keys, save_path=None):
 def _bar_axes(ax, x, values, bar_width, colors, ylabel, tick_labels, title):
     """Draw a single bar chart on ax with shared styling. Returns the bar container."""
     bars = ax.bar(x, values, bar_width, color=colors)
-    ax.set_ylabel(ylabel)
+    ax.set_ylabel(ylabel, fontsize=11)
     ax.set_xticks(x)
-    ax.set_xticklabels(tick_labels, rotation=45, ha="right", fontsize=8)
-    ax.set_title(title)
+    ax.set_xticklabels(tick_labels, rotation=45, ha="right", fontsize=10)
+    ax.set_title(title, fontsize=13)
     return bars
 
 
@@ -266,7 +266,7 @@ def plot_weighted_score_bar(study, result_reference_flow, u_values, save_path=No
 
     fig, ax = plt.subplots(figsize=(fig_w, 6))
     _bar_axes(ax, x, weighted_values, bar_width, bar_colors, "Weighted score", tick_labels, "Weighted score")
-    ax.legend(handles=legend_handles, fontsize=8, loc="upper left")
+    ax.legend(handles=legend_handles, fontsize=10, loc="upper left")
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -307,10 +307,10 @@ def plot_reference_flow_bar(study, result_reference_flow, u_values, save_path=No
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() / 2,
             f"U = {u_values[key]} W/m²K",
-            ha="center", va="center", fontsize=7, color="white",
+            ha="center", va="center", fontsize=9, color="white",
             fontweight="bold", rotation=90,
         )
-    ax.legend(handles=legend_handles, fontsize=8, loc="upper left")
+    ax.legend(handles=legend_handles, fontsize=10, loc="upper left")
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -359,22 +359,22 @@ def plot_indicators_bar(study, result_reference_flow,
 
     fig, ax1 = plt.subplots(figsize=(fig_w, 6))
     ax1.bar(x - bar_width_ind / 2, gwp_values, bar_width_ind, color=gwp_bar_colors)
-    ax1.set_ylabel("GWP (kg CO₂ eq.)", color="#238b45")
+    ax1.set_ylabel("GWP (kg CO₂ eq.)", color="#238b45", fontsize=11)
     ax1.tick_params(axis="y", labelcolor="#238b45")
     ax1.set_xticks(x)
-    ax1.set_xticklabels(tick_labels, rotation=45, ha="right", fontsize=8)
-    ax1.set_title("GWP and AP per construction (before normalization)")
+    ax1.set_xticklabels(tick_labels, rotation=45, ha="right", fontsize=10)
+    ax1.set_title("GWP and AP per construction (before normalization)", fontsize=13)
 
     ax2 = ax1.twinx()
     ax2.bar(x + bar_width_ind / 2, ap_values, bar_width_ind, color=ap_bar_colors)
-    ax2.set_ylabel("AP (mol H⁺ eq.)", color="#b30000")
+    ax2.set_ylabel("AP (mol H⁺ eq.)", color="#b30000", fontsize=11)
     ax2.tick_params(axis="y", labelcolor="#b30000")
 
     legend_handles = (
         [mpatches.Patch(color=gwp_id_color[cid], label=f"{cid} – GWP") for cid in construction_ids]
         + [mpatches.Patch(color=ap_id_color[cid],  label=f"{cid} – AP")  for cid in construction_ids]
     )
-    ax1.legend(handles=legend_handles, fontsize=8, loc="upper left")
+    ax1.legend(handles=legend_handles, fontsize=10, loc="upper left")
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
