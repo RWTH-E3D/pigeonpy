@@ -74,7 +74,9 @@ class Study(object):
         self.dataset_template = dataset_template
 
         if environmental_indicators or life_cycle_stages:
-            self._customize_dataset_template(environmental_indicators, life_cycle_stages)
+            self.dataset_template = self.dataset_template.get_customized_dataset_class(environmental_indicators,
+                                                                                       life_cycle_stages,
+                                                                                       class_name = f"{self.dataset_template.__name__}_{self.study_name}")
 
         self.epd_datamanager = EpdDataManager(self.dataset_template)
         self.calculation_input = CalculationInput()
@@ -153,8 +155,12 @@ class Study(object):
             name = dataset.name + "_normalized",
             history = dataset.history.create_clone()
         )
+
+        reference_result_log = ""
+        for idx, indicator in enumerate(normalized_dataset_class.environmental_indicators):
+            reference_result_log += f"      {indicator.abbreviation}: {reference_result[idx, 0]}\n"
         def log_normalization(dataset):
-            dataset.history.log_normalize(method_name, reference_result)
+            dataset.history.log_normalize(method_name, reference_result_log)
             return dataset
 
         for partition, value in self.result["indicator_values"].items():
@@ -334,7 +340,7 @@ class Study(object):
         """Apply weighting factors to calculation or normalization results.
 
         Handles both pandas Series and dataset instances and stores the weighted results under the given method name
-        in ``self.result``.
+        in 'self.result'.
         This method exists to avoid duplication between weighting of indicator results and normalized results.
 
         Parameters
@@ -353,8 +359,12 @@ class Study(object):
             name = dataset.name + "_weighted",
             history = dataset.history.create_clone()
         )
+
+        weighting_factors_log = ""
+        for idx, indicator in enumerate(weighted_dataset_class.environmental_indicators):
+            weighting_factors_log += f"      {indicator.abbreviation}: {weighting_factors[idx, 0]*100} %\n"
         def log_weighting(dataset):
-            dataset.history.log_weighting(method_name, weighting_factors)
+            dataset.history.log_weighting(method_name, weighting_factors_log)
             return dataset
 
         for partition, value in result.items():
@@ -380,34 +390,3 @@ class Study(object):
             array[index] = value
 
         return array
-
-
-    def _customize_dataset_template(self, indicators, stages):
-        """If environmental_indicators or life_cycle_stages are given during initialization of the study this method
-        creates a new subclass of the dataset_template containing only the desired indicators and life cycle stages,
-        leaving the original template class unchanged.
-
-        Parameters
-        ----------
-        indicators : list
-            Abbreviations for the desired indicators to use in the study.
-        stages : list
-            Abbreviations for the desired life cycle stages to use in the study.
-        """
-        # Create a new subclass to avoid mutating the original template class
-        custom_class = type(
-            f"{self.dataset_template.__name__}_{self.study_name}",
-            (self.dataset_template,),
-            {
-                "environmental_indicators": copy.deepcopy(self.dataset_template.environmental_indicators),
-                "life_cycle_stages": copy.deepcopy(self.dataset_template.life_cycle_stages),
-                "standard": self.dataset_template.standard,
-            }
-        )
-
-        # Let EpdAttributeLoader filter the attributes on the NEW class
-        attribute_loader = EpdAttributeLoader(indicators, stages, custom_class)
-        custom_class.epd_attribute_loader = attribute_loader
-
-        # Update to use the new custom class
-        self.dataset_template = custom_class

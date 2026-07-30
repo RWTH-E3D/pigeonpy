@@ -277,7 +277,7 @@ class Soda4LcaApi(ApiEpdSource):
         if invalid_module_counter > 0:
             section = xml_base_path.split("/")[2].split(":")[1]
             print(f"Warning: {invalid_module_counter} module values for '{section}' in dataset "
-                  f"'{process_dataset.find(".//common:UUID", ns).text}' could not be converted to float and were "
+                  f"'{process_dataset.find('.//common:UUID', ns).text}' could not be converted to float and were "
                   f"replaced with 0.0")
             # for indicator, invalid_entries in invalid_module_definitions.items():
             #     formatted = ", ".join(
@@ -514,9 +514,10 @@ class Soda4LcaApi(ApiEpdSource):
                 if stage in stage_index_map:
                     data_array[row_index, stage_index_map[stage]] = value
 
-        a1_a3_index = stage_index_map["a1_a3"]
-        if np.count_nonzero(data_array[:, a1_a3_index]) == 0:
-            data_array[:, a1_a3_index] = data_array[:, :a1_a3_index].sum(axis=1)
+        if "a1_a3" in epd_dataset.life_cycle_stages:
+            a1_a3_index = stage_index_map["a1_a3"]
+            if np.count_nonzero(data_array[:, a1_a3_index]) == 0:
+                data_array[:, a1_a3_index] = data_array[:, :a1_a3_index].sum(axis=1)
 
     @staticmethod
     def _parse_xml(xml_data):

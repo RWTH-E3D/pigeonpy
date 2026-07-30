@@ -500,6 +500,26 @@ class EpdDataset(object):
             name, (cls,), updated_class_dict
         )
         return dimensionless_dataset_template
+    @classmethod
+    def get_customized_dataset_class(cls, indicators, stages, class_name = "new class"):
+
+        # Create a new subclass to avoid mutating the original template class
+        custom_class = type(
+            class_name,
+            (cls,),
+            {
+                "environmental_indicators": copy.deepcopy(cls.environmental_indicators),
+                "life_cycle_stages": copy.deepcopy(cls.life_cycle_stages),
+                "standard": cls.standard,
+            }
+        )
+
+        # Let EpdAttributeLoader filter the attributes on the NEW class
+        attribute_loader = EpdAttributeLoader(indicators, stages, custom_class)
+        custom_class.epd_attribute_loader = attribute_loader
+
+        # Update to use the new custom class
+        return custom_class
 
 
 class History:
@@ -677,12 +697,12 @@ class History:
 
     def log_normalize(self, method_name, reference_result):
         """Logs a normalization calculation with a reference result."""
-        msg = f"Normalized with normalization method '{method_name}' and reference values\n{reference_result}"
+        msg = f"Normalized with normalization method '{method_name}' using following reference values:\n{reference_result}"
         self.entries.append(History.Entry(kind="normalize", message=msg, operand=reference_result, epd_id=None))
 
     def log_weighting(self, method_name, weighting_factors):
         """Logs a weighting calculation with weighting factors."""
-        msg = f"Weighted with weighting method '{method_name}' and weighting factors\n{weighting_factors}"
+        msg = f"Weighted with weighting method '{method_name}' using following weights:\n{weighting_factors}"
         self.entries.append(History.Entry(kind="weighting", message=msg, operand=weighting_factors, epd_id=None))
 
     def merge_histories(self, other_dataset):
