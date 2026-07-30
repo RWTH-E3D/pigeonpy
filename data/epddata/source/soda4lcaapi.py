@@ -251,7 +251,7 @@ class Soda4LcaApi(ApiEpdSource):
                     element_name = allocation.get(short_description, element_name)
                 else:
                     dataset_uuid = process_dataset.find(".//common:UUID", ns).text
-                    print(f"Unknown indicator found for dataset '{dataset_uuid}: '"
+                    print(f"Unknown indicator found for dataset '{dataset_uuid}': '"
                           f"Unable to allocate indicator uuid '{element_uuid}' to indicator")
 
             for amount in element.findall(".//epd:amount", ns):

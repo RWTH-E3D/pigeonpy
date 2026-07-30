@@ -78,7 +78,7 @@ def calculate_replacements(observation_period, replacement_cycle):
     replacements : int
         Either the number of replacements, if a replacement_cycle is specified in the input or 0.
     """
-    if isinstance(replacement_cycle, (int, float)) and not pd.isna(replacement_cycle):
+    if isinstance(replacement_cycle, (int, float, np.int32, np.int64, np.float32, np.float64)) and not pd.isna(replacement_cycle):
         replacements = np.ceil(observation_period / replacement_cycle) - 1
         return replacements
     else:
