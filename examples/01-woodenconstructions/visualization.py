@@ -2,6 +2,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
+matplotlib.rcParams['svg.fonttype'] = 'none'
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.image as mpimg
@@ -9,7 +10,7 @@ from matplotlib.lines import Line2D
 import matplotlib.cm as cm
 
 
-def plot_ap_overview(study, partition_keys, save_path=None):
+def plot_ap_overview(study, partition_keys, save_path=None, save_format="png"):
     """Visualize AP results from a Study as a pie-chart grid.
 
     Parameters
@@ -198,7 +199,7 @@ def plot_ap_overview(study, partition_keys, save_path=None):
         transform=fig.transFigure, color="#666666", lw=0.8, linestyle="--",
     ))
 
-    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    fig.savefig(save_path, dpi=150, bbox_inches="tight", format=save_format)
     plt.close(fig)
     print(f"Saved to: {save_path}")
 
@@ -238,7 +239,7 @@ def _bar_chart_setup(study, result_reference_flow):
     return keys, tick_labels, construction_ids, x, fig_w
 
 
-def plot_weighted_score_bar(study, result_reference_flow, u_values, save_path=None):
+def plot_weighted_score_bar(study, result_reference_flow, u_values, save_path=None, save_format="png"):
     """Bar chart of the weighted score per construction.
 
     Parameters
@@ -251,6 +252,8 @@ def plot_weighted_score_bar(study, result_reference_flow, u_values, save_path=No
         Dict with the same keys mapping to U-values [W/(m²·K)].
     save_path : Path or str, optional
         Output path for the chart. Defaults to v_weighted_score_bar.png in cwd.
+    save_format : str
+        Used by matplotlib for the figure export
     """
     if save_path is None:
         save_path = Path.cwd() / "v_weighted_score_bar.png"
@@ -268,12 +271,12 @@ def plot_weighted_score_bar(study, result_reference_flow, u_values, save_path=No
     _bar_axes(ax, x, weighted_values, bar_width, bar_colors, "Weighted score", tick_labels, "Weighted score")
     ax.legend(handles=legend_handles, fontsize=10, loc="upper left")
     fig.tight_layout()
-    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    fig.savefig(save_path, format=save_format, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved to: {save_path}")
 
 
-def plot_reference_flow_bar(study, result_reference_flow, u_values, save_path=None):
+def plot_reference_flow_bar(study, result_reference_flow, u_values, save_path=None, save_format="png"):
     """Bar chart of the result per reference flow, annotated with U-values.
 
     Parameters
@@ -312,14 +315,15 @@ def plot_reference_flow_bar(study, result_reference_flow, u_values, save_path=No
         )
     ax.legend(handles=legend_handles, fontsize=10, loc="upper left")
     fig.tight_layout()
-    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    fig.savefig(save_path, format=save_format, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved to: {save_path}")
 
 
 def plot_indicators_bar(study, result_reference_flow,
                          partition_key=("Dataholz ID", "Dataholz insulation option"),
-                         save_path=None):
+                         save_path=None,
+                         save_format="png"):
     """Bar chart of raw AP and GWP values (before normalization/weighting).
 
     Parameters
@@ -376,7 +380,7 @@ def plot_indicators_bar(study, result_reference_flow,
     )
     ax1.legend(handles=legend_handles, fontsize=10, loc="upper left")
     fig.tight_layout()
-    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    fig.savefig(save_path, format=save_format, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved to: {save_path}")
 
