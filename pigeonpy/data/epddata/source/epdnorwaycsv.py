@@ -1,6 +1,4 @@
-from data.epddata.source.soda4lcacsv import Soda4LcaCsv
-import pandas as pd
-import numpy as np
+from pigeonpy.data.epddata.source.soda4lcacsv import Soda4LcaCsv
 
 
 class EpdNorwayCsv(Soda4LcaCsv):

@@ -50,6 +50,10 @@ def get_soda4lca_node_datastock(root,
     Alternative format for download is "ZIP", which can get pretty large (Epd International ~18GB zip file).
     Note that CSV export is not available for every soda4LCA node.
 
+    The download of larger database exports may take time (EPD Norway for instance can take several minutes to download).
+    If one wishes to track the download, the _download_file() function below contains commented out code implementing a
+    progress bar for the download using the tqdm library.
+
     Parameters
     ----------
     root : str
@@ -84,10 +88,10 @@ def get_soda4lca_node_datastock(root,
     filename = datastock_dict["shortName"].translate(remove_punctuation_map)
 
     if export_format=="csv":
-        csv_export_endpoint = f"{root}/datastocks/{datastock_dict["uuid"]}/exportCSV"
+        csv_export_endpoint = f"{root}/datastocks/{datastock_dict['uuid']}/exportCSV"
         filepath = _download_file(url=csv_export_endpoint, filename=filename, extension=export_format)
     elif export_format=="zip":
-        zip_export_endpoint = f"{root}/datastocks/{datastock_dict["uuid"]}/export"
+        zip_export_endpoint = f"{root}/datastocks/{datastock_dict['uuid']}/export"
         filepath = _download_file(url=zip_export_endpoint, filename=filename, extension=export_format)
     else:
         raise ValueError(f"Error during request of datastock. Given export format '{export_format}' not supported.")
@@ -154,7 +158,6 @@ def _download_file(url, filename, extension):
     filepath : Path
         Full path to downloaded file
     """
-    from tqdm import tqdm
 
     remove_punctuation_map = dict((ord(char), None) for char in '\\/*?:"<>|')
     filename = filename.translate(remove_punctuation_map)
@@ -162,18 +165,26 @@ def _download_file(url, filename, extension):
 
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
-        total_size = int(response.headers.get("content-length", 0))
 
-        with open(filepath, 'wb') as f, tqdm(
-            desc=filename,
-            total=total_size,
-            unit="B",
-            unit_scale=True,
-            unit_divisor=1024
-        ) as bar:
+        # from tqdm import tqdm
+        #
+        # total_size = int(response.headers.get("content-length", 0))
+        #
+        # with open(filepath, 'wb') as f, tqdm(
+        #     desc=filename,
+        #     total=total_size,
+        #     unit="B",
+        #     unit_scale=True,
+        #     unit_divisor=1024
+        # ) as bar:
+        #     for chunk in response.iter_content(chunk_size=1024 * 1024):
+        #         if chunk:
+        #             f.write(chunk)
+        #             bar.update(len(chunk))
+
+        with open(filepath, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024 * 1024):
                 if chunk:
                     f.write(chunk)
-                    bar.update(len(chunk))
 
     return filepath

@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
-from epd.environmentalindicator import EnvironmentalIndicator
-from epd.lifecyclestage import LifeCycleStage
+from pigeonpy.epd.environmentalindicator import EnvironmentalIndicator
+from pigeonpy.epd.lifecyclestage import LifeCycleStage
 
 class EpdAttributeLoader:
     """Handles the loading of environmental indicators and life cycle stages from the json files into lists containing

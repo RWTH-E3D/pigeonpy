@@ -1,4 +1,4 @@
-from data.epddata.source.soda4lcaapi import Soda4LcaApi
+from pigeonpy.data.epddata.source.soda4lcaapi import Soda4LcaApi
 
 
 class EpdNorwayApi(Soda4LcaApi):

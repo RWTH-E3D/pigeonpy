@@ -1,8 +1,8 @@
 import unittest
 from pathlib import Path
-from data.epddata.source.tecojsonsource import TecoJson
-from epd.epddataset.en15804A1dataset import En15804A1Dataset
-from study.study import Study
+from pigeonpy.data.epddata.source.tecojsonsource import TecoJson
+from pigeonpy.epd.epddataset.en15804A1dataset import En15804A1Dataset
+from pigeonpy.study.study import Study
 
 class TestStudySystem(unittest.TestCase):
     """Tests for calculating results with the study class"""

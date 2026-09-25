@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from study.calculationinput import CalculationInput
+from pigeonpy.study.calculationinput import CalculationInput
 
 
 def calculate(*partitions, calculation_input, epd_datamanager, observation_period, replacement_stage=None):

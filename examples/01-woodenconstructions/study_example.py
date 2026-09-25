@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from study.study import Study
-from data.epddata.source.oekobaudatapi import OekobaudatApi
-from epd.epddataset.en15804A2dataset import En15804A2Dataset
+from pigeonpy.study.study import Study
+from pigeonpy.data.epddata.source.oekobaudatapi import OekobaudatApi
+from pigeonpy.epd.epddataset.en15804A2dataset import En15804A2Dataset
 from visualization import plot_ap_overview, plot_weighted_score_bar, plot_reference_flow_bar, plot_indicators_bar
 
 # ---- Study setup ----
@@ -31,8 +31,8 @@ example_study.run_calculation(*partition_keys)
 reference_normalize = {"gwp-total": 9.22E+03,
                        "ap": 4.73E+01}
 
-weighting_factors = {"gwp-total": 60,
-                     "ap": 40}
+weighting_factors = {"gwp-total": 0.6,
+                     "ap": 0.4}
 
 example_study.normalize("JRC-EC EU27", reference_normalize)
 example_study.weight("Example preference", weighting_factors, normalization_method="JRC-EC EU27")
@@ -60,7 +60,7 @@ for key in u_values:
     result_reference_flow[key] = weighted_results[key].get_sum().sum() / (u_values[key]**-1)
 
 # ---- Show calculation history ----
-#weighted_results[("awmopo04a", "00")].show_history()
+weighted_results[("awmopo04a", "00")].show_history()
 
 # ---- Visualization ----
 

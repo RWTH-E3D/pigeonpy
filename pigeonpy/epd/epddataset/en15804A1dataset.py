@@ -1,5 +1,5 @@
-from epd.epddataset.epddataset import EpdDataset
-from data.epddata.epddatamanager import EpdDataManager
+from pigeonpy.epd.epddataset.epddataset import EpdDataset
+from pigeonpy.data.epddata.epddatamanager import EpdDataManager
 import numpy as np
 
 

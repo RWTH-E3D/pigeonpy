@@ -1,8 +1,7 @@
-from study.study import Study
-import copy
+from pigeonpy.study.study import Study
 from pathlib import Path
-from data.epddata.source.oekobaudatapi import OekobaudatApi
-from epd.epddataset.en15804A2dataset import En15804A2Dataset
+from pigeonpy.data.epddata.source.oekobaudatapi import OekobaudatApi
+from pigeonpy.epd.epddataset.en15804A2dataset import En15804A2Dataset
 import timeit
 
 def basic_usage():

@@ -1,12 +1,10 @@
-import copy
 from pandas import Series
-from study.calculationinput import CalculationInput
-from study.calculator import calculate
-from data.epddata.epddatamanager import EpdDataManager
-from data.epdattributeloader import EpdAttributeLoader
-from data.output.lca_data_output import export_study_result
-from epd.epddataset.epddataset import EpdDataset
-from epd.epddataset.en15804A2dataset import En15804A2Dataset
+from pigeonpy.study.calculationinput import CalculationInput
+from pigeonpy.study.calculator import calculate
+from pigeonpy.data.epddata.epddatamanager import EpdDataManager
+from pigeonpy.data.output.lca_data_output import export_study_result
+from pigeonpy.epd.epddataset.epddataset import EpdDataset
+from pigeonpy.epd.epddataset.en15804A2dataset import En15804A2Dataset
 
 
 class Study(object):

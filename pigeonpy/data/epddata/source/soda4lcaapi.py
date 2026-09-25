@@ -1,6 +1,6 @@
 import pandas as pd
 
-from data.epddata.source.apiepdsource import ApiEpdSource
+from pigeonpy.data.epddata.source.apiepdsource import ApiEpdSource
 import requests
 import numpy as np
 from io import StringIO

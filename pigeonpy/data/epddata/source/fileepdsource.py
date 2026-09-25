@@ -1,4 +1,4 @@
-from data.epddata.source.epdsource import EpdSource
+from pigeonpy.data.epddata.source.epdsource import EpdSource
 
 
 class FileEpdSource(EpdSource):
