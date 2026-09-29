@@ -48,7 +48,7 @@ See the [`examples`](https://github.com/RWTH-E3D/pigeonpy/tree/main/examples) fo
 
 ### Architecture version 0.0.9(?):
 
-<img class="centerImage" src="./pics/UML_small_11pt_wide.svg" width="75%" alt="PigeonPy version 0.0.9 UML diagram" />
+<img class="centerImage" src="./pics/UML_small_11pt_wide.svg" width="50%" alt="PigeonPy version 0.0.9 UML diagram" />
 
 
 ## Installation
@@ -97,7 +97,7 @@ For examples of how to use PigeonPy, see the [examples](https://github.com/RWTH-
 
 The following diagram illustrates an example workflow using **PigeonPy**:
 
-<img src="./pics/flow_diagram.svg" width="60%" alt="PigeonPy example usage flow diagram" />
+<img src="./pics/flow_diagram.svg" width="40%" alt="PigeonPy example usage flow diagram" />
 
 ---
 
