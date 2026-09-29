@@ -71,8 +71,8 @@ partition_keys_visualization = [
    ("Dataholz ID", "Dataholz insulation option", "Material class"),
 ]
 
-plot_weighted_score_bar(example_study, result_reference_flow, u_values, save_path=f"{Path.cwd() / 'weighted_score_bar.svg'}", save_format="svg")
-plot_reference_flow_bar(example_study, result_reference_flow, u_values, save_path=f"{Path.cwd() / 'reference_flow_bar.svg'}", save_format="svg")
-plot_indicators_bar(example_study, result_reference_flow, save_path=f"{Path.cwd() / 'indicators_bar.svg'}", save_format="svg")
-plot_ap_overview(example_study, partition_keys_visualization, save_path=f"{Path.cwd() / 'ap_overview.svg'}", save_format="svg")
+# plot_weighted_score_bar(example_study, result_reference_flow, u_values, save_path=f"{Path.cwd() / 'weighted_score_bar.svg'}", save_format="svg")
+# plot_reference_flow_bar(example_study, result_reference_flow, u_values, save_path=f"{Path.cwd() / 'reference_flow_bar.svg'}", save_format="svg")
+# plot_indicators_bar(example_study, result_reference_flow, save_path=f"{Path.cwd() / 'indicators_bar.svg'}", save_format="svg")
+# plot_ap_overview(example_study, partition_keys_visualization, save_path=f"{Path.cwd() / 'ap_overview.svg'}", save_format="svg")
 
