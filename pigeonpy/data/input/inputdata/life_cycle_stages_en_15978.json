@@ -1,0 +1,94 @@
+{
+  "LifeCycleStages": [
+    {
+      "abbreviation": "a1",
+      "name": "Raw Material Supply",
+      "description": "Raw material supply, including processing of secondary material input"
+    },
+    {
+      "abbreviation": "a2",
+      "name": "Transport",
+      "description": "Transport of raw material and secondary material to the manufacturer"
+    },
+    {
+      "abbreviation": "a3",
+      "name": "Manufacturing",
+      "description": "Manufacturing of construction products, and all upstream processes from cradle to gate"
+    },
+    {
+      "abbreviation": "a1_a3",
+      "name": "Production",
+      "description": "The production of construction products as the sum of the first three production stages a1, a2, a3"
+    },
+    {
+      "abbreviation": "a4",
+      "name": "Transport",
+      "description": "Transport to the construction site"
+    },
+    {
+      "abbreviation": "a5",
+      "name": "Construction installation process",
+      "description": "Installation into the building"
+    },
+    {
+      "abbreviation": "b1",
+      "name": "Use",
+      "description": "Use or application of the installed product"
+    },
+    {
+      "abbreviation": "b2",
+      "name": "Maintenance",
+      "description": "Maintenance activities during the operational life"
+    },
+    {
+      "abbreviation": "b3",
+      "name": "Repair",
+      "description": "Repair activities, i.e. unscheduled replacements, during the operational life of the building"
+    },
+    {
+      "abbreviation": "b4",
+      "name": "Replacement",
+      "description": "Scheduled replacement during the operational life of the building, including construction and end-of-life phases"
+    },
+    {
+      "abbreviation": "b5",
+      "name": "Refurbishment",
+      "description": "Replacement of building components as part of a renovation during the operational life of the building"
+    },
+    {
+      "abbreviation": "b6",
+      "name": "Operational Energy use",
+      "description": "Energy consumption including impacts and aspects of operational energy use"
+    },
+    {
+      "abbreviation": "b7",
+      "name": "Operational Water use",
+      "description": "Water consumption including water use and its treatment during the normal operation of the building"
+    },
+    {
+      "abbreviation": "c1",
+      "name": "Deconstruction and Demolition",
+      "description": "Deconstruction, including dismantling or demolition, of the building, including initial on-site sorting of the materials"
+    },
+    {
+      "abbreviation": "c2",
+      "name": "Transport",
+      "description": "Transport to waste processing or disposal facilities"
+    },
+    {
+      "abbreviation": "c3",
+      "name": "Waste processing",
+      "description": "Waste processing for reuse, recovery and/or recycling"
+    },
+    {
+      "abbreviation": "c4",
+      "name": "Disposal",
+      "description": "Final disposal of waste including physical pre-treatment and management of the disposal site"
+    },
+    {
+      "abbreviation": "d",
+      "name": "Benefits and loads beyond the system boundary",
+      "description": "Net benefits and loads arising from the reuse of products or the recycling or recovery of energy from waste materials resulting from the construction stage, use stage and end of life stage"
+    }
+  ]
+}

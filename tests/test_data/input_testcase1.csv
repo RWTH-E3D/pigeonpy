@@ -1,0 +1,5 @@
+#amount,#epd_id,#epd_name,#scenario,#replacement_cycle,comment,partition1,partition2
+1.4,c1886328-bb80-44c8-aecf-5a5793afafc6,EPD_test 1,,,,subset1,subsetA
+1,c1886328-bb80-44c8-aecf-5a5793afafc6,EPD_test 1,,,,subset2,subsetB
+1.3,89fda79b-f9e7-4164-a07d-3da40b07b9d0,EPD_test 2,,,,subset2,subsetA
+1,89fda79b-f9e7-4164-a07d-3da40b07b9d0,EPD_test 2,,,,subset2,subsetA

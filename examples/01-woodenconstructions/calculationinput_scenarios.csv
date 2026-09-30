@@ -1,0 +1,73 @@
+#amount;#epd_id;#epd_name;#comment;#replacement_cycle;#scenario;Dataholz ID;Dataholz insulation option;Datatype;Owner;Load-bearing;Insulation;Material class;Insulation Type and Thickness
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awropo09a;00;generic;Sphera Solutions, Inc.;False;False;Mineral;Mineral wool 16cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awropo09a;00;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Mineral wool 16cm
+0.01536;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awropo09a;00;representative;Thünen Insitut;True;False;Organic;Mineral wool 16cm
+0.14464;f721d148-f727-4a55-b2e6-52ecb90e09be;Mineral wool insulation (low bulk density range);;;;awropo09a;00;average;Fachverband Mineralwolleindustrie;False;True;Mineral;Mineral wool 16cm
+0.015;766ea5bd-3f0f-4d48-a399-9c4a372524d8;EGGER OSB;;;;awropo09a;00;average;Institut Bauen und Umwelt e.V.;False;False;Organic composite;Mineral wool 16cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awropo09a;00;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Mineral wool 16cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awropo09a;03;generic;Sphera Solutions, Inc.;False;False;Mineral;Mineral wool 24cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awropo09a;03;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Mineral wool 24cm
+0.02304;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awropo09a;03;representative;Thünen Insitut;True;False;Organic;Mineral wool 24cm
+0.21696;f721d148-f727-4a55-b2e6-52ecb90e09be;Mineral wool insulation (low bulk density range);;;;awropo09a;03;average;Fachverband Mineralwolleindustrie;False;True;Mineral;Mineral wool 24cm
+0.015;766ea5bd-3f0f-4d48-a399-9c4a372524d8;EGGER OSB;;;;awropo09a;03;average;Institut Bauen und Umwelt e.V.;False;False;Organic composite;Mineral wool 24cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awropo09a;03;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Mineral wool 24cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awropo09a;06;generic;Sphera Solutions, Inc.;False;False;Mineral;Cellulose fiber 16cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awropo09a;06;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Cellulose fiber 16cm
+0.01536;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awropo09a;06;representative;Thünen Insitut;True;False;Organic;Cellulose fiber 16cm
+0.14464;3f764d2e-320b-4996-8c28-0f38e8971044;"Cellulose fibre board; 80 kg/m3";;;;awropo09a;06;generic;Sphera Solutions, Inc.;False;True;Organic;Cellulose fiber 16cm
+0.015;766ea5bd-3f0f-4d48-a399-9c4a372524d8;EGGER OSB;;;;awropo09a;06;average;Institut Bauen und Umwelt e.V.;False;False;Organic composite;Cellulose fiber 16cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awropo09a;06;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Cellulose fiber 16cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awropo09a;16;generic;Sphera Solutions, Inc.;False;False;Mineral;Cellulose fiber 24cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awropo09a;16;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Cellulose fiber 24cm
+0.02304;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awropo09a;16;representative;Thünen Insitut;True;False;Organic;Cellulose fiber 24cm
+0.21696;3f764d2e-320b-4996-8c28-0f38e8971044;"Cellulose fibre board; 80 kg/m3";;;;awropo09a;16;generic;Sphera Solutions, Inc.;False;True;Organic;Cellulose fiber 24cm
+0.015;766ea5bd-3f0f-4d48-a399-9c4a372524d8;EGGER OSB;;;;awropo09a;16;average;Institut Bauen und Umwelt e.V.;False;False;Organic composite;Cellulose fiber 24cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awropo09a;16;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Cellulose fiber 24cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awropo09a;11;generic;Sphera Solutions, Inc.;False;False;Mineral;Wood fiber 16cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awropo09a;11;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Wood fiber 16cm
+0.01536;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awropo09a;11;representative;Thünen Insitut;True;False;Organic;Wood fiber 16cm
+0.14464;ee0c4b18-f9c9-44d1-8766-36db08856a2f;Wood fiber insulation - dry process (German average);;;;awropo09a;11;representative;Thünen Insitut;False;True;Organic;Wood fiber 16cm
+0.015;766ea5bd-3f0f-4d48-a399-9c4a372524d8;EGGER OSB;;;;awropo09a;11;average;Institut Bauen und Umwelt e.V.;False;False;Organic composite;Wood fiber 16cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awropo09a;11;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Wood fiber 16cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awropo09a;17;generic;Sphera Solutions, Inc.;False;False;Mineral;Wood fiber 24cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awropo09a;17;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Wood fiber 24cm
+0.02304;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awropo09a;17;representative;Thünen Insitut;True;False;Organic;Wood fiber 24cm
+0.21696;ee0c4b18-f9c9-44d1-8766-36db08856a2f;Wood fiber insulation - dry process (German average);;;;awropo09a;17;representative;Thünen Insitut;False;True;Organic;Wood fiber 24cm
+0.015;766ea5bd-3f0f-4d48-a399-9c4a372524d8;EGGER OSB;;;;awropo09a;17;average;Institut Bauen und Umwelt e.V.;False;False;Organic composite;Wood fiber 24cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awropo09a;17;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Wood fiber 24cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awmopo04a;00;generic;Sphera Solutions, Inc.;False;False;Mineral;Mineral wool 12cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awmopo04a;00;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Mineral wool 12cm
+0.01152;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awmopo04a;00;representative;Thünen Insitut;True;False;Organic;Mineral wool 12cm
+0.10848;f721d148-f727-4a55-b2e6-52ecb90e09be;Mineral wool insulation (low bulk density range);;;;awmopo04a;00;average;Fachverband Mineralwolleindustrie;False;True;Mineral;Mineral wool 12cm
+0.09;8c4eb262-9ae6-4ace-8f3d-0b06f2007f3e;Cross laminated timber (German average);;;energetisch;awmopo04a;00;representative;Thünen Insitut;True;False;Organic composite;Mineral wool 12cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awmopo04a;00;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Mineral wool 12cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awmopo04a;01;generic;Sphera Solutions, Inc.;False;False;Mineral;Cellulose fiber 12cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awmopo04a;01;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Cellulose fiber 12cm
+0.01152;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awmopo04a;01;representative;Thünen Insitut;True;False;Organic;Cellulose fiber 12cm
+0.10848;5fac6347-55b0-47be-9118-d8229d7e62c4;"Cellulose fibre blowing insulation material; 45 kg/m3";;;;awmopo04a;01;generic;Sphera Solutions, Inc.;False;True;Organic;Cellulose fiber 12cm
+0.09;8c4eb262-9ae6-4ace-8f3d-0b06f2007f3e;Cross laminated timber (German average);;;energetisch;awmopo04a;01;representative;Thünen Insitut;True;False;Organic composite;Cellulose fiber 12cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awmopo04a;01;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Cellulose fiber 12cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awmopo04a;02;generic;Sphera Solutions, Inc.;False;False;Mineral;Wood fiber 12cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awmopo04a;02;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Wood fiber 12cm
+0.01152;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awmopo04a;02;representative;Thünen Insitut;True;False;Organic;Wood fiber 12cm
+0.10848;ee0c4b18-f9c9-44d1-8766-36db08856a2f;Wood fiber insulation - dry process (German average);;;;awmopo04a;02;representative;Thünen Insitut;False;True;Organic;Wood fiber 12cm
+0.09;8c4eb262-9ae6-4ace-8f3d-0b06f2007f3e;Cross laminated timber (German average);;;energetisch;awmopo04a;02;representative;Thünen Insitut;True;False;Organic composite;Wood fiber 12cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awmopo04a;02;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Wood fiber 12cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awmopo04a;03;generic;Sphera Solutions, Inc.;False;False;Mineral;Wood fiber 16cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awmopo04a;03;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Wood fiber 16cm
+0.01536;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awmopo04a;03;representative;Thünen Insitut;True;False;Organic;Wood fiber 16cm
+0.14464;ee0c4b18-f9c9-44d1-8766-36db08856a2f;Wood fiber insulation - dry process (German average);;;;awmopo04a;03;representative;Thünen Insitut;False;True;Organic;Wood fiber 16cm
+0.1;8c4eb262-9ae6-4ace-8f3d-0b06f2007f3e;Cross laminated timber (German average);;;energetisch;awmopo04a;03;representative;Thünen Insitut;True;False;Organic composite;Wood fiber 16cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awmopo04a;03;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Wood fiber 16cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awmopo04a;04;generic;Sphera Solutions, Inc.;False;False;Mineral;Mineral wool 16cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awmopo04a;04;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Mineral wool 16cm
+0.01536;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awmopo04a;04;representative;Thünen Insitut;True;False;Organic;Mineral wool 16cm
+0.14464;f721d148-f727-4a55-b2e6-52ecb90e09be;Mineral wool insulation (low bulk density range);;;;awmopo04a;04;average;Fachverband Mineralwolleindustrie;False;True;Mineral;Mineral wool 16cm
+0.1;8c4eb262-9ae6-4ace-8f3d-0b06f2007f3e;Cross laminated timber (German average);;;energetisch;awmopo04a;04;representative;Thünen Insitut;True;False;Organic composite;Mineral wool 16cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awmopo04a;04;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Mineral wool 16cm
+0.007;ddc96ae4-086c-4033-9e45-c5589f1661ba;Lime plaster;;;;awmopo04a;05;generic;Sphera Solutions, Inc.;False;False;Mineral;Cellulose fiber 16cm
+0.06;77a553ca-357e-4910-b114-5aa912d4d0e2;best wood wood fibre insulation boards (en);;;;awmopo04a;05;specific;Holzwerk Gebr. Schneider GmbH;False;True;Organic;Cellulose fiber 16cm
+0.01536;7aba3603-0689-4da5-8d24-fd92ae398d07;KVH structural timber (German average);;;energetisch;awmopo04a;05;representative;Thünen Insitut;True;False;Organic;Cellulose fiber 16cm
+0.14464;5fac6347-55b0-47be-9118-d8229d7e62c4;"Cellulose fibre blowing insulation material; 45 kg/m3";;;;awmopo04a;05;generic;Sphera Solutions, Inc.;False;True;Organic;Cellulose fiber 16cm
+0.1;8c4eb262-9ae6-4ace-8f3d-0b06f2007f3e;Cross laminated timber (German average);;;energetisch;awmopo04a;05;representative;Thünen Insitut;True;False;Organic composite;Cellulose fiber 16cm
+1;fbde9f28-e9d8-4300-9b21-dea035f5bc15;FIRE-RESISTANT PLASTERBOARD / Tool ;;;S1;awmopo04a;05;average;Institut Bauen und Umwelt e.V.;False;False;Mineral;Cellulose fiber 16cm

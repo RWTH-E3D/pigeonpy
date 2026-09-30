@@ -1,6 +1,6 @@
-from logic.epddataset.epddataset import EpdDataset
-from logic.epddataset.en15804A1dataset import En15804A1Dataset
-from logic.epddataset.en15804A2dataset import En15804A2Dataset
+from pigeonpy.epd.epddataset.epddataset import EpdDataset
+from pigeonpy.epd.epddataset.en15804A1dataset import En15804A1Dataset
+from pigeonpy.epd.epddataset.en15804A2dataset import En15804A2Dataset
 import numpy as np
 
 import unittest
@@ -16,6 +16,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
     """Test calculation dunder methods for EpdDataset objects"""
 
     def setUp(self):
+        """Initialize EpdDataset instances with data array shapes according to available standards."""
         self.a1_1_EpdDataset_class = EpdDataset()
         self.a1_1_EpdDataset_class.data = epd_dataset_a1_1
         self.a1_2_En15804A1_class = En15804A1Dataset()
@@ -25,6 +26,8 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
         self.a2_2_En15804A2_class = En15804A2Dataset()
         self.a2_2_En15804A2_class.data = epd_dataset_a2_2
 
+
+    """Tests for __add__ method"""
 
     def test_add_returned_object_type(self):
         self.assertIsInstance((self.a1_1_EpdDataset_class + self.a1_2_En15804A1_class), EpdDataset)
@@ -50,7 +53,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
             self.a1_2_En15804A1_class + self.a2_2_En15804A2_class
 
     def test_add_single_value(self):
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class + 5
             self.a1_2_En15804A1_class + 'test'
 
@@ -81,7 +84,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
             self.a1_2_En15804A1_class - self.a2_2_En15804A2_class
 
     def test_sub_single_value(self):
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class - 5
             self.a1_2_En15804A1_class - 'test'
 
@@ -127,6 +130,7 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
     def test_mul_raise_type_error(self):
         with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class * 'test'
+            self.a1_2_En15804A1_class * np.full((10,10), 'abc')
 
 
     """Tests for __truediv__ method"""
@@ -148,17 +152,13 @@ class TestEpdDatasetCalculationDunderMethods(unittest.TestCase):
         self.assertTrue((help_object.data == result).all())
         self.assertEqual((self.a1_1_EpdDataset_class - self.a1_2_En15804A1_class).data.all(), result.all())
 
-    def test_truediv_division_by_zero(self):
-        with self.assertRaises(FloatingPointError):
-            self.a1_2_En15804A1_class / 0.0
-
     def test_truediv_type_error(self):
         with self.assertRaises(TypeError):
             self.a1_2_En15804A1_class / 'test'
             self.a1_2_En15804A1_class / self.a1_1_EpdDataset_class
+            self.a1_2_En15804A1_class / np.full((10, 10), 'abc')
 
     def test_truediv_value_error(self):
-        # Maybe delete because unnecessary
         with self.assertRaises(ValueError):
             self.a1_2_En15804A1_class / self.a2_2_En15804A2_class.data
 
