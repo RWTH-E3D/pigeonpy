@@ -1,4 +1,3 @@
-"""Module containing utility functions"""
 import requests
 from pathlib import Path
 

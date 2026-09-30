@@ -5,7 +5,7 @@ class EpdNorwayApi(Soda4LcaApi):
     """Class for creating a soda4LCA instance of the EPD Norway API to load EpdDataset objects.
 
     Class variables
-    ----------
+    ---------------
     ROOT : str
         URL for the EPD Norway API resource point
 

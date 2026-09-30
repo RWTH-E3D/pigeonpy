@@ -6,7 +6,7 @@ from pigeonpy.data.epddata.source.epdnorwayapi import EpdNorwayApi
 from pigeonpy.data.epddata.epddatamanager import EpdDataManager
 from pigeonpy.epd.epddataset.en15804A1dataset import En15804A1Dataset
 from pigeonpy.epd.epddataset.en15804A2dataset import En15804A2Dataset
-from utility import get_soda4lca_node_datastock
+from pigeonpy.utility import get_soda4lca_node_datastock
 from pathlib import Path
 import unittest
 

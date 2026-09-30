@@ -16,7 +16,7 @@ class EpdDataset(object):
     operations performed on the instance.
 
     Class variables
-    ----------
+    ---------------
     environmental_indicators : list
         Empty list for environmental indicators
     life_cycle_stages : list

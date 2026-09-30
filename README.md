@@ -46,7 +46,7 @@ See the [`examples`](https://github.com/RWTH-E3D/pigeonpy/tree/main/examples) fo
 [//]: # "Calculation of results based on an arbitrary number of user defined Partitions and Subsets (see [examples](https://github.com/RWTH-E3D/pigeonpy/tree/main/examples)"
 [//]: # "Normalization and Weighting functionality"
 
-### Architecture version 0.0.9(?):
+### Architecture version 0.9.0(?):
 
 <img class="centerImage" src="./pics/UML_small_11pt_wide.svg" width="50%" alt="PigeonPy version 0.0.9 UML diagram" />
 

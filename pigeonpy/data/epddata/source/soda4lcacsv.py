@@ -8,7 +8,7 @@ class Soda4LcaCsv(FileEpdSource):
     separated between the two standards EN15804+A1 and EN15804+A2. Note that the CSV export is not enabled in all APIs.
 
     Class variables
-    ----------
+    ---------------
     a1_aliases : list
         Contains the different terminologies used in the database csv to indicate the standard EN15804+A1
         for a dataset

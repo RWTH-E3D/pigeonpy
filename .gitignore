@@ -1,0 +1,14 @@
+# Ignore the following files in GIT #
+#####################################
+
+
+# ignore docs#
+#####################
+docs/build
+docs/source/generated
+
+
+# PyCharm settings #
+#####################
+.idea
+

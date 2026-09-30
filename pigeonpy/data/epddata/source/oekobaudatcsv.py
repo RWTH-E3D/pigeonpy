@@ -12,7 +12,7 @@ class OekobaudatCsv(Soda4LcaCsv):
     present in the Soda4LcaCsv class.
 
     Class variables
-    ----------
+    ---------------
     a1_aliases : list
         Contains the different terminologies used in the Ökobaudat database csv to indicate the standard EN15804+A1
         for a dataset

@@ -17,7 +17,7 @@ class Soda4LcaApi(ApiEpdSource):
     datasets from other nodes.
 
     Class variables
-    ----------
+    ---------------
     exchange_uuid_allocations : dict
         A mapping for the exchange flow (pere, perm, etc.) reference UUIDs to the abbreviation of the exchange flow used
         in the environmental indicator JSON files

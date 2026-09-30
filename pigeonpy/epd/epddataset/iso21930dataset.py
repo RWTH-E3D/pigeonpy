@@ -15,7 +15,7 @@ class Iso21930Dataset(EpdDataset):
     stages.
 
     Class variables
-    ----------
+    ---------------
     environmental_indicators : list
         A list containing the environmental indicators as instances of the EnvironmentalIndicator class taken from the
         EpdAttributeLoader

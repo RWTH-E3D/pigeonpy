@@ -5,7 +5,7 @@ class OekobaudatApi(Soda4LcaApi):
     """Class for creating a soda4LCA instance of the Ökobaudat API to load EpdDataset objects.
 
     Class variables
-    ----------
+    ---------------
     ROOT : str
         URL for the Oekobaudat API resource point
 
