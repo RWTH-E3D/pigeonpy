@@ -1,3 +1,6 @@
+"""Defines the EpdDataset class as the libraries core data model and the History class for logging all operations
+performed on a dataset."""
+
 from dataclasses import dataclass
 from typing import Optional
 

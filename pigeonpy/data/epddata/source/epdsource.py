@@ -1,3 +1,5 @@
+"""Defines the abstract base class for EPD data sources."""
+
 class EpdSource(object):
     """Abstract class containing basic attributes and methods utilized in all subclasses, i.e. implemented EPD sources.
 

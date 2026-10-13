@@ -1,3 +1,4 @@
+"""Defines the abstract base class for EPD API data sources."""
 from pigeonpy.data.epddata.source.epdsource import EpdSource
 
 

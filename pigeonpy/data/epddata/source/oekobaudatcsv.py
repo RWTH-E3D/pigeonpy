@@ -1,4 +1,5 @@
-#from data.epddata.source.fileepdsource import FileEpdSource
+"""Provides the class for ÖKOBAUDAT CSV parsing."""
+
 from pigeonpy.data.epddata.source.soda4lcacsv import Soda4LcaCsv
 import pandas as pd
 import numpy as np

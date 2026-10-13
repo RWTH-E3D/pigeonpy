@@ -1,3 +1,4 @@
+"""Provides the class defining the connection to EPD Norway API."""
 from pigeonpy.data.epddata.source.soda4lcaapi import Soda4LcaApi
 
 

@@ -1,3 +1,4 @@
+"""Provides the class for EPD Norway CSV parsing."""
 from pigeonpy.data.epddata.source.soda4lcacsv import Soda4LcaCsv
 
 

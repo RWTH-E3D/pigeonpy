@@ -1,3 +1,5 @@
+"""Provides a subclass for holding EPD datasets conform with the standard EN 15804+A1."""
+
 from pigeonpy.epd.epddataset.epddataset import EpdDataset
 from pigeonpy.data.epddata.epddatamanager import EpdDataManager
 import numpy as np

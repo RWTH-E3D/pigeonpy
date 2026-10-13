@@ -1,3 +1,5 @@
+"""Provides the base class to parse soda4Lca CSV exports. Subclass it to define node-specific requirements."""
+
 from pigeonpy.data.epddata.source.fileepdsource import FileEpdSource
 import pandas as pd
 import numpy as np

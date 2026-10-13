@@ -1,0 +1,1 @@
+"""Contains the libraries core data model EpdDataset and its subclasses for the implemented standards."""

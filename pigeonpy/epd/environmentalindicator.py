@@ -1,3 +1,5 @@
+"""Defines the EnvironmentalIndicator dataclass."""
+
 from dataclasses import dataclass
 
 

@@ -1,3 +1,6 @@
+"""For reading the JSON input files with standard specific EPD information (environmental indicators and life cycle
+modules) used within EPD dataset objects."""
+
 from pathlib import Path
 import json
 from pigeonpy.epd.environmentalindicator import EnvironmentalIndicator

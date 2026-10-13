@@ -1,3 +1,5 @@
+"""Defines the LifeCycleStage dataclass."""
+
 from dataclasses import dataclass
 
 

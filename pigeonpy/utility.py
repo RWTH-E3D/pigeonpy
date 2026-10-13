@@ -1,3 +1,5 @@
+"""Provides functions for linear interpolating two datasets and for fetching soda4Lca database exports."""
+
 import requests
 from pathlib import Path
 

@@ -1,3 +1,5 @@
+"""Defines the core calculation functions for processing calculation dataframes and observation period based replacements."""
+
 import pandas as pd
 import numpy as np
 from pigeonpy.study.calculationinput import CalculationInput

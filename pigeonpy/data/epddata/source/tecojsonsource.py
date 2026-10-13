@@ -1,3 +1,5 @@
+"""Provides the class to parse Teco JSON EPD data."""
+
 from pigeonpy.data.epddata.source.fileepdsource import FileEpdSource
 from pathlib import Path
 import json

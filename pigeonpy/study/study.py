@@ -1,3 +1,5 @@
+"""Defines the Study class as main interface to the library with additional LCA study level functionality."""
+
 from pandas import Series
 from pigeonpy.study.calculationinput import CalculationInput
 from pigeonpy.study.calculator import calculate

@@ -1,5 +1,6 @@
-import pandas as pd
+"""Provides the base class to connect with soda4Lca API nodes. Subclass it to define node-specific requirements."""
 
+import pandas as pd
 from pigeonpy.data.epddata.source.apiepdsource import ApiEpdSource
 import requests
 import numpy as np

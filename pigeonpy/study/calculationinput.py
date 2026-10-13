@@ -1,3 +1,6 @@
+"""Provides the CalculationInput class for parsing and validating input CSV files, throwing CsvValidationError for
+issues with the input CSV file."""
+
 import csv
 import pandas as pd
 

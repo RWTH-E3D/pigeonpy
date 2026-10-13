@@ -1,3 +1,5 @@
+"""Defines the EpdDataManager class as registry and manager for all data sources."""
+
 class EpdDataManager(object):
     """Class to handle EPD data and their sources.
 
