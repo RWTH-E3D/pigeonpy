@@ -562,20 +562,20 @@ class History:
         Contains the operation performed on the dataset (kind), an explanatory string (message), an operand (if the
         operation was a calculation), and the epd_id of the dataset, the operation was performed on.
 
-        Attributes
-        ----------
+        Constructor Arguments:
+
         kind : str
-            "init"              – dataset initialized from source
-            "mul_scalar"        – multiplied by factor (scalar or array)
-            "mul_other"         – multiplied by other dataset
-            "sum"               – sum with other dataset
-            "diff"              - difference with other dataset
-            "truediv_divisor"   - division with divisor (scalar or array)
-            "truediv_other"     - division with other dataset
-            "replacements"      – replacement calculation
-            "normalize"         – normalization
-            "weighting"         – weighting
-            "other"             – generic
+            "init"              – dataset initialized from source |
+            "mul_scalar"        – multiplied by factor (scalar or array) |
+            "mul_other"         – multiplied by other dataset |
+            "sum"               – sum with other dataset |
+            "diff"              - difference with other dataset |
+            "truediv_divisor"   - division with divisor (scalar or array) |
+            "truediv_other"     - division with other dataset |
+            "replacements"      – replacement calculation |
+            "normalize"         – normalization |
+            "weighting"         – weighting |
+            "other"             – generic |
         message : str
             String object that describes the operation associated with the entry 
         operand : float
