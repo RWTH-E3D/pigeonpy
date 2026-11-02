@@ -91,7 +91,7 @@ pip install --editable .
 
 For examples of how to use PigeonPy, see the [examples](https://github.com/RWTH-E3D/pigeonpy/tree/main/examples).
 
-> **Documentation:** [Documentation LINK ZU GITHUB PAGES HINZUFÜGEN](...)
+> **Documentation:** [https://rwth-e3d.github.io/pigeonpy/](...)
 
 ### Example Workflow
 
