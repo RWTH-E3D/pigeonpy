@@ -494,7 +494,8 @@ class Soda4LcaApi(ApiEpdSource):
         Uses the environmental_indicators and life_cycle_stages lists available as class variables in the EpdDataset
         instance to extract the indicator values from the given epd_data dictionary and assign them to the correct row
         and column indices.
-        When the a1_a3 stage is not defined, i.e. zero, the sum of a1, a2, and a3 is assigned to it.
+        When the a1_a3 stage is not defined (missing or zero) for an indicator, the sum of a1, a2 and a3 is assigned to
+        it.
 
         Parameters
         ----------
@@ -509,16 +510,14 @@ class Soda4LcaApi(ApiEpdSource):
         stage_index_map = {stage.abbreviation: index for index, stage in enumerate(epd_dataset.life_cycle_stages)}
 
         for row_index, indicator in enumerate(epd_dataset.environmental_indicators):
-            indicator_data = epd_data.get(indicator.abbreviation, {})
+            indicator_data = dict(epd_data.get(indicator.abbreviation, {}))
+
+            if not indicator_data.get("a1_a3") and any(stage in indicator_data for stage in ("a1", "a2", "a3")):
+                indicator_data["a1_a3"] = sum(indicator_data.get(stage, 0.0) for stage in ("a1", "a2", "a3"))
 
             for stage, value in indicator_data.items():
                 if stage in stage_index_map:
                     data_array[row_index, stage_index_map[stage]] = value
-
-        if "a1_a3" in epd_dataset.life_cycle_stages:
-            a1_a3_index = stage_index_map["a1_a3"]
-            if np.count_nonzero(data_array[:, a1_a3_index]) == 0:
-                data_array[:, a1_a3_index] = data_array[:, :a1_a3_index].sum(axis=1)
 
     @staticmethod
     def _parse_xml(xml_data):
