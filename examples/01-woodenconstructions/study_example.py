@@ -28,8 +28,8 @@ partition_keys = [
 
 example_study.run_calculation(*partition_keys)
 
-reference_normalize = {"gwp-total": 9.22E+03,
-                       "ap": 4.73E+01}
+reference_normalize = {"gwp-total": 7.55E+03,
+                       "ap": 5.56E+01}
 
 weighting_factors = {"gwp-total": 0.6,
                      "ap": 0.4}
